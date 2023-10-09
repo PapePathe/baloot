@@ -1,0 +1,23 @@
+package znet
+
+import "pathe.co/zinx/ziface"
+
+type Request struct {
+	conn ziface.IConnection // The established connection with the client
+	msg  ziface.IMessage    // Data requested by the client
+}
+
+// GetConnection retrieves the connection information of the request
+func (r *Request) GetConnection() ziface.IConnection {
+	return r.conn
+}
+
+// GetData retrieves the data of the request message
+func (r *Request) GetData() []byte {
+	return r.msg.GetData()
+}
+
+// Get the ID of the request message
+func (r *Request) GetMsgID() uint32 {
+	return r.msg.GetMsgId()
+}
