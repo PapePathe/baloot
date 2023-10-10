@@ -9,7 +9,7 @@ var CENT GameTake = Cent{}
 type Cent struct{}
 
 func (t Cent) Name() string {
-	return "Coeur"
+	return "Cent"
 }
 
 func (t Cent) GreaterThan(other GameTake) bool {
