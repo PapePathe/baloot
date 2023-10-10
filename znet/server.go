@@ -12,24 +12,15 @@ import (
 
 // Implementation of the iServer interface, defining a Server service class.
 type Server struct {
-	// Name of the server.
-	Name string
-	// TCP4 or other.
-	IPVersion string
-	// IP address that the service is bound to.
-	IP string
-	// Port that the service is bound to.
-	Port int
-	// Message handler module of the current server, used to bind MsgIDs with corresponding handling methods
-	msgHandler ziface.IMsgHandle
-	// Connection manager for the server
-	ConnMgr ziface.IConnManager
-	// Hook function to be called when a connection is created for this server
+	ConnMgr     ziface.IConnManager
+	IPVersion   string
+	IP          string
+	game        game.Game
+	msgHandler  ziface.IMsgHandle
+	Name        string
 	OnConnStart func(conn ziface.IConnection)
-	// Hook function to be called when a connection is about to be disconnected for this server
-	OnConnStop func(conn ziface.IConnection)
-
-	Game game.Game
+	OnConnStop  func(conn ziface.IConnection)
+	Port        int
 }
 
 func CallBackToClient(conn *net.TCPConn, data []byte, cnt int) error {
@@ -97,7 +88,7 @@ func (s *Server) Start() {
 			cid++
 
 			// 3.4. start the handling business of the current connection
-			go dealConn.Start()
+			go dealConn.Start(&s.game)
 		}
 
 	}()
@@ -141,13 +132,13 @@ func NewServer() ziface.IServer {
 		Port:       utils.GlobalObject.TcpPort, // Get from global parameters
 		msgHandler: NewMsgHandle(),             // Initialize msgHandler
 		ConnMgr:    NewConnManager(),           // Create a ConnManager
-		Game:       *game.NewGame(),
+		game:       *game.NewGame(),
 	}
 	return s
 }
 
 func (s *Server) GetGame() *game.Game {
-	return &s.Game
+	return &s.game
 }
 
 // Set the hook function to be called when a connection is created for the server

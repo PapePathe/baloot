@@ -7,32 +7,23 @@ import (
 	"net"
 	"sync"
 
+	"pathe.co/zinx/pkg/game"
 	"pathe.co/zinx/pkg/player"
 	"pathe.co/zinx/utils"
 	"pathe.co/zinx/ziface"
 )
 
 type Connection struct {
-	// The server to which the current connection belongs
-	TcpServer ziface.IServer
-	// Current connection's socket TCP socket
-	Conn *net.TCPConn
-	// Current connection's ID, also known as SessionID, ID is globally unique
-	ConnID uint32
-	// Current connection's close status
-	isClosed bool
-	// Message handler, which manages MsgIDs and corresponding handling methods
-	MsgHandler ziface.IMsgHandle
-	// Channel to inform that the connection has exited/stopped
-	ExitBuffChan chan bool
-	// Unbuffered channel for message communication between the read and write Goroutines
-	msgChan chan []byte
-	// The buffered channel used for message communication between the reading and writing goroutines
-	msgBuffChan chan []byte
-	// Connection properties
-	property map[string]interface{}
-	// Lock for protecting concurrent property modifications
-	propertyLock sync.RWMutex
+	TcpServer    ziface.IServer
+	Conn         *net.TCPConn           // Current connection's socket TCP socket
+	ConnID       uint32                 // Current connection's ID, also known as SessionID, ID is globally unique
+	isClosed     bool                   // Current connection's close status
+	MsgHandler   ziface.IMsgHandle      // Message handler, which manages MsgIDs and corresponding handling methods
+	ExitBuffChan chan bool              // Channel to inform that the connection has exited/stopped
+	msgChan      chan []byte            // Unbuffered channel for message communication between the read and write Goroutines
+	msgBuffChan  chan []byte            // The buffered channel used for message communication between the reading and writing goroutines
+	property     map[string]interface{} // Connection properties
+	propertyLock sync.RWMutex           // Lock for protecting concurrent property modifications
 
 	Player player.Player
 }
@@ -51,10 +42,10 @@ func NewConnection(server ziface.IServer, conn *net.TCPConn, connID uint32, msgH
 	}
 
 	c.TcpServer.GetConnMgr().Add(c)
-	c.Player = *player.NewPlayer()
-	c.Player.Hand = player.Hand{Cards: c.TcpServer.GetGame().Distribuer()}
+	p := *player.NewPlayer()
+	c.TcpServer.GetGame().AddPlayer(&p)
 
-	b, _ := c.Player.SetForTransport()
+	b, _ := p.SetForTransport()
 	c.SendBuffMsg(0, []byte(b))
 	c.SendBuffMsg(1, []byte(c.Player.ShowTakes()))
 
@@ -69,16 +60,13 @@ func (c *Connection) StartWriter() {
 		select {
 		case data := <-c.msgChan:
 			fmt.Println("Data to be sent to client", data)
-			// Data to be written to the client
 			if _, err := c.Conn.Write(data); err != nil {
 				fmt.Println("Send Data error:", err, "Conn Writer exit")
 				return
 			}
 
 		case data, ok := <-c.msgBuffChan:
-			// Handling data for buffered channel
 			if ok {
-				// Data to be written to the client
 				if _, err := c.Conn.Write(data); err != nil {
 					fmt.Println("Send Buffered Data error:", err, "Conn Writer exit")
 					return
@@ -94,12 +82,9 @@ func (c *Connection) StartWriter() {
 	}
 }
 
-func (c *Connection) Start() {
-	// 1. Start a Goroutine for reading data from the client
+func (c *Connection) Start(g *game.Game) {
 	go c.StartReader()
-	// 2. Start a Goroutine for writing data back to the client
 	go c.StartWriter()
-	// Call the registered hook method for connection creation according to the user's requirements
 	c.TcpServer.CallOnConnStart(c)
 }
 
@@ -162,17 +147,14 @@ func (c *Connection) StartReader() {
 		}
 		msg.SetData(data)
 
-		// Get the Request data of the current client request
 		req := Request{
 			conn: c,
-			msg:  msg, // Replace buf with msg
+			msg:  msg,
 		}
 
 		if utils.GlobalObject.WorkerPoolSize > 0 {
-			// Worker pool mechanism has been started, send the message to the Worker for processing
 			c.MsgHandler.SendMsgToTaskQueue(&req)
 		} else {
-			// Execute the corresponding Handle method from the bound message and its corresponding processing method
 			go c.MsgHandler.DoMsgHandler(&req)
 		}
 	}

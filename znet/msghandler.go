@@ -31,7 +31,6 @@ func (mh *MsgHandle) DoMsgHandler(request ziface.IRequest) {
 		return
 	}
 
-	// Execute the corresponding handler methods
 	handler.PreHandle(request)
 	handler.Handle(request)
 	handler.PostHandle(request)
@@ -39,11 +38,9 @@ func (mh *MsgHandle) DoMsgHandler(request ziface.IRequest) {
 
 // Add specific handling logic for a message
 func (mh *MsgHandle) AddRouter(msgId uint32, router ziface.IRouter) {
-	// 1. Check if the current msg's API handler method already exists
 	if _, ok := mh.Apis[msgId]; ok {
 		panic("repeated api, msgId = " + strconv.Itoa(int(msgId)))
 	}
-	// 2. Add the binding relationship between msg and api
 	mh.Apis[msgId] = router
 	fmt.Println("Add api msgId =", msgId)
 }
@@ -51,10 +48,8 @@ func (mh *MsgHandle) AddRouter(msgId uint32, router ziface.IRouter) {
 // Start a Worker workflow
 func (mh *MsgHandle) StartOneWorker(workerID int, taskQueue chan ziface.IRequest) {
 	fmt.Println("Worker ID =", workerID, "is started.")
-	// Continuously wait for messages in the queue
 	for {
 		select {
-		// If there is a message, take the Request from the queue and execute the bound business method
 		case request := <-taskQueue:
 			mh.DoMsgHandler(request)
 		}

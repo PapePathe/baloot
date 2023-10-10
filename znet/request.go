@@ -1,10 +1,15 @@
 package znet
 
-import "pathe.co/zinx/ziface"
+import (
+	"pathe.co/zinx/pkg/game"
+	"pathe.co/zinx/ziface"
+)
 
 type Request struct {
-	conn ziface.IConnection // The established connection with the client
-	msg  ziface.IMessage    // Data requested by the client
+	conn ziface.IConnection
+	msg  ziface.IMessage
+	game *game.Game
+	pid  int
 }
 
 // GetConnection retrieves the connection information of the request
