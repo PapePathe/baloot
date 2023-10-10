@@ -1,11 +1,15 @@
 package ziface
 
-import "net"
+import (
+	"net"
+
+	"pathe.co/zinx/pkg/game"
+)
 
 // Define the connection interface
 type IConnection interface {
 	// Start the connection, making the current connection work
-	Start()
+	Start(*game.Game)
 	// Stop the connection, ending the current connection state
 	Stop()
 	// Get the raw socket TCPConn from the current connection
