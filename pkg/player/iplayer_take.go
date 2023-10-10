@@ -36,5 +36,5 @@ func (p *Player) ShowTakes() string {
 }
 
 func (p *Player) SetTake(gt *gametake.GameTake) {
-	p.Take = *gt
+	p.Take = gt
 }
