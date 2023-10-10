@@ -22,9 +22,9 @@ func evaluateCardOfOtherColor(genre string) int {
 	case "10":
 		return 10
 	case "R":
-		return 3
+		return 4
 	case "D":
-		return 2
+		return 3
 	case "8":
 		return 0
 	case "7":
@@ -45,9 +45,9 @@ func evaluateCardOfColor(genre string) int {
 	case "10":
 		return 10
 	case "R":
-		return 3
+		return 4
 	case "D":
-		return 2
+		return 3
 	case "8":
 		return 0
 	case "7":
