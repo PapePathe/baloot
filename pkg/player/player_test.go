@@ -10,7 +10,7 @@ import (
 func TestSetTake(t *testing.T) {
 	p := NewPlayer()
 	p.SetTake(&gametake.TOUT)
-	assert.Equal(t, p.Take, gametake.TOUT)
+	assert.Equal(t, p.Take, &gametake.TOUT)
 }
 
 func TestNewPlayer(t *testing.T) {

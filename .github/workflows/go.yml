@@ -7,7 +7,6 @@ jobs:
   build_ingestion_api:
 
     runs-on: ubuntu-latest
-    defaults:
     steps:
       - uses: actions/checkout@v3
 

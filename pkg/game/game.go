@@ -48,8 +48,8 @@ func (g *Game) AddTake(playerID int, take gametake.GameTake) error {
 	if g.players[playerID].Take != nil {
 		return errors.New("Oops duplicate player take")
 	}
-
 	g.players[playerID].Take = &take
+
 	if g.take.GreaterThan(take) && take != gametake.PASSE {
 		return errors.New("Oops bad take, choose a greater take or pass.")
 	}
