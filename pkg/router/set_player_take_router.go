@@ -14,7 +14,9 @@ type PlayerTakeRouter struct {
 // PlayerTake Handle
 func (this *PlayerTakeRouter) Handle(request ziface.IRequest) {
 	fmt.Println("Call PlayerTakeRouter Handle")
-	fmt.Println("recv from client: msgId=", request.GetMsgID(), ", data=", string(request.GetData()))
+	fmt.Println("recv from client: msgId=", request.GetMsgID(), ", data=")
+
+	takeID := int(request.GetData()[0])
 
 	err := request.GetConnection().SendBuffMsg(0, []byte("ping...ping...ping"))
 	if err != nil {
