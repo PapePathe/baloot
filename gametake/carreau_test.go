@@ -8,7 +8,7 @@ import (
 )
 
 func TestGetValue(t *testing.T) {
-	assert.Equal(t, 1, CARREAU.GetValue())
+	assert.Equal(t, 2, CARREAU.GetValue())
 }
 
 func TestGetName(t *testing.T) {

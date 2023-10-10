@@ -17,7 +17,7 @@ func (t Trefle) GreaterThan(other GameTake) bool {
 }
 
 func (t Trefle) GetValue() int {
-	return 0
+	return 1
 }
 
 func (t Trefle) EvaluateHand(cards [5]cards.Card) (entry GameTakeEntry) {

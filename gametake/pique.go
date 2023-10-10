@@ -6,9 +6,7 @@ import (
 
 var PIQUE GameTake = Pique{}
 
-type Pique struct {
-	value int32 `default:"2"`
-}
+type Pique struct{}
 
 func (t Pique) Name() string {
 	return "Pique"

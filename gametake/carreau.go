@@ -25,7 +25,7 @@ func (t Carreau) Name() string {
 }
 
 func (t Carreau) GetValue() int {
-	return 1
+	return 2
 }
 
 func (t Carreau) EvaluateHand(cards [5]cards.Card) (entry GameTakeEntry) {
