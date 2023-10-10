@@ -17,7 +17,7 @@ func (t Coeur) GreaterThan(other GameTake) bool {
 }
 
 func (t Coeur) GetValue() int {
-	return 2
+	return 3
 }
 
 func (t Coeur) EvaluateHand(cards [5]cards.Card) (entry GameTakeEntry) {

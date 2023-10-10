@@ -60,3 +60,36 @@ func TestEvaluateCardCOEUR(t *testing.T) {
 		})
 	}
 }
+
+type testGreaterThanCasesCOEUR struct {
+	name     string
+	take     GameTake
+	expected bool
+}
+
+func TestGreaterThanCOEUR(t *testing.T) {
+	tc := []testGreaterThanCasesCOEUR{
+		testGreaterThanCasesCOEUR{"Coeur is greater than tout", TOUT, false},
+		testGreaterThanCasesCOEUR{"Coeur is greater than cent", CENT, false},
+		testGreaterThanCasesCOEUR{"Coeur is greater than pique", PIQUE, false},
+		testGreaterThanCasesCOEUR{"Coeur is greater than carreau", CARREAU, true},
+		testGreaterThanCasesCOEUR{"Coeur is greater than trefle", TREFLE, true},
+		testGreaterThanCasesCOEUR{"Coeur is greater than passe", PASSE, true},
+	}
+	for _, test := range tc {
+		t.Run(test.name, func(t *testing.T) {
+			result := COEUR.GreaterThan(test.take)
+			assert.Equal(t, result, test.expected)
+		})
+	}
+}
+
+func TestGetValueCOEUR(t *testing.T) {
+	result := COEUR.GetValue()
+	assert.Equal(t, result, 3)
+}
+
+func TestNameCOEUR(t *testing.T) {
+	result := COEUR.Name()
+	assert.Equal(t, result, "Coeur")
+}
