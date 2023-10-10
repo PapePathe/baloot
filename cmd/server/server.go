@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 
+	"pathe.co/zinx/pkg/router"
 	"pathe.co/zinx/ziface"
 	"pathe.co/zinx/znet"
 )
@@ -80,6 +81,7 @@ func main() {
 	// Configure routers
 	s.AddRouter(0, &PingRouter{})
 	s.AddRouter(1, &HelloZinxRouter{})
+	s.AddRouter(2, &router.PlayerTakeRouter{})
 
 	// Start the server
 	s.Serve()
