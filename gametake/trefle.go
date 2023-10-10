@@ -6,9 +6,7 @@ import (
 
 var TREFLE GameTake = Trefle{}
 
-type Trefle struct {
-	Value int32 `default:"0"`
-}
+type Trefle struct{}
 
 func (t Trefle) Name() string {
 	return "Trefle"

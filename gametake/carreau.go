@@ -20,11 +20,11 @@ func (t Carreau) GreaterThan(other GameTake) bool {
 	return t.GetValue() > other.GetValue()
 }
 
-func (t *Carreau) Name() string {
+func (t Carreau) Name() string {
 	return "Carreau"
 }
 
-func (t *Carreau) GetValue() int {
+func (t Carreau) GetValue() int {
 	return 1
 }
 
