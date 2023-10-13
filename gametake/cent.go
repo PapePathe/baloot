@@ -4,9 +4,11 @@ import (
 	"pathe.co/zinx/pkg/cards"
 )
 
-var CENT GameTake = Cent{}
+var CENT GameTake = Cent{AllCardsValue: 120}
 
-type Cent struct{}
+type Cent struct {
+	AllCardsValue int
+}
 
 func (t Cent) Name() string {
 	return "Cent"
@@ -27,6 +29,10 @@ func (t Cent) EvaluateHand(cards [5]cards.Card) (entry GameTakeEntry) {
 	result += t.EvaluateCard(cards[2])
 	result += t.EvaluateCard(cards[3])
 	result += t.EvaluateCard(cards[4])
+	entry.CardsOfTakeValue = t.AllCardsValue
+	entry.AllCardsValue = t.AllCardsValue
+	entry.PlayerCardsOfTakeValue = result
+	entry.AllPlayerCardsValue = result
 
 	return entry
 }

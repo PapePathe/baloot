@@ -4,6 +4,8 @@ import (
 	"pathe.co/zinx/pkg/cards"
 )
 
+var AllTakes []GameTake = []GameTake{PASSE, TREFLE, CARREAU, COEUR, PIQUE, CENT, TOUT}
+
 type GameTake interface {
 	GreaterThan(t GameTake) bool
 	EvaluateHand([5]cards.Card) GameTakeEntry

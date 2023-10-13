@@ -34,6 +34,8 @@ func (t Carreau) EvaluateHand(cards [5]cards.Card) (entry GameTakeEntry) {
 	t.parseCard(&entry, cards[2])
 	t.parseCard(&entry, cards[3])
 	t.parseCard(&entry, cards[4])
+	entry.AllCardsValue = t.AllCardsValue
+	entry.CardsOfTakeValue = t.CardsValue
 
 	return entry
 }
@@ -42,9 +44,11 @@ func (t Carreau) parseCard(gt *GameTakeEntry, c cards.Card) {
 	value, sameColor := t.EvaluateCard(c)
 	gt.AllCardsValue += value
 	if sameColor {
-		gt.CardsOfTakeValue += value
+		gt.PlayerCardsOfTakeValue += value
+		gt.AllPlayerCardsValue += value
 	} else {
 		gt.OtherCardsValue += value
+		gt.AllPlayerCardsValue += value
 	}
 }
 

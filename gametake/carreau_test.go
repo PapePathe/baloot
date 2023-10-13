@@ -16,39 +16,48 @@ func TestGetName(t *testing.T) {
 }
 
 type evalCardsTestCase struct {
-	name             string
-	cards            [5]cards.Card
-	allCardsValue    int
-	cardsOfTakeValue int
+	name                   string
+	cards                  [5]cards.Card
+	allCardsValue          int
+	cardsOfTakeValue       int
+	allPlayerCardsValue    int
+	playerCardsOfTakeValue int
+}
+
+var TestEvaluateHandTable = []evalCardsTestCase{
+	evalCardsTestCase{
+		"valet et quatorzaine de carreau et trois sept",
+		[5]cards.Card{cards.ValetCarreau, cards.NeufCarreau, cards.SeptCarreau, cards.SeptCoeur, cards.SeptPique},
+		152,
+		62,
+		34,
+		34,
+	},
+	evalCardsTestCase{
+		"valet quatorzaine et as de carreau et trois sept",
+		[5]cards.Card{cards.ValetCarreau, cards.NeufCarreau, cards.AsCarreau, cards.SeptCoeur, cards.SeptPique},
+		152,
+		62,
+		45,
+		45,
+	},
+	evalCardsTestCase{
+		"valet quatorzaine et as de pique et trois sept",
+		[5]cards.Card{cards.ValetPique, cards.NeufPique, cards.AsPique, cards.SeptCoeur, cards.SeptPique},
+		152,
+		62,
+		13,
+		0,
+	},
 }
 
 func TestEvaluateHand(t *testing.T) {
-	tc := []evalCardsTestCase{
-		evalCardsTestCase{
-			"valet et quatorzaine de carreau et trois sept",
-			[5]cards.Card{cards.ValetCarreau, cards.NeufCarreau, cards.SeptCarreau, cards.SeptCoeur, cards.SeptPique},
-			34,
-			34,
-		},
-		evalCardsTestCase{
-			"valet quatorzaine et as de carreau et trois sept",
-			[5]cards.Card{cards.ValetCarreau, cards.NeufCarreau, cards.AsCarreau, cards.SeptCoeur, cards.SeptPique},
-			45,
-			45,
-		},
-		evalCardsTestCase{
-			"valet quatorzaine et as de pique et trois sept",
-			[5]cards.Card{cards.ValetPique, cards.NeufPique, cards.AsPique, cards.SeptCoeur, cards.SeptPique},
-			13,
-			0,
-		},
-	}
-
-	for _, c := range tc {
+	for _, c := range TestEvaluateHandTable {
 		t.Run(c.name, func(t *testing.T) {
 			result := CARREAU.EvaluateHand(c.cards)
 			assert.Equal(t, c.allCardsValue, result.AllCardsValue)
 			assert.Equal(t, c.cardsOfTakeValue, result.CardsOfTakeValue)
+			assert.Equal(t, c.allPlayerCardsValue, result.AllPlayerCardsValue)
 		})
 	}
 }

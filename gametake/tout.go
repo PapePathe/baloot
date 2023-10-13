@@ -4,10 +4,11 @@ import (
 	"pathe.co/zinx/pkg/cards"
 )
 
-var TOUT GameTake = Tout{}
+var TOUT GameTake = Tout{AllCardsValue: 162, CardsOfTakeValue: 162}
 
 type Tout struct {
-	Value int32 `default:4`
+	AllCardsValue    int
+	CardsOfTakeValue int
 }
 
 func (t Tout) Name() string {
@@ -29,6 +30,12 @@ func (t Tout) EvaluateHand(cards [5]cards.Card) (entry GameTakeEntry) {
 	result += t.EvaluateCard(cards[2])
 	result += t.EvaluateCard(cards[3])
 	result += t.EvaluateCard(cards[4])
+
+	entry.AllCardsValue = t.AllCardsValue
+	entry.CardsOfTakeValue = t.AllCardsValue
+	entry.OtherCardsValue = 0
+	entry.AllPlayerCardsValue = result
+	entry.PlayerCardsOfTakeValue = result
 
 	return entry
 }
