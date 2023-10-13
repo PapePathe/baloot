@@ -25,7 +25,7 @@ func NewGame() *Game {
 	plis := [8][4]cards.Card{}
 	jeu := cards.CardSet{}
 	players := [4]*player.Player{}
-	take := gametake.TREFLE
+	take := gametake.PASSE
 	p := Game{jeu.Distribuer(), 0, plis, 0, 0, players, take}
 
 	return &p
@@ -53,7 +53,12 @@ func (g *Game) AddTake(playerID int, take gametake.GameTake) error {
 	if g.take.GreaterThan(take) && take != gametake.PASSE {
 		return errors.New("Oops bad take, choose a greater take or pass.")
 	}
-	g.take = take
+
+	if g.take == gametake.PASSE {
+		g.take = take
+	} else if take != gametake.PASSE {
+		g.take = take
+	}
 
 	return nil
 }
@@ -66,4 +71,12 @@ func (g *Game) distribuer() [5]cards.Card {
 
 	g.CartesDistribuees += 5
 	return cards
+}
+
+func (g *Game) GetPlayers() [4]*player.Player {
+	return g.players
+}
+
+func (g *Game) GetTake() gametake.GameTake {
+	return g.take
 }

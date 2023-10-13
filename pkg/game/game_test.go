@@ -86,3 +86,12 @@ func TestAddTakeGreaterThanCurrentGameTake(t *testing.T) {
 	p.Take = &gametake.CENT
 	g.AddTake(p.GetID(), gametake.TOUT)
 }
+
+func TestAddTakePassDoesNotChangeGameTake(t *testing.T) {
+	g, p1, p2 := NewGame(), player.NewPlayer(), player.NewPlayer()
+	g.AddPlayer(p1)
+	g.AddPlayer(p2)
+	g.AddTake(p1.GetID(), gametake.CENT)
+	g.AddTake(p2.GetID(), gametake.PASSE)
+	assert.Equal(t, g.GetTake(), gametake.CENT)
+}
