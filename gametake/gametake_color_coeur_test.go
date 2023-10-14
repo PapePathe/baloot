@@ -54,7 +54,7 @@ func TestEvaluateCardCOEUR(t *testing.T) {
 
 	for _, test := range tc {
 		t.Run(test.name, func(t *testing.T) {
-			tout := Coeur{}
+			tout := COEUR
 			result, _ := tout.EvaluateCard(test.card)
 			assert.Equal(t, result, test.value)
 		})

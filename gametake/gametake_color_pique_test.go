@@ -54,7 +54,7 @@ func TestEvaluateCardPIQUE(t *testing.T) {
 
 	for _, test := range tc {
 		t.Run(test.name, func(t *testing.T) {
-			pique := Pique{}
+			pique := PIQUE
 			result, _ := pique.EvaluateCard(test.card)
 			assert.Equal(t, result, test.value)
 		})

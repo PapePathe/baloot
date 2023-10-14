@@ -109,7 +109,7 @@ func TestEvaluateCardCARREAU(t *testing.T) {
 
 	for _, test := range tc {
 		t.Run(test.name, func(t *testing.T) {
-			carreau := Carreau{}
+			carreau := CARREAU
 			result, _ := carreau.EvaluateCard(test.card)
 			assert.Equal(t, result, test.value)
 		})

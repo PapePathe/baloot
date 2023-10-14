@@ -14,9 +14,27 @@ type GameTakeEntry struct {
 	PlayerCardsOfTakeValue int
 	OtherCardsValue        int
 	ImportantCards         [5]cards.Card
+	Flags                  map[string]flag
 }
 
+type flag struct {
+	name string
+}
+
+var (
+	FlagTwoValets = flag{"two-valets"}
+	FlagTwoAces   = flag{"two-aces"}
+	Flag34Color   = flag{"two-valets"}
+)
+
 func (gte GameTakeEntry) CanTake(gt GameTake) bool {
+
+	if gt == TOUT {
+		if _, ok := gte.Flags[FlagTwoValets.name]; ok {
+			return true
+		}
+	}
+
 	takeRatio := gte.TakeRatio(gt)
 	ratio := gte.Ratio(gt)
 
@@ -59,4 +77,12 @@ func (gte GameTakeEntry) String() string {
 
 func (gte GameTakeEntry) Print(gt GameTake) table.Row {
 	return table.Row{gt.Name(), gte.AllCardsValue, gte.AllPlayerCardsValue, gte.CardsOfTakeValue, gte.PlayerCardsOfTakeValue, gte.Ratio(gt), gte.TakeRatio(gt), gte.CanTake(gt)}
+}
+
+type IGameTakeEntryPersisTence interface {
+	Persist() error
+}
+
+type IGameTakeEntryBroker interface {
+	Publish() error
 }

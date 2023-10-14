@@ -55,7 +55,7 @@ func TestEvaluateCard(t *testing.T) {
 	for _, test := range tc {
 		t.Run(test.name, func(t *testing.T) {
 			tout := Tout{}
-			result := tout.EvaluateCard(test.card)
+			result, _ := tout.EvaluateCard(test.card)
 			assert.Equal(t, result, test.value)
 		})
 	}
@@ -88,6 +88,7 @@ func TestTOUTGreaterThan(t *testing.T) {
 		testTOUTGreaterThanCases{"Tout is greater than cent", TREFLE, true},
 		testTOUTGreaterThanCases{"Tout is greater than cent", PASSE, true},
 	}
+
 	for _, test := range tc {
 		t.Run(test.name, func(t *testing.T) {
 			result := TOUT.GreaterThan(test.take)

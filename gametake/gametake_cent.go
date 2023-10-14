@@ -23,12 +23,20 @@ func (t Cent) GetValue() int {
 }
 
 func (t Cent) EvaluateHand(cards [5]cards.Card) (entry GameTakeEntry) {
-	result := 0
-	result += t.EvaluateCard(cards[0])
-	result += t.EvaluateCard(cards[1])
-	result += t.EvaluateCard(cards[2])
-	result += t.EvaluateCard(cards[3])
-	result += t.EvaluateCard(cards[4])
+	entry.Flags = make(map[string]flag)
+	result, acesCount := 0, 0
+
+	for _, c := range cards {
+		result += t.parseCard(c)
+		if c.IsAce() {
+			acesCount++
+
+			if acesCount == 2 {
+				entry.Flags[FlagTwoAces.name] = FlagTwoAces
+			}
+		}
+	}
+
 	entry.CardsOfTakeValue = t.AllCardsValue
 	entry.AllCardsValue = t.AllCardsValue
 	entry.PlayerCardsOfTakeValue = result
@@ -37,19 +45,25 @@ func (t Cent) EvaluateHand(cards [5]cards.Card) (entry GameTakeEntry) {
 	return entry
 }
 
-func (t Cent) EvaluateCard(card cards.Card) int {
+func (t Cent) parseCard(c cards.Card) int {
+	value, _ := t.EvaluateCard(c)
+
+	return value
+}
+
+func (t Cent) EvaluateCard(card cards.Card) (int, bool) {
 	switch card.Genre {
 	case "A":
-		return 11
+		return 11, true
 	case "10":
-		return 10
+		return 10, true
 	case "R":
-		return 4
+		return 4, true
 	case "D":
-		return 3
+		return 3, true
 	case "V":
-		return 2
+		return 2, true
 	default:
-		return 0
+		return 0, true
 	}
 }

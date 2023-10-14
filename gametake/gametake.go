@@ -4,57 +4,41 @@ import (
 	"pathe.co/zinx/pkg/cards"
 )
 
+var TREFLE ColorTake = ColorTake{
+	CardsValue:      62,
+	AllCardsValue:   152,
+	OtherCardsValue: 90,
+	Couleur:         "Trefle",
+	Value:           1,
+}
+var CARREAU ColorTake = ColorTake{
+	CardsValue:      62,
+	AllCardsValue:   152,
+	OtherCardsValue: 90,
+	Couleur:         "Carreau",
+	Value:           2,
+}
+var COEUR ColorTake = ColorTake{
+	CardsValue:      62,
+	AllCardsValue:   152,
+	OtherCardsValue: 90,
+	Couleur:         "Coeur",
+	Value:           3,
+}
+
+var PIQUE ColorTake = ColorTake{
+	CardsValue:      62,
+	AllCardsValue:   152,
+	OtherCardsValue: 90,
+	Couleur:         "Pique",
+	Value:           4,
+}
 var AllTakes []GameTake = []GameTake{PASSE, TREFLE, CARREAU, COEUR, PIQUE, CENT, TOUT}
 
 type GameTake interface {
 	GreaterThan(t GameTake) bool
 	EvaluateHand([5]cards.Card) GameTakeEntry
+	EvaluateCard(cards.Card) (int, bool)
 	GetValue() int
 	Name() string
-}
-
-func evaluateCardOfOtherColor(genre string) int {
-	switch genre {
-	case "V":
-		return 2
-	case "9":
-		return 0
-	case "A":
-		return 11
-	case "10":
-		return 10
-	case "R":
-		return 4
-	case "D":
-		return 3
-	case "8":
-		return 0
-	case "7":
-		return 0
-	}
-
-	return 0
-}
-
-func evaluateCardOfColor(genre string) int {
-	switch genre {
-	case "V":
-		return 20
-	case "9":
-		return 14
-	case "A":
-		return 11
-	case "10":
-		return 10
-	case "R":
-		return 4
-	case "D":
-		return 3
-	case "8":
-		return 0
-	case "7":
-		return 0
-	}
-
-	return 0
 }

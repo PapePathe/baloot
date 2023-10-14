@@ -24,6 +24,6 @@ func (t Passe) EvaluateHand(cards [5]cards.Card) (entry GameTakeEntry) {
 	return entry
 }
 
-func (t Passe) EvaluateCard(card cards.Card) int {
-	return 0
+func (t Passe) EvaluateCard(card cards.Card) (int, bool) {
+	return 0, true
 }

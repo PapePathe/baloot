@@ -25,11 +25,19 @@ func (t Tout) GetValue() int {
 
 func (t Tout) EvaluateHand(cards [5]cards.Card) (entry GameTakeEntry) {
 	result := 0
-	result += t.EvaluateCard(cards[0])
-	result += t.EvaluateCard(cards[1])
-	result += t.EvaluateCard(cards[2])
-	result += t.EvaluateCard(cards[3])
-	result += t.EvaluateCard(cards[4])
+	valetsCount := 0
+	entry.Flags = make(map[string]flag)
+
+	for _, c := range cards {
+		if c.IsValet() {
+			valetsCount++
+			if valetsCount == 2 {
+				entry.Flags[FlagTwoValets.name] = FlagTwoValets
+			}
+		}
+
+		result += t.parseCard(c)
+	}
 
 	entry.AllCardsValue = t.AllCardsValue
 	entry.CardsOfTakeValue = t.AllCardsValue
@@ -40,21 +48,27 @@ func (t Tout) EvaluateHand(cards [5]cards.Card) (entry GameTakeEntry) {
 	return entry
 }
 
-func (t Tout) EvaluateCard(card cards.Card) int {
+func (t Tout) parseCard(c cards.Card) int {
+	value, _ := t.EvaluateCard(c)
+
+	return value
+}
+
+func (t Tout) EvaluateCard(card cards.Card) (int, bool) {
 	switch card.Genre {
 	case "V":
-		return 20
+		return 20, true
 	case "9":
-		return 14
+		return 14, true
 	case "A":
-		return 11
+		return 11, true
 	case "10":
-		return 10
+		return 10, true
 	case "R":
-		return 4
+		return 4, true
 	case "D":
-		return 3
+		return 3, true
 	default:
-		return 0
+		return 0, true
 	}
 }
