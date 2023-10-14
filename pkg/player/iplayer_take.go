@@ -8,7 +8,7 @@ import (
 )
 
 type IPlayerTakes interface {
-	GetBestTake() *gametake.GameTake
+	GetBestTake() gametake.GameTake
 	GetTakes() map[gametake.GameTake]gametake.GameTakeEntry
 	SetTake(*gametake.GameTake)
 }
@@ -33,6 +33,26 @@ func (p *Player) ShowTakes() string {
 	}
 
 	return sb.String()
+}
+
+func (p *Player) GetBestTake() (take gametake.GameTake) {
+
+	takes := []gametake.GameTake{}
+
+	for take, takeEntry := range p.GetTakes() {
+		if takeEntry.CanTake(take) {
+			takes = append(takes, take)
+		}
+	}
+
+	if len(takes) == 1 {
+		take = takes[0]
+		return take
+	}
+
+	take = gametake.PASSE
+
+	return take
 }
 
 func (p *Player) SetTake(gt *gametake.GameTake) {
