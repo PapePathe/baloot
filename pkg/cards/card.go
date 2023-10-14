@@ -50,6 +50,18 @@ func (c *Card) String() string {
 	return fmt.Sprintf("(%s %s)", c.Genre, c.Couleur)
 }
 
+func (c *Card) IsValet() bool {
+	return c.Genre == "V"
+}
+
+func (c *Card) IsAce() bool {
+	return c.Genre == "A"
+}
+
+func (c *Card) IsNine() bool {
+	return c.Genre == "9"
+}
+
 type CardSet struct {
 	Cards [32]Card
 }
