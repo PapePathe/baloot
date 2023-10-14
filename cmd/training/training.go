@@ -14,29 +14,28 @@ import (
 func main() {
 	for {
 		g := newSampleGame()
-		takes := playerTakes(g)
-		for _, take := range takes {
-			fmt.Println(take)
-		}
+		playerTakes(g)
+		fmt.Println(g.GetTake().Name())
+		fmt.Println("\n\n\n -------------")
 		time.Sleep(10 * time.Second)
 	}
 }
 
 func playerTakes(g *game.Game) (takes []constrainedTake) {
 	_ptk := []gametake.GameTake{}
-	for _, player := range g.GetPlayers() {
-		player.PreetyHand()
+	for _, playerObj := range g.GetPlayers() {
 		if g.GetTake() == gametake.TOUT {
 			fmt.Println("Going to start the game")
 			break
 		}
 
-		g.AddTake(player.GetID(), player.GetBestTake())
-		ctk := constrainedTake{take: *player.Take, takes: []gametake.GameTake{}, cards: player.Hand.Cards}
+		g.AddTake(playerObj.GetID(), playerObj.GetBestTake())
+		ctk := constrainedTake{take: *playerObj.Take, takes: []gametake.GameTake{}, cards: playerObj.OrderedCardsForTake(g.GetTake())}
+		fmt.Println(ctk)
 		for _, t := range _ptk {
 			ctk.takes = append(ctk.takes, t)
 		}
-		_ptk = append(_ptk, *player.Take)
+		_ptk = append(_ptk, *playerObj.Take)
 		takes = append(takes, ctk)
 	}
 	return takes
