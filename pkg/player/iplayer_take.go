@@ -50,6 +50,11 @@ func (p *Player) GetBestTake() (take gametake.GameTake) {
 		return take
 	}
 
+	if len(takes) == 2 {
+		take = takes[0]
+		return take
+	}
+
 	take = gametake.PASSE
 
 	return take

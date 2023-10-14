@@ -1,6 +1,8 @@
 package player
 
 import (
+	"sort"
+
 	"pathe.co/zinx/gametake"
 	"pathe.co/zinx/pkg/cards"
 )
@@ -53,4 +55,30 @@ func (p *Player) OrderedCards() map[string][]cards.Card {
 	}
 
 	return m
+}
+
+func (p *Player) OrderedCardsForTake(t gametake.GameTake) [5]cards.Card {
+	m := make(map[string][]cards.Card)
+
+	for _, c := range p.Hand.Cards {
+		_, ok := m[c.Couleur]
+
+		if ok {
+			m[c.Couleur] = append(m[c.Couleur], c)
+		} else {
+			m[c.Couleur] = []cards.Card{c}
+		}
+		sorter := SortByColorAndType{m[c.Couleur], t}
+		sort.Sort(sorter)
+	}
+
+	result := []cards.Card{}
+
+	for _, cards := range m {
+		for _, c := range cards {
+			result = append(result, c)
+		}
+	}
+
+	return [5]cards.Card(result)
 }
