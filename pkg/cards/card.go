@@ -55,7 +55,7 @@ type CardSet struct {
 }
 
 func (j CardSet) Distribuer() [32]Card {
-	rand.Seed(time.Now().UnixNano())
+	rand.New(rand.NewSource(time.Now().UnixNano()))
 	cartes := CardSet{Jeu32Cartes}
 	rand.Shuffle(len(cartes.Cards), func(i, j int) {
 		cartes.Cards[i], cartes.Cards[j] = cartes.Cards[j], cartes.Cards[i]

@@ -51,7 +51,7 @@ func TestAddTakeLessThanGameTake(t *testing.T) {
 	g2.AddPlayer(p2)
 	g2.AddTake(p1.GetID(), gametake.CENT)
 	err2 := g2.AddTake(p2.GetID(), gametake.PIQUE)
-	assert.Equal(t, errors.New("Oops bad take, choose a greater take or pass."), err2)
+	assert.Equal(t, errors.New("oops bad take, choose a greater take or pass"), err2)
 }
 
 func TestAddTakeLessThanGameTakeButIsPASS(t *testing.T) {
@@ -70,7 +70,7 @@ func TestAddTakeForPlayerThatHasTaken(t *testing.T) {
 	p.Take = &gametake.CENT
 	err := g.AddTake(p.GetID(), gametake.TOUT)
 
-	assert.Equal(t, errors.New("Oops duplicate player take"), err)
+	assert.Equal(t, errors.New("oops duplicate player take"), err)
 }
 
 func TestAddTakeLessThanCurrentGameTake(t *testing.T) {

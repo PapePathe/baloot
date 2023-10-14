@@ -62,8 +62,7 @@ func (s *Server) Start() {
 		fmt.Println("start Zinx server  ", s.Name, " succ, now listening...")
 
 		// TODO server.go should have a method to generate ID automatically
-		var cid uint32
-		cid = 0
+		var cid uint32 = 0
 		// 3. Start the server network connection business.
 		for {
 

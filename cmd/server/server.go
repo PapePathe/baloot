@@ -14,7 +14,7 @@ type PingRouter struct {
 }
 
 // Ping Handle
-func (this *PingRouter) Handle(request ziface.IRequest) {
+func (pr *PingRouter) Handle(request ziface.IRequest) {
 	fmt.Println("Call PingRouter Handle")
 	// Read client data first, then reply with ping...ping...ping
 	fmt.Println("recv from client: msgId=", request.GetMsgID(), ", data=", string(request.GetData()))
@@ -30,7 +30,7 @@ type HelloZinxRouter struct {
 }
 
 // HelloZinxRouter Handle
-func (this *HelloZinxRouter) Handle(request ziface.IRequest) {
+func (pr *HelloZinxRouter) Handle(request ziface.IRequest) {
 	fmt.Println("Call HelloZinxRouter Handle")
 	// Read client data first, then reply with ping...ping...ping
 	fmt.Println("recv from client: msgId=", request.GetMsgID(), ", data=", string(request.GetData()))

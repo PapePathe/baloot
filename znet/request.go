@@ -26,3 +26,11 @@ func (r *Request) GetData() []byte {
 func (r *Request) GetMsgID() uint32 {
 	return r.msg.GetMsgId()
 }
+
+func (r *Request) GetGame() *game.Game {
+	return r.game
+}
+
+func (r *Request) GetPlayerID() int {
+	return r.pid
+}

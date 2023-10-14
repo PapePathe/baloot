@@ -21,7 +21,7 @@ type Game struct {
 }
 
 func NewGame() *Game {
-	rand.Seed(time.Now().UnixNano())
+	rand.New(rand.NewSource(time.Now().UnixNano()))
 	plis := [8][4]cards.Card{}
 	jeu := cards.CardSet{}
 	players := [4]*player.Player{}
@@ -46,12 +46,12 @@ func (g *Game) AddPlayer(p *player.Player) error {
 
 func (g *Game) AddTake(playerID int, take gametake.GameTake) error {
 	if g.players[playerID].Take != nil {
-		return errors.New("Oops duplicate player take")
+		return errors.New("oops duplicate player take")
 	}
 	g.players[playerID].Take = &take
 
 	if g.take.GreaterThan(take) && take != gametake.PASSE {
-		return errors.New("Oops bad take, choose a greater take or pass.")
+		return errors.New("oops bad take, choose a greater take or pass")
 	}
 
 	if g.take == gametake.PASSE {

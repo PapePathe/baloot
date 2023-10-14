@@ -90,8 +90,7 @@ func (c *Connection) Start(g *game.Game) {
 
 func (c *Connection) Stop() {
 	fmt.Println("Conn Stop()...ConnID = ", c.ConnID)
-	// If the current connection is already closed
-	if c.isClosed == true {
+	if c.isClosed {
 		return
 	}
 	c.isClosed = true
