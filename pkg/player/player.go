@@ -11,7 +11,7 @@ type Player struct {
 	Hand      Hand               `json:"hand"`
 	Transport IPlayerTransport   `json:"-"`
 	Take      *gametake.GameTake `json:"take"`
-	id        int                `json:"id"`
+	id        int
 }
 
 func NewPlayer() *Player {
