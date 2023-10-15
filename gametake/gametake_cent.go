@@ -1,6 +1,8 @@
 package gametake
 
 import (
+	"encoding/json"
+
 	"pathe.co/zinx/pkg/cards"
 )
 
@@ -66,4 +68,13 @@ func (t Cent) EvaluateCard(card cards.Card) (int, bool) {
 	default:
 		return 0, true
 	}
+}
+
+func (t Cent) MarshalJSON() ([]byte, error) {
+	customStruct := struct {
+		Name string
+	}{
+		Name: t.Name(),
+	}
+	return json.Marshal(customStruct)
 }
