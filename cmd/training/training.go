@@ -18,6 +18,13 @@ func main() {
 		g := newSampleGame()
 		playerTakes(g)
 		fmt.Println(g.GetTake().Name())
+
+		g.DispatchCards()
+
+		for _, p := range g.GetPlayers() {
+			fmt.Println(p.OrderedCardsForPlaying(g.GetTake()))
+		}
+		fmt.Scanf("Hey")
 		fmt.Println("\n\n\n -------------")
 	}
 }
