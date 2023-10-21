@@ -34,6 +34,15 @@ var PIQUE ColorTake = ColorTake{
 	Value:           4,
 }
 var AllTakes []GameTake = []GameTake{PASSE, TREFLE, CARREAU, COEUR, PIQUE, CENT, TOUT}
+var AllTakesByName map[string]GameTake = map[string]GameTake{
+	"Passe":   PASSE,
+	"Trefle":  TREFLE,
+	"Carreau": CARREAU,
+	"Coeur":   COEUR,
+	"Pique":   PIQUE,
+	"Cent":    CENT,
+	"Tout":    TOUT,
+}
 
 type GameTake interface {
 	GreaterThan(t GameTake) bool
