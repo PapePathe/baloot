@@ -3,27 +3,30 @@ package player
 import (
 	"sort"
 
+	"github.com/gofiber/contrib/websocket"
 	"pathe.co/zinx/gametake"
 	"pathe.co/zinx/pkg/cards"
 )
 
 type Player struct {
-	Hand      Hand               `json:"hand"`
-	Transport IPlayerTransport   `json:"-"`
-	Take      *gametake.GameTake `json:"take"`
-	id        int
+	Hand        Hand               `json:"hand"`
+	PlayingHand PlayingHand        `json:"playing_hand"`
+	Transport   IPlayerTransport   `json:"-"`
+	Take        *gametake.GameTake `json:"take"`
+	ID          int                `json:"id"`
+	Conn        *websocket.Conn
 }
 
 func NewPlayer() *Player {
-	return &Player{Hand: Hand{}, Transport: JSONMarshaler{}, Take: nil}
+	return &Player{Hand: Hand{}, PlayingHand: PlayingHand{}, Transport: JSONMarshaler{}, Take: nil}
 }
 
 func (p *Player) SetID(id int) {
-	p.id = id
+	p.ID = id
 }
 
 func (p *Player) GetID() int {
-	return p.id
+	return p.ID
 }
 
 func (p *Player) SetForTransport() ([]byte, error) {
@@ -81,4 +84,30 @@ func (p *Player) OrderedCardsForTake(t gametake.GameTake) [5]cards.Card {
 	}
 
 	return [5]cards.Card(result)
+}
+
+func (p *Player) OrderedCardsForPlaying(t gametake.GameTake) [8]cards.Card {
+	m := make(map[string][]cards.Card)
+
+	for _, c := range p.PlayingHand.Cards {
+		_, ok := m[c.Couleur]
+
+		if ok {
+			m[c.Couleur] = append(m[c.Couleur], c)
+		} else {
+			m[c.Couleur] = []cards.Card{c}
+		}
+		sorter := SortByColorAndType{m[c.Couleur], t}
+		sort.Sort(sorter)
+	}
+
+	result := []cards.Card{}
+
+	for _, cards := range m {
+		for _, c := range cards {
+			result = append(result, c)
+		}
+	}
+
+	return [8]cards.Card(result)
 }

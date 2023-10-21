@@ -19,6 +19,18 @@ func (h *Hand) String() string {
 	return sb.String()
 }
 
+type PlayingHand struct {
+	Cards []cards.Card
+}
+
+func (h *PlayingHand) String() string {
+	var sb strings.Builder
+	for _, c := range h.Cards {
+		sb.WriteString(c.String())
+	}
+	return sb.String()
+}
+
 type SortByColorAndType struct {
 	Cards []cards.Card
 	Take  gametake.GameTake
