@@ -10,6 +10,8 @@ import (
 	"pathe.co/zinx/pkg/player"
 )
 
+var CardsAlreadyDispatchedError = errors.New("Cards already dispatched error")
+
 type Game struct {
 	Cartes            [32]cards.Card
 	NombrePli         int
@@ -79,4 +81,37 @@ func (g *Game) GetPlayers() [4]*player.Player {
 
 func (g *Game) GetTake() gametake.GameTake {
 	return g.take
+}
+
+func (g *Game) AvailableTakes() []gametake.GameTake {
+	takes := []gametake.GameTake{}
+	takes = append(takes, gametake.PASSE)
+	for _, t := range gametake.AllTakes {
+		if t.GreaterThan(g.take) {
+			takes = append(takes, t)
+		}
+	}
+
+	return takes
+}
+
+func (g *Game) DispatchCards() error {
+	if g.CartesDistribuees == 32 {
+		return CardsAlreadyDispatchedError
+	}
+
+	for _, p := range g.players {
+		cards := []cards.Card{}
+		for _, c := range p.Hand.Cards {
+			cards = append(cards, c)
+		}
+		for i := 0; i < 3; i++ {
+			cards = append(cards, g.Cartes[g.CartesDistribuees])
+			g.CartesDistribuees++
+		}
+
+		p.PlayingHand = player.PlayingHand{Cards: cards}
+	}
+
+	return nil
 }

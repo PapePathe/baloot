@@ -55,10 +55,8 @@ func TestAddTakeLessThanGameTake(t *testing.T) {
 }
 
 func TestAddTakeLessThanGameTakeButIsPASS(t *testing.T) {
-	g2 := NewGame()
-	p1, p2 := player.NewPlayer(), player.NewPlayer()
-	g2.AddPlayer(p1)
-	g2.AddPlayer(p2)
+	g2 := setupGame(2)
+	p1, p2 := g2.players[0], g2.players[1]
 	g2.AddTake(p1.GetID(), gametake.CENT)
 	err2 := g2.AddTake(p2.GetID(), gametake.PASSE)
 	assert.Equal(t, nil, err2)
@@ -88,10 +86,35 @@ func TestAddTakeGreaterThanCurrentGameTake(t *testing.T) {
 }
 
 func TestAddTakePassDoesNotChangeGameTake(t *testing.T) {
-	g, p1, p2 := NewGame(), player.NewPlayer(), player.NewPlayer()
-	g.AddPlayer(p1)
-	g.AddPlayer(p2)
+	g := setupGame(2)
+	p1, p2 := g.players[0], g.players[1]
 	g.AddTake(p1.GetID(), gametake.CENT)
 	g.AddTake(p2.GetID(), gametake.PASSE)
 	assert.Equal(t, g.GetTake(), gametake.CENT)
+}
+
+func TestDispatchCards(t *testing.T) {
+	g := setupGame(4)
+	g.DispatchCards()
+
+	assert.Equal(t, g.CartesDistribuees, 32)
+
+	for _, p := range g.players {
+		assert.Equal(t, len(p.PlayingHand.Cards), 8)
+	}
+}
+
+func TestDispatchCardsIsIdempotent(t *testing.T) {
+	g := setupGame(4)
+	g.DispatchCards()
+
+	assert.Error(t, g.DispatchCards(), CardsAlreadyDispatchedError)
+}
+
+func setupGame(playersCount int) *Game {
+	g := NewGame()
+	for i := 0; i < playersCount; i++ {
+		g.AddPlayer(player.NewPlayer())
+	}
+	return g
 }
