@@ -12,7 +12,7 @@ function CardView({ Genre, Couleur, onDragStart, onDragEnter, onDragEnd}) {
   const icon = icons[Couleur];
 
   return (
-    <Card size={'sm'} draggable onDragStart={onDragStart} onDragEnter={onDragEnter} onDragEnd={onDragEnd}>
+    <Card w={128} draggable onDragStart={onDragStart} onDragEnter={onDragEnter} onDragEnd={onDragEnd}>
       <CardHeader>
         <Text textAlign={'left'} fontSize="32" flex='1'>{Genre}</Text>
       </CardHeader>
