@@ -51,9 +51,7 @@ func playerTakes(g *game.Game) (takes []constrainedTake) {
 		_kakfa_messages = append(_kakfa_messages, msg)
 
 		fmt.Println(ctk)
-		for _, t := range _ptk {
-			ctk.Takes = append(ctk.Takes, t)
-		}
+		ctk.Takes = append(ctk.Takes, _ptk...)
 		_ptk = append(_ptk, *playerObj.Take)
 		takes = append(takes, ctk)
 	}

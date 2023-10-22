@@ -47,7 +47,7 @@ func SetTakeMsg(gt string, pid int) setTake {
 
 type broadcastPlayerTakeMsg struct {
 	ID             messageID           `json:"id"`
-	Take           string              `json: 'take'`
+	Take           string              `json:"take"`
 	PlayerId       int                 `json:"player_id"`
 	AvailableTakes []gametake.GameTake `json:"available_takes"`
 }

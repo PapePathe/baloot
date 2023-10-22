@@ -108,7 +108,7 @@ func TestDispatchCardsIsIdempotent(t *testing.T) {
 	g := setupGame(4)
 	g.DispatchCards()
 
-	assert.Error(t, g.DispatchCards(), CardsAlreadyDispatchedError)
+	assert.Error(t, g.DispatchCards(), ErrCardsAlreadyDispatched)
 }
 
 func TestNewGame(t *testing.T) {

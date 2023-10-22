@@ -57,9 +57,9 @@ func main() {
 				pid, _ := strconv.Atoi(obj["player_id"])
 				err := g.AddTake(pid, gametake.AllTakesByName[obj["gametake"]])
 				if err != nil {
-					log.Printf(err.Error())
+					log.Println(err.Error())
 				}
-				log.Printf(g.GetTake().Name())
+				log.Println(g.GetTake().Name())
 
 				b := game.BroadcastPlayerTakeMsg(obj["gametake"], id, g.AvailableTakes())
 				for _, p := range g.GetPlayers() {

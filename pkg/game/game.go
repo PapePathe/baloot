@@ -12,7 +12,7 @@ import (
 	"pathe.co/zinx/pkg/player"
 )
 
-var CardsAlreadyDispatchedError = errors.New("Cards already dispatched error")
+var ErrCardsAlreadyDispatched = errors.New("cards already dispatched error")
 
 type Game struct {
 	Cartes            [32]cards.Card
@@ -129,7 +129,7 @@ func (g *Game) AvailableTakes() []gametake.GameTake {
 
 func (g *Game) DispatchCards() error {
 	if g.CartesDistribuees == 32 {
-		return CardsAlreadyDispatchedError
+		return ErrCardsAlreadyDispatched
 	}
 
 	for _, p := range g.players {

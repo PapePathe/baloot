@@ -49,10 +49,8 @@ func (mh *MsgHandle) AddRouter(msgId uint32, router ziface.IRouter) {
 func (mh *MsgHandle) StartOneWorker(workerID int, taskQueue chan ziface.IRequest) {
 	fmt.Println("Worker ID =", workerID, "is started.")
 	for {
-		select {
-		case request := <-taskQueue:
-			mh.DoMsgHandler(request)
-		}
+		request := <-taskQueue
+		mh.DoMsgHandler(request)
 	}
 }
 

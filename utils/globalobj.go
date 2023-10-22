@@ -2,7 +2,7 @@ package utils
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"os"
 
 	"pathe.co/zinx/ziface"
 )
@@ -42,7 +42,7 @@ Define a global object
 var GlobalObject *GlobalObj
 
 func (g *GlobalObj) Reload() error {
-	data, err := ioutil.ReadFile("conf/zinx.json")
+	data, err := os.ReadFile("conf/zinx.json")
 	if err != nil {
 		return err
 	}

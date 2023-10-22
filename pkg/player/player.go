@@ -83,9 +83,7 @@ func (p *Player) OrderedCardsForTake(t gametake.GameTake) [5]cards.Card {
 	result := []cards.Card{}
 
 	for _, cards := range m {
-		for _, c := range cards {
-			result = append(result, c)
-		}
+		result = append(result, cards...)
 	}
 
 	return [5]cards.Card(result)
@@ -109,9 +107,7 @@ func (p *Player) OrderedCardsForPlaying(t gametake.GameTake) [8]cards.Card {
 	result := []cards.Card{}
 
 	for _, cards := range m {
-		for _, c := range cards {
-			result = append(result, c)
-		}
+		result = append(result, cards...)
 	}
 
 	return [8]cards.Card(result)

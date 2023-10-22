@@ -7,8 +7,7 @@ import (
 )
 
 type KafkaPublisher struct {
-	autocreateTopics bool
-	writer           *kafka.Writer
+	writer *kafka.Writer
 }
 
 func NewPublisher(addr []string, autocreateTopics bool) *KafkaPublisher {

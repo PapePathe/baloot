@@ -12,7 +12,7 @@ type PlayerTakeRouter struct {
 }
 
 // PlayerTake Handle
-func (this *PlayerTakeRouter) Handle(request ziface.IRequest) {
+func (ptr *PlayerTakeRouter) Handle(request ziface.IRequest) {
 	fmt.Println("Call PlayerTakeRouter Handle")
 	fmt.Println("recv from client: msgId=", request.GetMsgID(), ", data=")
 
