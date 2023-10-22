@@ -111,6 +111,12 @@ func TestDispatchCardsIsIdempotent(t *testing.T) {
 	assert.Error(t, g.DispatchCards(), CardsAlreadyDispatchedError)
 }
 
+func TestNewGame(t *testing.T) {
+	g := NewGame()
+
+	assert.Equal(t, g.TakesFinished, false)
+}
+
 func setupGame(playersCount int) *Game {
 	g := NewGame()
 	for i := 0; i < playersCount; i++ {

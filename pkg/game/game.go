@@ -1,7 +1,9 @@
 package game
 
 import (
+	"encoding/json"
 	"errors"
+	"fmt"
 	"math/rand"
 	"time"
 
@@ -18,6 +20,7 @@ type Game struct {
 	Plis              [8][4]cards.Card
 	CartesDistribuees int
 	NombreJoueurs     int
+	TakesFinished     bool
 	players           [4]*player.Player
 	take              gametake.GameTake
 }
@@ -28,7 +31,7 @@ func NewGame() *Game {
 	jeu := cards.CardSet{}
 	players := [4]*player.Player{}
 	take := gametake.PASSE
-	p := Game{jeu.Distribuer(), 0, plis, 0, 0, players, take}
+	p := Game{jeu.Distribuer(), 0, plis, 0, 0, false, players, take}
 
 	return &p
 }
@@ -62,7 +65,36 @@ func (g *Game) AddTake(playerID int, take gametake.GameTake) error {
 		g.take = take
 	}
 
+	if g.take == gametake.TOUT || g.takesComplete() {
+		g.TakesFinished = true
+		g.DispatchCards()
+
+		for _, p := range g.players {
+			if p != nil {
+				fmt.Println("sending playing hand to player")
+				r := ReceivePlayingHandMsg(*p, []gametake.GameTake{})
+				m, _ := json.Marshal(r)
+
+				if p.Conn != nil {
+					if err := p.Conn.WriteMessage(1, m); err != nil {
+						fmt.Println(err)
+					}
+				}
+			}
+		}
+	}
+
 	return nil
+}
+
+func (g *Game) takesComplete() bool {
+	for _, p := range g.players {
+		if p != nil && p.Take == nil {
+			return false
+		}
+	}
+
+	return true
 }
 
 func (g *Game) distribuer() [5]cards.Card {
@@ -102,15 +134,18 @@ func (g *Game) DispatchCards() error {
 
 	for _, p := range g.players {
 		cards := []cards.Card{}
-		for _, c := range p.Hand.Cards {
-			cards = append(cards, c)
-		}
-		for i := 0; i < 3; i++ {
-			cards = append(cards, g.Cartes[g.CartesDistribuees])
-			g.CartesDistribuees++
-		}
+		if p != nil {
 
-		p.PlayingHand = player.PlayingHand{Cards: cards}
+			for _, c := range p.Hand.Cards {
+				cards = append(cards, c)
+			}
+			for i := 0; i < 3; i++ {
+				cards = append(cards, g.Cartes[g.CartesDistribuees])
+				g.CartesDistribuees++
+			}
+
+			p.PlayingHand = player.PlayingHand{Cards: cards}
+		}
 	}
 
 	return nil

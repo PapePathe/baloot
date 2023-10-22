@@ -22,7 +22,7 @@ func TestNewPlayer(t *testing.T) {
 func TestSetID(t *testing.T) {
 	p := NewPlayer()
 	p.SetID(0)
-	assert.Equal(t, p.id, 0)
+	assert.Equal(t, p.ID, 0)
 }
 
 func TestOrderedCards(t *testing.T) {

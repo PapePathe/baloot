@@ -14,11 +14,16 @@ type Player struct {
 	Transport   IPlayerTransport   `json:"-"`
 	Take        *gametake.GameTake `json:"take"`
 	ID          int                `json:"id"`
-	Conn        *websocket.Conn
+	Conn        *websocket.Conn    `json:"-"`
 }
 
 func NewPlayer() *Player {
-	return &Player{Hand: Hand{}, PlayingHand: PlayingHand{}, Transport: JSONMarshaler{}, Take: nil}
+	return &Player{
+		Hand:        Hand{},
+		PlayingHand: PlayingHand{},
+		Transport:   JSONMarshaler{},
+		Take:        nil,
+	}
 }
 
 func (p *Player) SetID(id int) {
