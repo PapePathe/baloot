@@ -31,7 +31,7 @@ func main() {
 			g.AddPlayer(p)
 			log.Println(p)
 
-			r := ReceiveTakeHandMsg(*p, gametake.AllTakes)
+			r := game.ReceiveTakeHandMsg(*p, gametake.AllTakes)
 			m, _ := json.Marshal(r)
 			if err := c.WriteMessage(1, m); err != nil {
 				log.Println("write:", err)
@@ -44,11 +44,11 @@ func main() {
 		)
 		for {
 			if mt, msg, err = c.ReadMessage(); err != nil {
-				log.Println("read:", err)
+				log.Println("error reading message:", err)
 				break
 			}
 
-			log.Printf("recv: %s %s", msg, mt)
+			log.Printf("recv: %s %d", msg, mt)
 			obj := map[string]string{}
 			_ = json.Unmarshal(msg, &obj)
 
@@ -59,14 +59,15 @@ func main() {
 				if err != nil {
 					log.Printf(err.Error())
 				}
-
 				log.Printf(g.GetTake().Name())
 
-				b := broadcastPlayerTake{ID: BroadcastPlayerTake, Take: obj["gametake"], PlayerId: id, AvailableTakes: g.AvailableTakes()}
+				b := game.BroadcastPlayerTakeMsg(obj["gametake"], id, g.AvailableTakes())
 				for _, p := range g.GetPlayers() {
-					m, _ := json.Marshal(b)
-					if err := p.Conn.WriteMessage(1, m); err != nil {
-						log.Println("write:", err)
+					if p != nil {
+						m, _ := json.Marshal(b)
+						if err := p.Conn.WriteMessage(1, m); err != nil {
+							log.Println("write:", err)
+						}
 					}
 				}
 			}
@@ -74,46 +75,4 @@ func main() {
 	}))
 
 	log.Fatal(app.Listen(":7777"))
-}
-
-type messageID int
-
-var (
-	ReceiveTakeHand     messageID = 1
-	ReceivePlayingHand  messageID = 2
-	SetTake             messageID = 3
-	PlayCard            messageID = 4
-	BroadcastCards      messageID = 5
-	BroadcastPlayerTake messageID = 5
-)
-
-type broadcastPlayerTake struct {
-	ID             messageID           `json:"id"`
-	Take           string              `json: 'take'`
-	PlayerId       int                 `json:"player_id"`
-	AvailableTakes []gametake.GameTake `json:"available_takes"`
-}
-
-type receiveTakeHandMsg struct {
-	ID             messageID           `json:"id"`
-	Player         player.Player       `json:"player"`
-	AvailableTakes []gametake.GameTake `json:"available_takes"`
-}
-
-func ReceiveTakeHandMsg(p player.Player, takes []gametake.GameTake) receiveTakeHandMsg {
-	clientMessage := receiveTakeHandMsg{ID: ReceiveTakeHand, Player: p, AvailableTakes: takes}
-
-	return clientMessage
-}
-
-type setTake struct {
-	ID       messageID `json:"id"`
-	PlayerId int       `json:"player_id"`
-	Gametake string    `json:"gametake"`
-}
-
-func setTakeMsg(gt string, pid int) setTake {
-	clientMessage := setTake{ID: SetTake, PlayerId: pid, Gametake: gt}
-
-	return clientMessage
 }
