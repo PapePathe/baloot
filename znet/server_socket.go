@@ -88,9 +88,9 @@ func (s *SocketHandler) HandlePlayerTake(c *websocket.Conn, obj map[string]strin
 
 func (s *SocketHandler) HandlePlayerCard(c *websocket.Conn, obj map[string]string) {
 	pid, _ := strconv.Atoi(obj["player_id"])
-	c := cards.Card{Couleur: obj["couleur"], Genre: obj["genre"]}
+	card := cards.Card{Couleur: obj["couleur"], Genre: obj["genre"]}
 
-	err := s.g.PlayCard(pid, c)
+	err := s.g.PlayCard(pid, card)
 
 	if err != nil {
 		log.Println(err.Error())
