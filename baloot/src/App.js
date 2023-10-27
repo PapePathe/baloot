@@ -10,6 +10,7 @@ function App() {
   const [messageHistory, setMessageHistory] = useState([]);
   const { sendMessage, lastJsonMessage, readyState } = useWebSocket(WS_URL);
   const [ playingCards, setPlayingCards] = useState([]);
+  const [ deck, setDeck] = useState([]);
   const [ cards, setCards] = useState([]);
   const [ takes, setTakes] = useState([]);
   const [ gametake, setGametake] = useState(null);
@@ -71,6 +72,10 @@ function App() {
             setPlayerTakes((prev) => [...prev, lastJsonMessage.take])
             setTakes((prev) => lastJsonMessage.available_takes)
             break
+          case 6:
+            setDeck((prev) => lastJsonMessage.deck)
+            setPlayingCards((prev) => lastJsonMessage.player.playing_hand.Cards)
+            break
           default:
             throw new Error("Error message id not found")
         }
@@ -84,9 +89,10 @@ function App() {
   }, [sendMessage]);
 
   const handleClickPlayMessage = useCallback((couleur, genre, event) => {
-    sendMessage(JSON.stringify({player_id: `${playerID}`, color: couleur, genre: genre, id: '4'}))
-    console.log(event, couleur, genre);
-  }, []);
+    if (couleur !== "" && genre !== "") {
+      sendMessage(JSON.stringify({player_id: `${playerID}`, color: couleur, genre: genre, id: '4'}))
+    }
+  }, [playerID, sendMessage]);
 
   const connectionStatus = {
     [ReadyState.CONNECTING]: 'Connecting',
@@ -104,7 +110,12 @@ function App() {
           <GridItem colSpan={4} rowSpan={3} bg='papayawhip'>
             <VStack spacing={0} align='stretch' height='100%'>
               <Box h='25%' bg='yellow.200'></Box>
-              <Box h='40%' bg='tomato'>{gametake? (<Text>{gametake}</Text>) : null}</Box>
+              <Box h='40%' bg='tomato'>
+                {gametake? (<Text>{gametake}</Text>) : null}
+                { deck? (
+                  <PlayingCardsView cards={deck} />
+                ) : null }
+              </Box>
               <Box h='35%' bg='pink.100'>
                 {takes? (
                   <TakesGroupView takes={takes} onClickHandler={handleClickSendMessage} playerID={playerID}  />
