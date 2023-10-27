@@ -43,15 +43,9 @@ func NewGame() *Game {
 }
 
 func (g *Game) PlayCard(playerID int, c cards.Card) error {
+	fmt.Println(c)
 	p := g.players[playerID]
-	hasCard := false
-
-	for _, pc := range p.PlayingHand.Cards {
-		if pc == c {
-			hasCard = true
-			break
-		}
-	}
+	hasCard, idx := p.HasCard(c)
 
 	if !hasCard {
 		return errors.New("card not found in player hand")
@@ -59,6 +53,7 @@ func (g *Game) PlayCard(playerID int, c cards.Card) error {
 
 	g.Plis[g.nombrePli][g.pliCardsCount] = c
 	g.pliCardsCount++
+	p.PlayingHand.Cards[idx] = cards.Card{}
 
 	if g.pliCardsCount == 4 {
 		g.nombrePli++
@@ -66,6 +61,14 @@ func (g *Game) PlayCard(playerID int, c cards.Card) error {
 	}
 
 	return nil
+}
+
+func (g *Game) CurrentDeck() ([4]cards.Card, error) {
+	if g.nombrePli > 7 {
+		return [4]cards.Card{}, errors.New("deck not found")
+	}
+
+	return g.Plis[g.nombrePli], nil
 }
 
 func (g *Game) AddPlayer(p *player.Player) error {

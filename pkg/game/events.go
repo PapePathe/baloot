@@ -2,18 +2,32 @@ package game
 
 import (
 	"pathe.co/zinx/gametake"
+	"pathe.co/zinx/pkg/cards"
 	"pathe.co/zinx/pkg/player"
 )
 
 type messageID int
 
 var (
+	BroadcastPlayerTake messageID = 5
+	PlayCard            messageID = 4
 	ReceiveTakeHand     messageID = 1
 	ReceivePlayingHand  messageID = 2
+	ReceiveDeck         messageID = 6
 	SetTake             messageID = 3
-	PlayCard            messageID = 4
-	BroadcastPlayerTake messageID = 5
 )
+
+type receiveDeckMsg struct {
+	ID     messageID     `json:"id"`
+	Player player.Player `json:"player"`
+	Deck   [4]cards.Card `json:"deck"`
+}
+
+func ReceiveDeckMsg(p player.Player, d [4]cards.Card) receiveDeckMsg {
+	msg := receiveDeckMsg{ID: ReceiveDeck, Player: p, Deck: d}
+
+	return msg
+}
 
 type receivePlayingHandMsg struct {
 	ID     messageID         `json:"id"`

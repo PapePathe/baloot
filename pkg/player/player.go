@@ -34,6 +34,16 @@ func (p *Player) GetID() int {
 	return p.ID
 }
 
+func (p *Player) HasCard(c cards.Card) (bool, int) {
+	for idx, pc := range p.PlayingHand.Cards {
+		if pc == c {
+			return true, idx
+		}
+	}
+
+	return false, -1
+}
+
 func (p *Player) SetForTransport() ([]byte, error) {
 	return p.Transport.Marshal(*p)
 }

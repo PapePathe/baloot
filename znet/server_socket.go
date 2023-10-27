@@ -2,6 +2,7 @@ package znet
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"strconv"
 
@@ -88,11 +89,23 @@ func (s *SocketHandler) HandlePlayerTake(c *websocket.Conn, obj map[string]strin
 
 func (s *SocketHandler) HandlePlayerCard(c *websocket.Conn, obj map[string]string) {
 	pid, _ := strconv.Atoi(obj["player_id"])
-	card := cards.Card{Couleur: obj["couleur"], Genre: obj["genre"]}
+	card := cards.Card{Couleur: obj["color"], Genre: obj["genre"]}
+
+	fmt.Println(pid)
 
 	err := s.g.PlayCard(pid, card)
-
 	if err != nil {
 		log.Println(err.Error())
+	}
+
+	deck, _ := s.g.CurrentDeck()
+	for _, p := range s.g.GetPlayers() {
+		if p != nil && p.Conn != nil {
+			b := game.ReceiveDeckMsg(*p, deck)
+			m, _ := json.Marshal(b)
+			if err := p.Conn.WriteMessage(1, m); err != nil {
+				log.Println("write:", err)
+			}
+		}
 	}
 }
