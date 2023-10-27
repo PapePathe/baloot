@@ -15,6 +15,18 @@ var (
 	BroadcastPlayerTake messageID = 5
 )
 
+type receivePlayingHandMsg struct {
+	ID     messageID         `json:"id"`
+	Take   gametake.GameTake `json:"gametake"`
+	Player player.Player     `json:"player"`
+}
+
+func ReceivePlayingHandMsg(p player.Player, take gametake.GameTake) receivePlayingHandMsg {
+	clientMessage := receivePlayingHandMsg{ID: ReceivePlayingHand, Player: p, Take: take}
+
+	return clientMessage
+}
+
 type receiveTakeHandMsg struct {
 	ID             messageID           `json:"id"`
 	Player         player.Player       `json:"player"`
@@ -23,12 +35,6 @@ type receiveTakeHandMsg struct {
 
 func ReceiveTakeHandMsg(p player.Player, takes []gametake.GameTake) receiveTakeHandMsg {
 	clientMessage := receiveTakeHandMsg{ID: ReceiveTakeHand, Player: p, AvailableTakes: takes}
-
-	return clientMessage
-}
-
-func ReceivePlayingHandMsg(p player.Player, takes []gametake.GameTake) receiveTakeHandMsg {
-	clientMessage := receiveTakeHandMsg{ID: ReceivePlayingHand, Player: p, AvailableTakes: takes}
 
 	return clientMessage
 }

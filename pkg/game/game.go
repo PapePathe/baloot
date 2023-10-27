@@ -16,7 +16,8 @@ var ErrCardsAlreadyDispatched = errors.New("cards already dispatched error")
 
 type Game struct {
 	Cartes            [32]cards.Card
-	NombrePli         int
+	nombrePli         int
+	pliCardsCount     int
 	Plis              [8][4]cards.Card
 	CartesDistribuees int
 	NombreJoueurs     int
@@ -27,13 +28,44 @@ type Game struct {
 
 func NewGame() *Game {
 	rand.New(rand.NewSource(time.Now().UnixNano()))
-	plis := [8][4]cards.Card{}
 	jeu := cards.CardSet{}
-	players := [4]*player.Player{}
-	take := gametake.PASSE
-	p := Game{jeu.Distribuer(), 0, plis, 0, 0, false, players, take}
+	p := Game{
+		Cartes:            jeu.Distribuer(),
+		Plis:              [8][4]cards.Card{},
+		CartesDistribuees: 0,
+		NombreJoueurs:     0,
+		TakesFinished:     false,
+		players:           [4]*player.Player{},
+		take:              gametake.PASSE,
+	}
 
 	return &p
+}
+
+func (g *Game) PlayCard(playerID int, c cards.Card) error {
+	p := g.players[playerID]
+	hasCard := false
+
+	for _, pc := range p.PlayingHand.Cards {
+		if pc == c {
+			hasCard = true
+			break
+		}
+	}
+
+	if !hasCard {
+		return errors.New("card not found in player hand")
+	}
+
+	g.Plis[g.nombrePli][g.pliCardsCount] = c
+	g.pliCardsCount++
+
+	if g.pliCardsCount == 4 {
+		g.nombrePli++
+		g.pliCardsCount = 0
+	}
+
+	return nil
 }
 
 func (g *Game) AddPlayer(p *player.Player) error {
@@ -68,23 +100,26 @@ func (g *Game) AddTake(playerID int, take gametake.GameTake) error {
 	if g.take == gametake.TOUT || g.takesComplete() {
 		g.TakesFinished = true
 		g.DispatchCards()
+		g.sendPlayingHands()
+	}
 
-		for _, p := range g.players {
-			if p != nil {
-				fmt.Println("sending playing hand to player")
-				r := ReceivePlayingHandMsg(*p, []gametake.GameTake{})
-				m, _ := json.Marshal(r)
+	return nil
+}
 
-				if p.Conn != nil {
-					if err := p.Conn.WriteMessage(1, m); err != nil {
-						fmt.Println(err)
-					}
+func (g *Game) sendPlayingHands() {
+	for _, p := range g.players {
+		if p != nil {
+			fmt.Println("sending playing hand to player")
+			r := ReceivePlayingHandMsg(*p, g.GetTake())
+			m, _ := json.Marshal(r)
+
+			if p.Conn != nil {
+				if err := p.Conn.WriteMessage(1, m); err != nil {
+					fmt.Println(err)
 				}
 			}
 		}
 	}
-
-	return nil
 }
 
 func (g *Game) takesComplete() bool {
