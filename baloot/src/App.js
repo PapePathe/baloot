@@ -2,6 +2,9 @@ import React, { useState, useCallback, useEffect, useRef } from "react";
 import useWebSocket, { ReadyState } from "react-use-websocket";
 import TakesGroupView from "./components/TakesGroupView";
 import PlayingCardsView from "./components/PlayingCardsView";
+import reorderCards from "./utils/reorderCards";
+import messageStore from "./utils/messageStore";
+import playCard from "./utils/playCard";
 import {
   Flex,
   Spacer,
@@ -27,83 +30,18 @@ function App() {
   const [playerID, setPlayerID] = useState(null);
   const dragItem = useRef();
   const dragOverItem = useRef();
-
   const dragStart = (e) => {
     dragItem.current = e.target;
   };
-
   const dragEnter = (e) => {
     dragOverItem.current = e.currentTarget;
   };
-
-  const drop = () => {
-    const index = Array.from(dragItem.current.parentNode.children).indexOf(
-      dragItem.current,
-    );
-    const index2 = Array.from(dragOverItem.current.parentNode.children).indexOf(
-      dragOverItem.current,
-    );
-    const copyListItems = [...cards];
-    const dragItemCount = copyListItems[index];
-    copyListItems.splice(index, 1);
-    copyListItems.splice(index2, 0, dragItemCount);
-    dragItem.current = null;
-    dragOverItem.current = null;
-    setCards(copyListItems);
-  };
-
-  const orderPlayingCards = () => {
-    const index = Array.from(dragItem.current.parentNode.children).indexOf(
-      dragItem.current,
-    );
-    const index2 = Array.from(dragOverItem.current.parentNode.children).indexOf(
-      dragOverItem.current,
-    );
-    const copyListItems = [...playingCards];
-    const dragItemCount = copyListItems[index];
-    copyListItems.splice(index, 1);
-    copyListItems.splice(index2, 0, dragItemCount);
-    dragItem.current = null;
-    dragOverItem.current = null;
-    setPlayingCards(copyListItems);
-  };
-
-  useEffect(() => {
-    if (lastJsonMessage !== null) {
-      if (lastJsonMessage !== {}) {
-        switch (lastJsonMessage.id) {
-          case 1:
-            setPlayerID((prev) => lastJsonMessage.player.id);
-            setCards((prev) => lastJsonMessage.player.hand.Cards);
-            setTakes((prev) => lastJsonMessage.available_takes);
-            break;
-          case 2:
-            setCards((prev) => []);
-            setTakes((prev) => []);
-            setPlayerTakes((prev) => []);
-            setPlayingCards(
-              (prev) => lastJsonMessage.player.playing_hand.Cards,
-            );
-            setGametake((prev) => lastJsonMessage.gametake.Name);
-            break;
-          case 5:
-            setPlayerTakes((prev) => [...prev, lastJsonMessage.take]);
-            setTakes((prev) => lastJsonMessage.available_takes);
-            break;
-          case 6:
-            setDeck((prev) => lastJsonMessage.deck);
-            setPlayingCards(
-              (prev) => lastJsonMessage.player.playing_hand.Cards,
-            );
-            break;
-          default:
-            throw new Error("Error message id not found");
-        }
-      }
-      setMessageHistory((prev) => prev.concat(lastJsonMessage));
-    }
-  }, [lastJsonMessage, setMessageHistory]);
-
+  const drop = useCallback(() => {
+    reorderCards(dragItem, dragOverItem, cards, setCards);
+  }, [dragItem, dragOverItem, cards, setCards]);
+  const orderPlayingCards = useCallback(() => {
+    reorderCards(dragItem, dragOverItem, playingCards, setPlayingCards);
+  }, [dragItem, dragOverItem, playingCards, setPlayingCards]);
   const handleClickSendMessage = useCallback(
     (take, pid) => {
       sendMessage(
@@ -112,22 +50,26 @@ function App() {
     },
     [sendMessage],
   );
-
   const handleClickPlayMessage = useCallback(
     (couleur, genre, event) => {
-      if (couleur !== "" && genre !== "") {
-        sendMessage(
-          JSON.stringify({
-            player_id: `${playerID}`,
-            color: couleur,
-            genre: genre,
-            id: "4",
-          }),
-        );
-      }
+      playCard(couleur, genre, playerID, sendMessage);
     },
     [playerID, sendMessage],
   );
+
+  useEffect(() => {
+    messageStore(
+      lastJsonMessage,
+      setMessageHistory,
+      setDeck,
+      setPlayingCards,
+      setGametake,
+      setPlayerID,
+      setPlayerTakes,
+      setCards,
+      setTakes,
+    );
+  }, [lastJsonMessage, setMessageHistory]);
 
   return (
     <div>
