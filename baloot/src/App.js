@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useRef } from "react";
-import useWebSocket, { ReadyState } from "react-use-websocket";
+import useWebSocket from "react-use-websocket";
 import TakesGroupView from "./components/TakesGroupView";
 import PlayingCardsView from "./components/PlayingCardsView";
 import reorderCards from "./utils/reorderCards";
@@ -13,14 +13,12 @@ import {
   GridItem,
   VStack,
   Box,
-  StackDivider,
 } from "@chakra-ui/react";
 
 const WS_URL = "ws://127.0.0.1:7777/ws/100";
 
 function App() {
   const [messageHistory, setMessageHistory] = useState([]);
-  const { sendMessage, lastJsonMessage, readyState } = useWebSocket(WS_URL);
   const [playingCards, setPlayingCards] = useState([]);
   const [deck, setDeck] = useState([]);
   const [cards, setCards] = useState([]);
@@ -28,6 +26,7 @@ function App() {
   const [gametake, setGametake] = useState(null);
   const [playerTakes, setPlayerTakes] = useState([]);
   const [playerID, setPlayerID] = useState(null);
+  const { sendMessage, lastJsonMessage } = useWebSocket(WS_URL);
   const dragItem = useRef();
   const dragOverItem = useRef();
   const dragStart = (e) => {
