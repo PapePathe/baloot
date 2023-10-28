@@ -1,13 +1,20 @@
-import {
-  SimpleGrid
-} from '@chakra-ui/react'
-import CardView from './CardView';
+import { SimpleGrid } from "@chakra-ui/react";
+import CardView from "./CardView";
 
-function PlayingCardsView({cards, onDragStart, onDragEnter, onDragEnd, onClick}) {
-  return (  <SimpleGrid spacing={2} templateColumns='repeat(auto-fill, minmax(120px, 1fr))'>
-    {
-      cards.map((c) => {
-        return c? (
+function PlayingCardsView({
+  cards,
+  onDragStart,
+  onDragEnter,
+  onDragEnd,
+  onClick,
+}) {
+  return (
+    <SimpleGrid
+      spacing={2}
+      templateColumns="repeat(auto-fill, minmax(120px, 1fr))"
+    >
+      {cards.map((c) => {
+        return c ? (
           <CardView
             onClick={onClick}
             Genre={c.Genre}
@@ -16,11 +23,10 @@ function PlayingCardsView({cards, onDragStart, onDragEnter, onDragEnd, onClick})
             onDragEnter={(e) => onDragEnter(e)}
             onDragEnd={onDragEnd}
           />
-        ) : null
-      })
-    }
-  </SimpleGrid>
-  )
+        ) : null;
+      })}
+    </SimpleGrid>
+  );
 }
 
-export default PlayingCardsView
+export default PlayingCardsView;
