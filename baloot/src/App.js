@@ -1,19 +1,11 @@
 import React, { useState, useCallback, useEffect, useRef } from "react";
 import useWebSocket from "react-use-websocket";
-import TakesGroupView from "./components/TakesGroupView";
-import PlayingCardsView from "./components/PlayingCardsView";
+import DeckView from "./components/DeckView";
+import PlayerCardsView from "./components/PlayerCardsView";
 import reorderCards from "./utils/reorderCards";
 import messageStore from "./utils/messageStore";
 import playCard from "./utils/playCard";
-import {
-  Flex,
-  Spacer,
-  Text,
-  Grid,
-  GridItem,
-  VStack,
-  Box,
-} from "@chakra-ui/react";
+import { Grid, GridItem, VStack, Box } from "@chakra-ui/react";
 
 const WS_URL = "ws://127.0.0.1:7777/ws/100";
 
@@ -83,42 +75,19 @@ function App() {
           <GridItem colSpan={4} rowSpan={3} bg="papayawhip">
             <VStack spacing={0} align="stretch" height="100%">
               <Box h="25%" bg="yellow.200"></Box>
-              <Box h="40%" bg="tomato">
-                <Flex>
-                  <Box p="4">Team a score</Box>
-                  <Spacer />
-                  <Box p="4">{gametake ? <Text>{gametake}</Text> : null}</Box>
-                  <Spacer />
-                  <Box p="4">Team b score</Box>
-                </Flex>
-                {deck ? <PlayingCardsView cards={deck} /> : null}
-              </Box>
-              <Box h="35%" bg="pink.100">
-                {takes ? (
-                  <TakesGroupView
-                    takes={takes}
-                    onClickHandler={handleClickSendMessage}
-                    playerID={playerID}
-                  />
-                ) : null}
-                {playingCards ? (
-                  <PlayingCardsView
-                    cards={playingCards}
-                    onDragEnd={orderPlayingCards}
-                    onDragEnter={dragEnter}
-                    onDragStart={dragStart}
-                    onClick={handleClickPlayMessage}
-                  />
-                ) : null}
-                {cards ? (
-                  <PlayingCardsView
-                    cards={cards}
-                    onDragEnd={drop}
-                    onDragEnter={dragEnter}
-                    onDragStart={dragStart}
-                  />
-                ) : null}
-              </Box>
+              <DeckView deck={deck} gametake={gametake} />
+              <PlayerCardsView
+                takes={takes}
+                playingCards={playingCards}
+                orderPlayingCards={orderPlayingCards}
+                cards={cards}
+                handleClickSendMessage={handleClickSendMessage}
+                handleClickPlayMessage={handleClickPlayMessage}
+                dragStart={dragStart}
+                dragEnter={dragEnter}
+                drop={drop}
+                playerID={playerID}
+              />
             </VStack>
           </GridItem>
           <GridItem colSpan={1} rowSpan={3} bg="tomato" />
