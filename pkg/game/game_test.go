@@ -119,47 +119,56 @@ func TestNewGame(t *testing.T) {
 }
 
 func TestPlayCard(t *testing.T) {
-	g := setupGame(4)
-	g.DispatchCards()
-	p1, p2, p3, p4 := g.players[0], g.players[1], g.players[3], g.players[3]
-
 	t.Run("Player can play one of his cards", func(t *testing.T) {
+		g := setupGame(4)
+		g.DispatchCards()
+		p1, p2, p3, p4 := g.players[0], g.players[1], g.players[3], g.players[3]
+
+		c1 := p1.PlayingHand.Cards[0]
 		err := g.PlayCard(p1.GetID(), p1.PlayingHand.Cards[0])
-		pli := [4]cards.Card{p1.PlayingHand.Cards[0]}
+		pli := [4]cards.Card{c1}
 		assert.Equal(t, err, nil)
 		assert.Equal(t, g.Plis[0], pli)
 		assert.Equal(t, g.pliCardsCount, 1)
 		assert.Equal(t, g.nombrePli, 0)
 
-		err2 := g.PlayCard(p2.GetID(), p2.PlayingHand.Cards[0])
-		pli2 := [4]cards.Card{p1.PlayingHand.Cards[0], p2.PlayingHand.Cards[0]}
+		c2 := p2.PlayingHand.Cards[0]
+		err2 := g.PlayCard(p2.GetID(), c2)
+		pli2 := [4]cards.Card{c1, c2}
 		assert.Equal(t, err2, nil)
 		assert.Equal(t, g.Plis[0], pli2)
 		assert.Equal(t, g.pliCardsCount, 2)
 		assert.Equal(t, g.nombrePli, 0)
 
-		err3 := g.PlayCard(p3.GetID(), p3.PlayingHand.Cards[0])
-		pli3 := [4]cards.Card{p1.PlayingHand.Cards[0], p2.PlayingHand.Cards[0], p3.PlayingHand.Cards[0]}
+		c3 := p3.PlayingHand.Cards[0]
+		err3 := g.PlayCard(p3.GetID(), c3)
+		pli3 := [4]cards.Card{c1, c2, c3}
 		assert.Equal(t, err3, nil)
 		assert.Equal(t, g.Plis[0], pli3)
 		assert.Equal(t, g.pliCardsCount, 3)
 		assert.Equal(t, g.nombrePli, 0)
 
+		c4 := p3.PlayingHand.Cards[0]
 		err4 := g.PlayCard(p4.GetID(), p4.PlayingHand.Cards[0])
-		pli4 := [4]cards.Card{p1.PlayingHand.Cards[0], p2.PlayingHand.Cards[0], p3.PlayingHand.Cards[0], p4.PlayingHand.Cards[0]}
+		pli4 := [4]cards.Card{c1, c2, c3, c4}
 		assert.Equal(t, err4, nil)
 		assert.Equal(t, g.Plis[0], pli4)
 		assert.Equal(t, g.pliCardsCount, 0)
 		assert.Equal(t, g.nombrePli, 1)
 
+		cp1 := p1.PlayingHand.Cards[1]
 		g.PlayCard(p1.GetID(), p1.PlayingHand.Cards[1])
-		pli1 := [4]cards.Card{p1.PlayingHand.Cards[1]}
+		pli1 := [4]cards.Card{cp1}
 		assert.Equal(t, g.Plis[1], pli1)
 		assert.Equal(t, g.pliCardsCount, 1)
 		assert.Equal(t, g.nombrePli, 1)
 	})
 
 	t.Run("Player One cannot play a card he does not have", func(t *testing.T) {
+		g := setupGame(4)
+		g.DispatchCards()
+		p1, p2 := g.players[0], g.players[1]
+
 		err := g.PlayCard(p1.GetID(), p2.PlayingHand.Cards[0])
 		assert.Error(t, err, errors.New("card not found in player hand"))
 	})
