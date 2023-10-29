@@ -48,6 +48,7 @@ type GameTake interface {
 	GreaterThan(t GameTake) bool
 	EvaluateHand([5]cards.Card) GameTakeEntry
 	EvaluateCard(cards.Card) (int, bool)
+	EvaluateDeck([4]cards.Card) int
 	GetValue() int
 	Name() string
 }

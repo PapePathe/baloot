@@ -93,3 +93,55 @@ func TestNameCOEUR(t *testing.T) {
 	result := COEUR.Name()
 	assert.Equal(t, result, "Coeur")
 }
+
+func TestEvaluateDeckCOEUR(t *testing.T) {
+	type TestEvaluateDeckTableCOEUR struct {
+		name   string
+		deck   [4]cards.Card
+		result int
+	}
+	testcases := []TestEvaluateDeckTableCOEUR{
+		TestEvaluateDeckTableCOEUR{
+			name:   "With no cards",
+			deck:   [4]cards.Card{},
+			result: 0,
+		},
+		TestEvaluateDeckTableCOEUR{
+			name:   "With a valet of other color and zero value cards",
+			deck:   [4]cards.Card{cards.SeptCarreau, cards.ValetCarreau, cards.HuitCarreau, cards.SeptTrefle},
+			result: 2,
+		},
+		TestEvaluateDeckTableCOEUR{
+			name:   "With a valet of same color and zero value cards",
+			deck:   [4]cards.Card{cards.SeptCarreau, cards.ValetCoeur, cards.HuitCarreau, cards.SeptTrefle},
+			result: 20,
+		},
+		TestEvaluateDeckTableCOEUR{
+			name:   "With two nines of other color an height and a seven",
+			deck:   [4]cards.Card{cards.SeptCarreau, cards.NeufPique, cards.HuitCarreau, cards.NeufTrefle},
+			result: 0,
+		},
+		TestEvaluateDeckTableCOEUR{
+			name:   "With one nine of same color and a nine of other color an height and a seven",
+			deck:   [4]cards.Card{cards.SeptCarreau, cards.NeufCoeur, cards.HuitCarreau, cards.NeufTrefle},
+			result: 14,
+		},
+		TestEvaluateDeckTableCOEUR{
+			name:   "With one ace and three tens",
+			deck:   [4]cards.Card{cards.AsCarreau, cards.DixCarreau, cards.DixPique, cards.DixCoeur},
+			result: 41,
+		},
+		TestEvaluateDeckTableCOEUR{
+			name:   "With one ten two kings and a seven",
+			deck:   [4]cards.Card{cards.DixCarreau, cards.RoiCarreau, cards.RoiCoeur, cards.SeptCarreau},
+			result: 18,
+		},
+	}
+
+	for _, test := range testcases {
+		t.Run(test.name, func(t *testing.T) {
+			result := COEUR.EvaluateDeck(test.deck)
+			assert.Equal(t, result, test.result)
+		})
+	}
+}

@@ -26,6 +26,15 @@ func (t ColorTake) GetValue() int {
 	return t.Value
 }
 
+func (t ColorTake) EvaluateDeck(cards [4]cards.Card) (result int) {
+	for _, c := range cards {
+		value, _ := t.EvaluateCard(c)
+		result += value
+	}
+
+	return result
+}
+
 func (t ColorTake) EvaluateHand(cards [5]cards.Card) (entry GameTakeEntry) {
 	t.parseCard(&entry, cards[0])
 	t.parseCard(&entry, cards[1])

@@ -91,3 +91,40 @@ func TestEvaluateCardCENT(t *testing.T) {
 		})
 	}
 }
+
+func TestCENTEvaluateDeck(t *testing.T) {
+	type TestCENTEvaluateDeckTable struct {
+		name   string
+		deck   [4]cards.Card
+		result int
+	}
+	testcases := []TestCENTEvaluateDeckTable{
+		TestCENTEvaluateDeckTable{
+			name:   "With no cards",
+			deck:   [4]cards.Card{},
+			result: 0,
+		},
+		TestCENTEvaluateDeckTable{
+			name:   "With cards all worth zero points",
+			deck:   [4]cards.Card{cards.SeptCarreau, cards.NeufCoeur, cards.HuitCarreau, cards.NeufTrefle},
+			result: 0,
+		},
+		TestCENTEvaluateDeckTable{
+			name:   "With one ace and three tens",
+			deck:   [4]cards.Card{cards.AsCarreau, cards.DixCarreau, cards.DixPique, cards.DixCoeur},
+			result: 41,
+		},
+		TestCENTEvaluateDeckTable{
+			name:   "With one ten two kings and a seven",
+			deck:   [4]cards.Card{cards.DixCarreau, cards.RoiCarreau, cards.RoiCoeur, cards.SeptCarreau},
+			result: 18,
+		},
+	}
+
+	for _, test := range testcases {
+		t.Run(test.name, func(t *testing.T) {
+			result := CENT.EvaluateDeck(test.deck)
+			assert.Equal(t, result, test.result)
+		})
+	}
+}

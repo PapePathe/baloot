@@ -25,6 +25,15 @@ func (t Tout) GetValue() int {
 	return 6
 }
 
+func (t Tout) EvaluateDeck(cards [4]cards.Card) (result int) {
+	for _, c := range cards {
+		value, _ := t.EvaluateCard(c)
+		result += value
+	}
+
+	return result
+}
+
 func (t Tout) EvaluateHand(cards [5]cards.Card) (entry GameTakeEntry) {
 	result := 0
 	valetsCount := 0

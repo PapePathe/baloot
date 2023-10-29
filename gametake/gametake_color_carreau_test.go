@@ -138,3 +138,45 @@ func TestCARREAUGreaterThan(t *testing.T) {
 		})
 	}
 }
+
+func TestEvaluateDeckCARREAU(t *testing.T) {
+	type TestEvaluateDeckTableCARREAU struct {
+		name   string
+		deck   [4]cards.Card
+		result int
+	}
+	testcases := []TestEvaluateDeckTableCARREAU{
+		TestEvaluateDeckTableCARREAU{
+			name:   "With no cards",
+			deck:   [4]cards.Card{},
+			result: 0,
+		},
+		TestEvaluateDeckTableCARREAU{
+			name:   "With a valet of other color and zero value cards",
+			deck:   [4]cards.Card{cards.SeptCarreau, cards.ValetCoeur, cards.HuitCarreau, cards.SeptTrefle},
+			result: 2,
+		},
+		TestEvaluateDeckTableCARREAU{
+			name:   "With two nines of other color an height and a seven",
+			deck:   [4]cards.Card{cards.SeptCarreau, cards.NeufCoeur, cards.HuitCarreau, cards.NeufTrefle},
+			result: 0,
+		},
+		TestEvaluateDeckTableCARREAU{
+			name:   "With one ace and three tens",
+			deck:   [4]cards.Card{cards.AsCarreau, cards.DixCarreau, cards.DixPique, cards.DixCoeur},
+			result: 41,
+		},
+		TestEvaluateDeckTableCARREAU{
+			name:   "With one ten two kings and a seven",
+			deck:   [4]cards.Card{cards.DixCarreau, cards.RoiCarreau, cards.RoiCoeur, cards.SeptCarreau},
+			result: 18,
+		},
+	}
+
+	for _, test := range testcases {
+		t.Run(test.name, func(t *testing.T) {
+			result := CARREAU.EvaluateDeck(test.deck)
+			assert.Equal(t, result, test.result)
+		})
+	}
+}

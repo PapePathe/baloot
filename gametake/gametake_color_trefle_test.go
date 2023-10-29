@@ -93,3 +93,55 @@ func TestNameTREFLE(t *testing.T) {
 	result := TREFLE.Name()
 	assert.Equal(t, result, "Trefle")
 }
+
+func TestEvaluateDeckTREFLE(t *testing.T) {
+	type TestEvaluateDeckTableTREFLE struct {
+		name   string
+		deck   [4]cards.Card
+		result int
+	}
+	testcases := []TestEvaluateDeckTableTREFLE{
+		TestEvaluateDeckTableTREFLE{
+			name:   "With no cards",
+			deck:   [4]cards.Card{},
+			result: 0,
+		},
+		TestEvaluateDeckTableTREFLE{
+			name:   "With a valet of other color and zero value cards",
+			deck:   [4]cards.Card{cards.SeptCarreau, cards.ValetCarreau, cards.HuitCarreau, cards.SeptTrefle},
+			result: 2,
+		},
+		TestEvaluateDeckTableTREFLE{
+			name:   "With a valet of same color and zero value cards",
+			deck:   [4]cards.Card{cards.SeptCarreau, cards.ValetTrefle, cards.HuitCarreau, cards.SeptTrefle},
+			result: 20,
+		},
+		TestEvaluateDeckTableTREFLE{
+			name:   "With two nines of other color an height and a seven",
+			deck:   [4]cards.Card{cards.SeptCarreau, cards.NeufPique, cards.HuitCarreau, cards.NeufCarreau},
+			result: 0,
+		},
+		TestEvaluateDeckTableTREFLE{
+			name:   "With one nine of same color and a nine of other color an height and a seven",
+			deck:   [4]cards.Card{cards.SeptCarreau, cards.NeufTrefle, cards.HuitCarreau, cards.NeufCarreau},
+			result: 14,
+		},
+		TestEvaluateDeckTableTREFLE{
+			name:   "With one ace and three tens",
+			deck:   [4]cards.Card{cards.AsCarreau, cards.DixCarreau, cards.DixPique, cards.DixCoeur},
+			result: 41,
+		},
+		TestEvaluateDeckTableTREFLE{
+			name:   "With one ten two kings and a seven",
+			deck:   [4]cards.Card{cards.DixCarreau, cards.RoiCarreau, cards.RoiCoeur, cards.SeptCarreau},
+			result: 18,
+		},
+	}
+
+	for _, test := range testcases {
+		t.Run(test.name, func(t *testing.T) {
+			result := TREFLE.EvaluateDeck(test.deck)
+			assert.Equal(t, result, test.result)
+		})
+	}
+}

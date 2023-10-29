@@ -22,6 +22,10 @@ func (t Passe) GetValue() int {
 	return 0
 }
 
+func (t Passe) EvaluateDeck(cards [4]cards.Card) int {
+	return 0
+}
+
 func (t Passe) EvaluateHand(cards [5]cards.Card) (entry GameTakeEntry) {
 	return entry
 }

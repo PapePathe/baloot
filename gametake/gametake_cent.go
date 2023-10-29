@@ -24,6 +24,15 @@ func (t Cent) GetValue() int {
 	return 5
 }
 
+func (t Cent) EvaluateDeck(cards [4]cards.Card) (result int) {
+	for _, c := range cards {
+		value, _ := t.EvaluateCard(c)
+		result += value
+	}
+
+	return result
+}
+
 func (t Cent) EvaluateHand(cards [5]cards.Card) (entry GameTakeEntry) {
 	entry.Flags = make(map[string]flag)
 	result, acesCount := 0, 0
