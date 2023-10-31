@@ -43,7 +43,6 @@ func NewGame() *Game {
 }
 
 func (g *Game) PlayCard(playerID int, c cards.Card) error {
-	fmt.Println(c)
 	p := g.players[playerID]
 	hasCard, idx := p.HasCard(c)
 
