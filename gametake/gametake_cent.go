@@ -79,6 +79,36 @@ func (t Cent) EvaluateCard(card cards.Card) (int, bool) {
 	}
 }
 
+func (t Cent) Winner(a cards.Card, b cards.Card) cards.Card {
+	aValue, bValue := t.EvaluateCardForWin(a), t.EvaluateCardForWin(b)
+
+	if a.Couleur == b.Couleur && aValue > bValue {
+		return a
+	}
+	return b
+}
+
+func (t Cent) EvaluateCardForWin(card cards.Card) int {
+	switch card.Genre {
+	case "A":
+		return 11
+	case "10":
+		return 10
+	case "R":
+		return 4
+	case "D":
+		return 3
+	case "V":
+		return 2
+	case "8":
+		return 1
+	case "7":
+		return 0
+	default:
+		return 0
+	}
+}
+
 func (t Cent) MarshalJSON() ([]byte, error) {
 	customStruct := struct {
 		Name string

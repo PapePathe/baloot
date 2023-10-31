@@ -34,6 +34,14 @@ func (t Passe) EvaluateCard(card cards.Card) (int, bool) {
 	return 0, true
 }
 
+func (t Passe) EvaluateCardForWin(card cards.Card) int {
+	return 0
+}
+
+func (t Passe) Winner(a cards.Card, b cards.Card) cards.Card {
+	return a
+}
+
 func (t Passe) MarshalJSON() ([]byte, error) {
 	customStruct := struct {
 		Name string

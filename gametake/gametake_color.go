@@ -71,6 +71,47 @@ func (t ColorTake) EvaluateCard(card cards.Card) (value int, sameColor bool) {
 	return value, sameColor
 }
 
+var WinValues map[string]int = map[string]int{
+	"V": 20, "9": 14, "A": 11, "10": 10, "R": 4, "D": 3, "8": 1, "7": 0,
+}
+var OtherWinValues map[string]int = map[string]int{
+	"V": 2, "9": 0, "A": 11, "10": 10, "R": 4, "D": 3,
+}
+
+func (t ColorTake) EvaluateCardForWin(card cards.Card) int {
+	return 0
+}
+
+func (t ColorTake) Winner(a cards.Card, b cards.Card) cards.Card {
+	if a.Couleur == b.Couleur {
+		if a.Couleur == t.Couleur {
+			aValue, bValue := evaluateCardOfColor(a.Genre), evaluateCardOfColor(b.Genre)
+			if aValue > bValue {
+				return a
+			} else {
+				return b
+			}
+		} else {
+			aValue, bValue := evaluateCardOfOtherColor(a.Genre), evaluateCardOfOtherColor(b.Genre)
+			if aValue > bValue {
+				return a
+			} else {
+				return b
+			}
+		}
+	} else {
+		if a.Couleur == t.Couleur {
+			return a
+		}
+		if b.Couleur == t.Couleur {
+			return b
+		}
+		return b
+	}
+
+	return a
+}
+
 func evaluateCardOfOtherColor(genre string) int {
 	switch genre {
 	case "V":

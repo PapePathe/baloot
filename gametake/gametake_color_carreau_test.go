@@ -5,6 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"pathe.co/zinx/pkg/cards"
+	. "pathe.co/zinx/pkg/cards"
 )
 
 func TestGetValue(t *testing.T) {
@@ -177,6 +178,31 @@ func TestEvaluateDeckCARREAU(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			result := CARREAU.EvaluateDeck(test.deck)
 			assert.Equal(t, result, test.result)
+		})
+	}
+}
+
+func TestWinnerCARREAU(t *testing.T) {
+	testcases := []struct {
+		name    string
+		a, b, w Card
+	}{
+		{name: "Dix carreau As Carreau", a: DixCarreau, b: AsCarreau, w: AsCarreau},
+		{name: "As Carreau Dix carreau ", a: AsCarreau, b: DixCarreau, w: AsCarreau},
+		{name: "Dix carreau Neuf pique", a: DixCarreau, b: NeufPique, w: DixCarreau},
+		{name: "Neuf pique Dix carreau ", a: NeufPique, b: DixCarreau, w: DixCarreau},
+		{name: "Neuf pique Dix pique", a: NeufPique, b: DixPique, w: DixPique},
+		{name: "Dix pique Neuf pique", a: DixPique, b: NeufPique, w: DixPique},
+		{name: "Neuf pique Huit trefle", a: NeufPique, b: HuitTrefle, w: HuitTrefle},
+		{name: "Huit trefle Neuf pique", a: HuitTrefle, b: NeufPique, w: NeufPique},
+		{name: "Neuf coeur Neuf pique", a: NeufCoeur, b: NeufPique, w: NeufPique},
+		{name: "Neuf pique Neuf coeur", a: NeufPique, b: NeufCoeur, w: NeufCoeur},
+	}
+
+	for _, test := range testcases {
+		t.Run(test.name, func(t *testing.T) {
+			w := CARREAU.Winner(test.a, test.b)
+			assert.Equal(t, test.w, w)
 		})
 	}
 }
