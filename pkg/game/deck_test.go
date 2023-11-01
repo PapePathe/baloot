@@ -22,20 +22,25 @@ func TestNewDeck(t *testing.T) {
 func TestAddCard(t *testing.T) {
 	t.Run("Can add one card to deck", func(t *testing.T) {
 		d := NewDeck([4]int{0, 1, 2, 3}, TOUT)
-		d.AddCard(0, ValetCarreau)
+		err := d.AddCard(0, ValetCarreau)
 
+		assert.NoError(t, err)
 		assert.Equal(t, d.cardscount, 1)
 		assert.Equal(t, d.cards, [4]Card{ValetCarreau})
 	})
 
 	t.Run("Cannot add more than four cards to deck", func(t *testing.T) {
 		d := NewDeck([4]int{0, 1, 2, 3}, TOUT)
-		d.AddCard(0, ValetCarreau)
-		d.AddCard(1, SeptCarreau)
-		d.AddCard(2, HuitCarreau)
-		d.AddCard(3, DixCarreau)
-		err := d.AddCard(0, NeufCarreau)
+		err := d.AddCard(0, ValetCarreau)
+		assert.NoError(t, err)
+		err = d.AddCard(1, SeptCarreau)
+		assert.NoError(t, err)
+		err = d.AddCard(2, HuitCarreau)
+		assert.NoError(t, err)
+		err = d.AddCard(3, DixCarreau)
+		assert.NoError(t, err)
 
+		err = d.AddCard(0, NeufCarreau)
 		assert.Equal(t, err, ErrCannotAddMoreThanFourCardsToDeck)
 	})
 
@@ -48,8 +53,9 @@ func TestAddCard(t *testing.T) {
 
 	t.Run("Cannot add existing card to deck", func(t *testing.T) {
 		d := NewDeck([4]int{0, 1, 2, 3}, TOUT)
-		d.AddCard(0, ValetCarreau)
-		err := d.AddCard(1, ValetCarreau)
+		err := d.AddCard(0, ValetCarreau)
+		assert.NoError(t, err)
+		err = d.AddCard(1, ValetCarreau)
 
 		assert.Equal(t, err, ErrCannotAddExistingCardToDeck)
 	})

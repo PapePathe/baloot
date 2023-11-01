@@ -28,7 +28,8 @@ func TestAddMoreThanFivePlayers(t *testing.T) {
 
 	for i := 0; i < 4; i++ {
 		var p *player.Player = player.NewPlayer()
-		g.AddPlayer(p)
+		err := g.AddPlayer(p)
+		assert.NoError(t, err)
 		assert.Equal(t, p.GetID(), i)
 	}
 	np := player.NewPlayer()
@@ -38,10 +39,14 @@ func TestAddMoreThanFivePlayers(t *testing.T) {
 
 func TestAddTake(t *testing.T) {
 	g, p := NewGame(), player.NewPlayer()
-	g.AddPlayer(p)
-	err := g.AddTake(p.GetID(), gametake.TOUT)
+	err := g.AddPlayer(p)
+	assert.NoError(t, err)
 
-	assert.Equal(t, nil, err)
+	err = g.AddTake(p.GetID(), gametake.TOUT)
+	assert.NoError(t, err)
+
+	err = g.AddTake(p.GetID(), gametake.TOUT)
+	assert.Error(t, err)
 	assert.Equal(t, p.Take, &gametake.TOUT)
 	assert.Equal(t, g.take, gametake.TOUT)
 }
@@ -49,9 +54,12 @@ func TestAddTake(t *testing.T) {
 func TestAddTakeLessThanGameTake(t *testing.T) {
 	g2 := NewGame()
 	p1, p2 := player.NewPlayer(), player.NewPlayer()
-	g2.AddPlayer(p1)
-	g2.AddPlayer(p2)
-	g2.AddTake(p1.GetID(), gametake.CENT)
+	err := g2.AddPlayer(p1)
+	assert.NoError(t, err)
+	err = g2.AddPlayer(p2)
+	assert.NoError(t, err)
+	err = g2.AddTake(p1.GetID(), gametake.CENT)
+	assert.NoError(t, err)
 	err2 := g2.AddTake(p2.GetID(), gametake.PIQUE)
 	assert.Equal(t, errors.New("oops bad take, choose a greater take or pass"), err2)
 }
@@ -59,46 +67,54 @@ func TestAddTakeLessThanGameTake(t *testing.T) {
 func TestAddTakeLessThanGameTakeButIsPASS(t *testing.T) {
 	g2 := setupGame(2)
 	p1, p2 := g2.players[0], g2.players[1]
-	g2.AddTake(p1.GetID(), gametake.CENT)
-	err2 := g2.AddTake(p2.GetID(), gametake.PASSE)
-	assert.Equal(t, nil, err2)
+	err := g2.AddTake(p1.GetID(), gametake.CENT)
+	assert.NoError(t, err)
+	err = g2.AddTake(p2.GetID(), gametake.PASSE)
+	assert.Equal(t, nil, err)
 }
 
 func TestAddTakeForPlayerThatHasTaken(t *testing.T) {
 	g, p := NewGame(), player.NewPlayer()
-	g.AddPlayer(p)
+	err := g.AddPlayer(p)
+	assert.NoError(t, err)
+
 	p.Take = &gametake.CENT
-	err := g.AddTake(p.GetID(), gametake.TOUT)
+	err = g.AddTake(p.GetID(), gametake.TOUT)
 
 	assert.Equal(t, errors.New("oops duplicate player take"), err)
 }
 
 func TestAddTakeLessThanCurrentGameTake(t *testing.T) {
 	g, p := NewGame(), player.NewPlayer()
-	g.AddPlayer(p)
-	p.Take = &gametake.CENT
-	g.AddTake(p.GetID(), gametake.TOUT)
+	err := g.AddPlayer(p)
+	assert.NoError(t, err)
+	err = g.AddTake(p.GetID(), gametake.TOUT)
+	assert.NoError(t, err)
 }
 
 func TestAddTakeGreaterThanCurrentGameTake(t *testing.T) {
 	g, p := NewGame(), player.NewPlayer()
-	g.AddPlayer(p)
-	p.Take = &gametake.CENT
-	g.AddTake(p.GetID(), gametake.TOUT)
+	err := g.AddPlayer(p)
+	assert.NoError(t, err)
+	err = g.AddTake(p.GetID(), gametake.TOUT)
+	assert.NoError(t, err)
 }
 
 func TestAddTakePassDoesNotChangeGameTake(t *testing.T) {
 	g := setupGame(2)
 	p1, p2 := g.players[0], g.players[1]
-	g.AddTake(p1.GetID(), gametake.CENT)
-	g.AddTake(p2.GetID(), gametake.PASSE)
+	err := g.AddTake(p1.GetID(), gametake.CENT)
+	assert.NoError(t, err)
+	err = g.AddTake(p2.GetID(), gametake.PASSE)
+	assert.NoError(t, err)
 	assert.Equal(t, g.GetTake(), gametake.CENT)
 }
 
 func TestDispatchCards(t *testing.T) {
 	g := setupGame(4)
-	g.DispatchCards()
+	err := g.DispatchCards()
 
+	assert.Equal(t, err, nil)
 	assert.Equal(t, g.CartesDistribuees, 32)
 
 	for _, p := range g.players {
@@ -108,8 +124,9 @@ func TestDispatchCards(t *testing.T) {
 
 func TestDispatchCardsIsIdempotent(t *testing.T) {
 	g := setupGame(4)
-	g.DispatchCards()
+	err := g.DispatchCards()
 
+	assert.Equal(t, err, nil)
 	assert.Error(t, g.DispatchCards(), ErrCardsAlreadyDispatched)
 }
 
@@ -122,11 +139,12 @@ func TestNewGame(t *testing.T) {
 func TestPlayCard(t *testing.T) {
 	t.Run("Player can play one of his cards", func(t *testing.T) {
 		g := setupGame(4)
-		g.DispatchCards()
+		err := g.DispatchCards()
+		assert.Equal(t, err, nil)
 		p1, p2, p3, p4 := g.players[0], g.players[1], g.players[3], g.players[3]
 
 		c1 := p1.PlayingHand.Cards[0]
-		err := g.PlayCard(p1.GetID(), p1.PlayingHand.Cards[0])
+		err = g.PlayCard(p1.GetID(), p1.PlayingHand.Cards[0])
 		pli := [4]cards.Card{c1}
 		assert.Equal(t, err, nil)
 		assert.Equal(t, g.Plis[0], pli)
@@ -158,7 +176,8 @@ func TestPlayCard(t *testing.T) {
 		assert.Equal(t, g.nombrePli, 1)
 
 		cp1 := p1.PlayingHand.Cards[1]
-		g.PlayCard(p1.GetID(), p1.PlayingHand.Cards[1])
+		err = g.PlayCard(p1.GetID(), p1.PlayingHand.Cards[1])
+		assert.Equal(t, err, nil)
 		pli1 := [4]cards.Card{cp1}
 		assert.Equal(t, g.Plis[1], pli1)
 		assert.Equal(t, g.pliCardsCount, 1)
@@ -167,10 +186,12 @@ func TestPlayCard(t *testing.T) {
 
 	t.Run("Player One cannot play a card he does not have", func(t *testing.T) {
 		g := setupGame(4)
-		g.DispatchCards()
+		err := g.DispatchCards()
+		assert.NoError(t, err)
+
 		p1, p2 := g.players[0], g.players[1]
 
-		err := g.PlayCard(p1.GetID(), p2.PlayingHand.Cards[0])
+		err = g.PlayCard(p1.GetID(), p2.PlayingHand.Cards[0])
 		assert.Error(t, err, errors.New("card not found in player hand"))
 	})
 }
@@ -226,12 +247,14 @@ func TestPlayCardNext(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			g := test.game
 			p1, p2, p3, p4 := g.players[0], g.players[1], g.players[2], g.players[3]
-			g.AddTake(0, test.take)
+			err := g.AddTake(0, test.take)
+			assert.NoError(t, err)
 			if test.take != gametake.TOUT {
-				g.DispatchCards()
+				err := g.DispatchCards()
+				assert.NoError(t, err)
 			}
 
-			err := g.PlayCardNext(p1.GetID(), p1.PlayingHand.Cards[0])
+			err = g.PlayCardNext(p1.GetID(), p1.PlayingHand.Cards[0])
 			assert.Equal(t, err, nil)
 
 			err = g.PlayCardNext(p2.GetID(), p2.PlayingHand.Cards[0])
@@ -259,7 +282,11 @@ func TestPlayCardNext(t *testing.T) {
 func setupGame(playersCount int) *Game {
 	g := NewGame()
 	for i := 0; i < playersCount; i++ {
-		g.AddPlayer(player.NewPlayer())
+		err := g.AddPlayer(player.NewPlayer())
+		if err != nil {
+			fmt.Println("ERROR SETTING UP A TEST GAME")
+		}
+
 	}
 	return g
 }

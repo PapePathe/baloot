@@ -133,7 +133,9 @@ func (g *Game) AddTake(playerID int, take gametake.GameTake) error {
 
 	if g.take == gametake.TOUT || g.takesComplete() {
 		g.TakesFinished = true
-		g.DispatchCards()
+		if err := g.DispatchCards(); err != nil {
+			return err
+		}
 		g.sendPlayingHands()
 	}
 
