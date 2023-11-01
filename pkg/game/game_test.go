@@ -2,6 +2,7 @@ package game
 
 import (
 	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -172,6 +173,87 @@ func TestPlayCard(t *testing.T) {
 		err := g.PlayCard(p1.GetID(), p2.PlayingHand.Cards[0])
 		assert.Error(t, err, errors.New("card not found in player hand"))
 	})
+}
+
+func TestNextRound(t *testing.T) {
+	g := NewGame()
+
+	assert.Equal(t, g.NextRound(0), [4]int{0, 1, 2, 3})
+	assert.Equal(t, g.NextRound(1), [4]int{1, 2, 3, 0})
+	assert.Equal(t, g.NextRound(2), [4]int{2, 3, 0, 1})
+	assert.Equal(t, g.NextRound(3), [4]int{3, 0, 1, 2})
+}
+
+func TestPlayCardNext(t *testing.T) {
+	testcases := []struct {
+		name string
+		game *Game
+		take gametake.GameTake
+	}{
+		{
+			name: gametake.TOUT.Name(),
+			take: gametake.TOUT,
+			game: setupGame(4),
+		},
+		{
+			name: gametake.CENT.Name(),
+			take: gametake.CENT,
+			game: setupGame(4),
+		},
+		{
+			name: gametake.COEUR.Name(),
+			take: gametake.COEUR,
+			game: setupGame(4),
+		},
+		{
+			name: gametake.CARREAU.Name(),
+			take: gametake.CARREAU,
+			game: setupGame(4),
+		},
+		{
+			name: gametake.PIQUE.Name(),
+			take: gametake.PIQUE,
+			game: setupGame(4),
+		},
+		{
+			name: gametake.TREFLE.Name(),
+			take: gametake.TREFLE,
+			game: setupGame(4),
+		},
+	}
+
+	for _, test := range testcases {
+		t.Run(test.name, func(t *testing.T) {
+			g := test.game
+			p1, p2, p3, p4 := g.players[0], g.players[1], g.players[2], g.players[3]
+			g.AddTake(0, test.take)
+			if test.take != gametake.TOUT {
+				g.DispatchCards()
+			}
+
+			err := g.PlayCardNext(p1.GetID(), p1.PlayingHand.Cards[0])
+			assert.Equal(t, err, nil)
+
+			err = g.PlayCardNext(p2.GetID(), p2.PlayingHand.Cards[0])
+			assert.Equal(t, err, nil)
+
+			err = g.PlayCardNext(p3.GetID(), p3.PlayingHand.Cards[0])
+			assert.Equal(t, err, nil)
+
+			err = g.PlayCardNext(p4.GetID(), p4.PlayingHand.Cards[0])
+			assert.Equal(t, err, nil)
+
+			pli := [4]cards.Card{
+				p1.PlayingHand.Cards[0],
+				p2.PlayingHand.Cards[0],
+				p3.PlayingHand.Cards[0],
+				p4.PlayingHand.Cards[0],
+			}
+			assert.Equal(t, g.Decks[0].cards, pli)
+			winner := g.Decks[0].winner
+			fmt.Println("take ", g.GetTake().Name(), "deck", pli, "winner:", winner)
+		})
+	}
 }
 
 func setupGame(playersCount int) *Game {

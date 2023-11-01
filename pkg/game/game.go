@@ -18,6 +18,7 @@ type Game struct {
 	Cartes            [32]cards.Card
 	nombrePli         int
 	pliCardsCount     int
+	Decks             [8]Deck
 	Plis              [8][4]cards.Card
 	CartesDistribuees int
 	NombreJoueurs     int
@@ -32,6 +33,7 @@ func NewGame() *Game {
 	p := Game{
 		Cartes:            jeu.Distribuer(),
 		Plis:              [8][4]cards.Card{},
+		Decks:             [8]Deck{},
 		CartesDistribuees: 0,
 		NombreJoueurs:     0,
 		TakesFinished:     false,
@@ -40,6 +42,36 @@ func NewGame() *Game {
 	}
 
 	return &p
+}
+
+func (g *Game) NextRound(playerID int) [4]int {
+	switch playerID {
+	case 0:
+		return [4]int{0, 1, 2, 3}
+	case 1:
+		return [4]int{1, 2, 3, 0}
+	case 2:
+		return [4]int{2, 3, 0, 1}
+	case 3:
+		return [4]int{3, 0, 1, 2}
+	default:
+		panic("invalid input")
+	}
+}
+
+func (g *Game) PlayCardNext(playerID int, c cards.Card) error {
+	if g.Decks[g.nombrePli].cardscount == 0 {
+		g.Decks[g.nombrePli] = NewDeck([4]int{0, 1, 2, 3}, g.take)
+	}
+
+	if err := g.Decks[g.nombrePli].AddCard(playerID, c); err != nil {
+		return err
+	}
+
+	//	if g.Decks[g.nombrePli].cardscount == 4 {
+	//		g.nombrePli++
+	//	}
+	return nil
 }
 
 func (g *Game) PlayCard(playerID int, c cards.Card) error {
