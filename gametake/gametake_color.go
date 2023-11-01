@@ -108,8 +108,6 @@ func (t ColorTake) Winner(a cards.Card, b cards.Card) cards.Card {
 		}
 		return b
 	}
-
-	return a
 }
 
 func evaluateCardOfOtherColor(genre string) int {
