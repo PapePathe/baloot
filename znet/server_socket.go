@@ -73,7 +73,13 @@ func (s *SocketHandler) Handle(c *websocket.Conn) {
 func (s *SocketHandler) HandlePlayerTake(_ *websocket.Conn, obj map[string]string) {
 	id, _ := strconv.Atoi(obj["id"])
 	pid, _ := strconv.Atoi(obj["player_id"])
-	err := s.g.AddTake(pid, gametake.AllTakesByName[obj["gametake"]])
+	tk, ok := gametake.AllTakesByName[obj["gametake"]]
+	if !ok {
+		fmt.Println("take not found", obj)
+		return
+	}
+
+	err := s.g.AddTake(pid, tk)
 
 	if err != nil {
 		log.Println(err.Error())
@@ -87,7 +93,9 @@ func (s *SocketHandler) HandlePlayerTake(_ *websocket.Conn, obj map[string]strin
 		for _, p := range s.g.GetPlayers() {
 			if p != nil {
 				m, err := json.Marshal(b)
-				fmt.Println(err)
+				if err != nil {
+					fmt.Println(err)
+				}
 
 				if err := p.Conn.WriteMessage(1, m); err != nil {
 					log.Println("write:", err)
