@@ -22,15 +22,16 @@ var (
 )
 
 type Game struct {
-	Cartes            [32]cards.Card
+	CartesDistribuees int
 	nombrePli         int
 	pliCardsCount     int
-	Decks             [8]Deck
-	Plis              [8][4]cards.Card
-	CartesDistribuees int
 	NombreJoueurs     int
 	TakesFinished     bool
+	Cartes            [32]cards.Card
+	Decks             [8]Deck
+	Plis              [8][4]cards.Card
 	players           [4]*player.Player
+	ring              [4]int
 	take              gametake.GameTake
 }
 
@@ -79,9 +80,10 @@ func (g *Game) PlayCardNext(playerID int, c cards.Card) error {
 		return err
 	}
 
-	//	if g.Decks[g.nombrePli].cardscount == 4 {
-	//		g.nombrePli++
-	//	}
+	if g.Decks[g.nombrePli].cardscount == 4 {
+		g.ring = g.NextRound(g.Decks[g.nombrePli].winner)
+		g.nombrePli++
+	}
 	return nil
 }
 
@@ -134,6 +136,7 @@ func (g *Game) AddTake(playerID int, take gametake.GameTake) error {
 
 	g.players[playerID].Take = &take
 
+	fmt.Println(take)
 	if g.take.GreaterThan(take) && take != gametake.PASSE {
 		return ErrBadTake
 	}
