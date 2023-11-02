@@ -1,3 +1,0 @@
-package znet
-
-func ServerTest() {}
