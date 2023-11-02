@@ -9,28 +9,29 @@ const messageStore = (
   setCards,
   setTakes,
 ) => {
+  console.log(lastJsonMessage);
   if (lastJsonMessage !== null) {
     if (lastJsonMessage !== {}) {
       switch (lastJsonMessage.id) {
         case 1:
           setPlayerID((prev) => lastJsonMessage.player.id);
-          setCards((prev) => lastJsonMessage.player.hand.Cards);
-          setTakes((prev) => lastJsonMessage.available_takes);
+          setCards((prev) => lastJsonMessage.player.hand.cards);
+          setTakes((prev) => lastJsonMessage.availableTakes);
           break;
         case 2:
           setCards((prev) => []);
           setTakes((prev) => []);
           setPlayerTakes((prev) => []);
-          setPlayingCards((prev) => lastJsonMessage.player.playing_hand.Cards);
-          setGametake((prev) => lastJsonMessage.gametake.Name);
+          setPlayingCards((prev) => lastJsonMessage.player.playingHand.cards);
+          setGametake((prev) => lastJsonMessage.gametake.name);
           break;
         case 5:
           setPlayerTakes((prev) => [...prev, lastJsonMessage.take]);
-          setTakes((prev) => lastJsonMessage.available_takes);
+          setTakes((prev) => lastJsonMessage.availableTakes);
           break;
         case 6:
           setDeck((prev) => lastJsonMessage.deck);
-          setPlayingCards((prev) => lastJsonMessage.player.playing_hand.Cards);
+          setPlayingCards((prev) => lastJsonMessage.player.playingHand.cards);
           break;
         default:
           throw new Error("Error message id not found");

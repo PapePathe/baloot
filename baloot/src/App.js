@@ -35,6 +35,7 @@ function App() {
   }, [dragItem, dragOverItem, playingCards, setPlayingCards]);
   const handleClickSendMessage = useCallback(
     (take, pid) => {
+      console.log(take, pid);
       sendMessage(
         JSON.stringify({ player_id: `${pid}`, gametake: take, id: "2" }),
       );
