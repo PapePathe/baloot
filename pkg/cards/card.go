@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-var Jeu32Cartes [32]Card = [32]Card{
+var Jeu32Cartes = [32]Card{
 	{"A", "Pique"},
 	{"A", "Coeur"},
 	{"A", "Carreau"},
@@ -66,9 +66,11 @@ type CardSet struct {
 	Cards [32]Card
 }
 
-func (j CardSet) Distribuer() [32]Card {
+func (j CardSet) Distribute() [32]Card {
 	rand.New(rand.NewSource(time.Now().UnixNano()))
+
 	cartes := CardSet{Jeu32Cartes}
+
 	rand.Shuffle(len(cartes.Cards), func(i, j int) {
 		cartes.Cards[i], cartes.Cards[j] = cartes.Cards[j], cartes.Cards[i]
 	})

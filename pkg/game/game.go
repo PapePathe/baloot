@@ -12,7 +12,14 @@ import (
 	"pathe.co/zinx/pkg/player"
 )
 
-var ErrCardsAlreadyDispatched = errors.New("cards already dispatched error")
+var (
+	ErrCardsAlreadyDispatched   = errors.New("cards already dispatched error")
+	ErrCardNotFoundInPlayerHand = errors.New("card not found in player hand")
+	ErrDeckNotFound             = errors.New("deck not found")
+	ErrGameIsFull               = errors.New("Game is full")
+	ErrDuplicatePlayerTake      = errors.New("oops duplicate player take")
+	ErrBadTake                  = errors.New("oops bad take, choose a greater take or pass")
+)
 
 type Game struct {
 	Cartes            [32]cards.Card
@@ -29,9 +36,11 @@ type Game struct {
 
 func NewGame() *Game {
 	rand.New(rand.NewSource(time.Now().UnixNano()))
-	jeu := cards.CardSet{}
-	p := Game{
-		Cartes:            jeu.Distribuer(),
+
+	jeu := cards.CardSet{Cards: [32]cards.Card{}}
+
+	newGame := Game{
+		Cartes:            jeu.Distribute(),
 		Plis:              [8][4]cards.Card{},
 		Decks:             [8]Deck{},
 		CartesDistribuees: 0,
@@ -39,9 +48,11 @@ func NewGame() *Game {
 		TakesFinished:     false,
 		players:           [4]*player.Player{},
 		take:              gametake.PASSE,
+		nombrePli:         0,
+		pliCardsCount:     0,
 	}
 
-	return &p
+	return &newGame
 }
 
 func (g *Game) NextRound(playerID int) [4]int {
@@ -74,17 +85,18 @@ func (g *Game) PlayCardNext(playerID int, c cards.Card) error {
 	return nil
 }
 
-func (g *Game) PlayCard(playerID int, c cards.Card) error {
-	p := g.players[playerID]
-	hasCard, idx := p.HasCard(c)
+func (g *Game) PlayCard(playerID int, card cards.Card) error {
+	plyr := g.players[playerID]
+	hasCard, idx := plyr.HasCard(card)
 
 	if !hasCard {
-		return errors.New("card not found in player hand")
+		return ErrCardNotFoundInPlayerHand
 	}
 
-	g.Plis[g.nombrePli][g.pliCardsCount] = c
+	g.Plis[g.nombrePli][g.pliCardsCount] = card
+	plyr.PlayingHand.Cards[idx] = cards.Card{Genre: "", Couleur: ""}
+
 	g.pliCardsCount++
-	p.PlayingHand.Cards[idx] = cards.Card{}
 
 	if g.pliCardsCount == 4 {
 		g.nombrePli++
@@ -96,20 +108,20 @@ func (g *Game) PlayCard(playerID int, c cards.Card) error {
 
 func (g *Game) CurrentDeck() ([4]cards.Card, error) {
 	if g.nombrePli > 7 {
-		return [4]cards.Card{}, errors.New("deck not found")
+		return [4]cards.Card{}, ErrDeckNotFound
 	}
 
 	return g.Plis[g.nombrePli], nil
 }
 
-func (g *Game) AddPlayer(p *player.Player) error {
+func (g *Game) AddPlayer(plyr *player.Player) error {
 	if g.NombreJoueurs == 4 {
-		return errors.New("Game is full")
+		return ErrGameIsFull
 	}
 
-	p.Hand.Cards = g.distribuer()
-	p.SetID(g.NombreJoueurs)
-	g.players[g.NombreJoueurs] = p
+	plyr.Hand.Cards = g.distribute()
+	plyr.SetID(g.NombreJoueurs)
+	g.players[g.NombreJoueurs] = plyr
 	g.NombreJoueurs++
 
 	return nil
@@ -117,12 +129,13 @@ func (g *Game) AddPlayer(p *player.Player) error {
 
 func (g *Game) AddTake(playerID int, take gametake.GameTake) error {
 	if g.players[playerID].Take != nil {
-		return errors.New("oops duplicate player take")
+		return ErrDuplicatePlayerTake
 	}
+
 	g.players[playerID].Take = &take
 
 	if g.take.GreaterThan(take) && take != gametake.PASSE {
-		return errors.New("oops bad take, choose a greater take or pass")
+		return ErrBadTake
 	}
 
 	if g.take == gametake.PASSE {
@@ -133,9 +146,11 @@ func (g *Game) AddTake(playerID int, take gametake.GameTake) error {
 
 	if g.take == gametake.TOUT || g.takesComplete() {
 		g.TakesFinished = true
+
 		if err := g.DispatchCards(); err != nil {
 			return err
 		}
+
 		g.sendPlayingHands()
 	}
 
@@ -143,14 +158,19 @@ func (g *Game) AddTake(playerID int, take gametake.GameTake) error {
 }
 
 func (g *Game) sendPlayingHands() {
-	for _, p := range g.players {
-		if p != nil {
+	for _, plyr := range g.players {
+		if plyr != nil {
 			fmt.Println("sending playing hand to player")
-			r := ReceivePlayingHandMsg(*p, g.GetTake())
-			m, _ := json.Marshal(r)
 
-			if p.Conn != nil {
-				if err := p.Conn.WriteMessage(1, m); err != nil {
+			r := receivePlayingHandMsg(*plyr, g.GetTake())
+			jsonMsg, err := json.Marshal(r)
+
+			if err != nil {
+				fmt.Println(err)
+			}
+
+			if plyr.Conn != nil {
+				if err := plyr.Conn.WriteMessage(1, jsonMsg); err != nil {
 					fmt.Println(err)
 				}
 			}
@@ -168,13 +188,14 @@ func (g *Game) takesComplete() bool {
 	return true
 }
 
-func (g *Game) distribuer() [5]cards.Card {
+func (g *Game) distribute() [5]cards.Card {
 	cards := [5]cards.Card{}
 	for i := 0; i < 5; i++ {
 		cards[i] = g.Cartes[g.CartesDistribuees+i]
 	}
 
 	g.CartesDistribuees += 5
+
 	return cards
 }
 
@@ -189,6 +210,7 @@ func (g *Game) GetTake() gametake.GameTake {
 func (g *Game) AvailableTakes() []gametake.GameTake {
 	takes := []gametake.GameTake{}
 	takes = append(takes, gametake.PASSE)
+
 	for _, t := range gametake.AllTakes {
 		if t.GreaterThan(g.take) {
 			takes = append(takes, t)
@@ -203,19 +225,20 @@ func (g *Game) DispatchCards() error {
 		return ErrCardsAlreadyDispatched
 	}
 
-	for _, p := range g.players {
+	for _, plyr := range g.players {
 		cards := []cards.Card{}
-		if p != nil {
 
-			for _, c := range p.Hand.Cards {
+		if plyr != nil {
+			for _, c := range plyr.Hand.Cards {
 				cards = append(cards, c)
 			}
+
 			for i := 0; i < 3; i++ {
 				cards = append(cards, g.Cartes[g.CartesDistribuees])
 				g.CartesDistribuees++
 			}
 
-			p.PlayingHand = player.PlayingHand{Cards: cards}
+			plyr.PlayingHand = player.PlayingHand{Cards: cards}
 		}
 	}
 

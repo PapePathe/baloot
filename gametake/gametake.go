@@ -4,21 +4,23 @@ import (
 	"pathe.co/zinx/pkg/cards"
 )
 
-var TREFLE ColorTake = ColorTake{
+var TREFLE = ColorTake{
 	CardsValue:      62,
 	AllCardsValue:   152,
 	OtherCardsValue: 90,
 	Couleur:         "Trefle",
 	Value:           1,
 }
-var CARREAU ColorTake = ColorTake{
+
+var CARREAU = ColorTake{
 	CardsValue:      62,
 	AllCardsValue:   152,
 	OtherCardsValue: 90,
 	Couleur:         "Carreau",
 	Value:           2,
 }
-var COEUR ColorTake = ColorTake{
+
+var COEUR = ColorTake{
 	CardsValue:      62,
 	AllCardsValue:   152,
 	OtherCardsValue: 90,
@@ -26,15 +28,17 @@ var COEUR ColorTake = ColorTake{
 	Value:           3,
 }
 
-var PIQUE ColorTake = ColorTake{
+var PIQUE = ColorTake{
 	CardsValue:      62,
 	AllCardsValue:   152,
 	OtherCardsValue: 90,
 	Couleur:         "Pique",
 	Value:           4,
 }
-var AllTakes []GameTake = []GameTake{PASSE, TREFLE, CARREAU, COEUR, PIQUE, CENT, TOUT}
-var AllTakesByName map[string]GameTake = map[string]GameTake{
+
+var AllTakes = []GameTake{PASSE, TREFLE, CARREAU, COEUR, PIQUE, CENT, TOUT}
+
+var AllTakesByName = map[string]GameTake{
 	"Passe":   PASSE,
 	"Trefle":  TREFLE,
 	"Carreau": CARREAU,
@@ -46,11 +50,11 @@ var AllTakesByName map[string]GameTake = map[string]GameTake{
 
 type GameTake interface {
 	GreaterThan(t GameTake) bool
-	EvaluateHand([5]cards.Card) GameTakeEntry
-	EvaluateCard(cards.Card) (int, bool)
-	EvaluateCardForWin(cards.Card) int
-	EvaluateDeck([4]cards.Card) int
-	Winner(cards.Card, cards.Card) cards.Card
+	EvaluateHand(hand [5]cards.Card) GameTakeEntry
+	EvaluateCard(c cards.Card) (int, bool)
+	EvaluateCardForWin(c cards.Card) int
+	EvaluateDeck(deck [4]cards.Card) int
+	Winner(c cards.Card, w cards.Card) cards.Card
 	GetValue() int
 	Name() string
 }

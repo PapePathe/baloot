@@ -8,7 +8,7 @@ import (
 )
 
 type Hand struct {
-	Cards [5]cards.Card
+	Cards [5]cards.Card `json:"cards"`
 }
 
 func (h *Hand) String() string {
@@ -16,11 +16,12 @@ func (h *Hand) String() string {
 	for _, c := range h.Cards {
 		sb.WriteString(c.String())
 	}
+
 	return sb.String()
 }
 
 type PlayingHand struct {
-	Cards []cards.Card
+	Cards []cards.Card `json:"cards"`
 }
 
 func (h *PlayingHand) String() string {
@@ -28,6 +29,7 @@ func (h *PlayingHand) String() string {
 	for _, c := range h.Cards {
 		sb.WriteString(c.String())
 	}
+
 	return sb.String()
 }
 

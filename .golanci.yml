@@ -1,0 +1,35 @@
+linters:
+  linters-settings:
+    revive:
+      rules:
+        - name: exported
+          severity: info 
+          disabled: true 
+  disable:
+    - ireturn
+    - funlen
+    - wrapcheck
+    - typecheck
+    - gomnd
+    - gochecknoglobals
+    - depguard
+    - varnamelen
+    - dupl
+    - testpackage
+    - forbidigo
+    - exhaustruct
+    - gofumpt
+  presets:
+    - bugs
+    - comment
+    - complexity
+    - error
+    - format
+    - import
+    - metalinter
+    - module
+    - performance
+    - sql
+    - style
+    - test
+    - unused

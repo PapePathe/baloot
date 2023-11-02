@@ -17,63 +17,63 @@ var (
 	SetTake             messageID = 3
 )
 
-type receiveDeckMsg struct {
+type ReceiveDeckMsg struct {
 	ID     messageID     `json:"id"`
 	Player player.Player `json:"player"`
 	Deck   [4]cards.Card `json:"deck"`
 }
 
-func ReceiveDeckMsg(p player.Player, d [4]cards.Card) receiveDeckMsg {
-	msg := receiveDeckMsg{ID: ReceiveDeck, Player: p, Deck: d}
+func ReceiveDeckEvt(p player.Player, d [4]cards.Card) ReceiveDeckMsg {
+	msg := ReceiveDeckMsg{ID: ReceiveDeck, Player: p, Deck: d}
 
 	return msg
 }
 
-type receivePlayingHandMsg struct {
+type ReceivePlayingHandMsg struct {
 	ID     messageID         `json:"id"`
 	Take   gametake.GameTake `json:"gametake"`
 	Player player.Player     `json:"player"`
 }
 
-func ReceivePlayingHandMsg(p player.Player, take gametake.GameTake) receivePlayingHandMsg {
-	clientMessage := receivePlayingHandMsg{ID: ReceivePlayingHand, Player: p, Take: take}
+func receivePlayingHandMsg(p player.Player, take gametake.GameTake) ReceivePlayingHandMsg {
+	clientMessage := ReceivePlayingHandMsg{ID: ReceivePlayingHand, Player: p, Take: take}
 
 	return clientMessage
 }
 
-type receiveTakeHandMsg struct {
+type ReceiveTakeHandMsg struct {
 	ID             messageID           `json:"id"`
 	Player         player.Player       `json:"player"`
-	AvailableTakes []gametake.GameTake `json:"available_takes"`
+	AvailableTakes []gametake.GameTake `json:"availableTakes"`
 }
 
-func ReceiveTakeHandMsg(p player.Player, takes []gametake.GameTake) receiveTakeHandMsg {
-	clientMessage := receiveTakeHandMsg{ID: ReceiveTakeHand, Player: p, AvailableTakes: takes}
+func ReceiveTakeHandEvt(p player.Player, takes []gametake.GameTake) ReceiveTakeHandMsg {
+	clientMessage := ReceiveTakeHandMsg{ID: ReceiveTakeHand, Player: p, AvailableTakes: takes}
 
 	return clientMessage
 }
 
-type setTake struct {
+type SetPlayerTake struct {
 	ID       messageID `json:"id"`
-	PlayerId int       `json:"player_id"`
+	PlayerID int       `json:"playerId"`
 	Gametake string    `json:"gametake"`
 }
 
-func SetTakeMsg(gt string, pid int) setTake {
-	clientMessage := setTake{ID: SetTake, PlayerId: pid, Gametake: gt}
+// func setTakeMsg(gt string, pid int) SetPlayerTake {
+// 	clientMessage := SetPlayerTake{ID: SetTake, PlayerID: pid, Gametake: gt}
+//
+// 	return clientMessage
+// }
 
-	return clientMessage
-}
-
-type broadcastPlayerTakeMsg struct {
+type BroadcastPlayerTakeMsg struct {
 	ID             messageID           `json:"id"`
 	Take           string              `json:"take"`
-	PlayerId       int                 `json:"player_id"`
-	AvailableTakes []gametake.GameTake `json:"available_takes"`
+	PlayerID       int                 `json:"playerId"`
+	AvailableTakes []gametake.GameTake `json:"availableTakes"`
 }
 
-func BroadcastPlayerTakeMsg(gt string, pid int, at []gametake.GameTake) broadcastPlayerTakeMsg {
-	clientMessage := broadcastPlayerTakeMsg{ID: BroadcastPlayerTake, Take: gt, PlayerId: pid, AvailableTakes: at}
+func BroadcastPlayerTakeEvt(gt string, pid int, at []gametake.GameTake) BroadcastPlayerTakeMsg {
+	clientMessage := BroadcastPlayerTakeMsg{ID: BroadcastPlayerTake, Take: gt, PlayerID: pid, AvailableTakes: at}
 
 	return clientMessage
 }

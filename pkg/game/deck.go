@@ -23,11 +23,17 @@ type Deck struct {
 }
 
 func NewDeck(p [4]int, gt gametake.GameTake) Deck {
-	return Deck{winner: -1, players: p, gametake: gt}
+	return Deck{
+		winner:     -1,
+		players:    p,
+		gametake:   gt,
+		cards:      [4]cards.Card{},
+		cardscount: 0,
+	}
 }
 
-func (d *Deck) AddCard(pid int, c cards.Card) error {
-	if err := d.validateCard(c); err != nil {
+func (d *Deck) AddCard(pid int, card cards.Card) error {
+	if err := d.validateCard(card); err != nil {
 		return err
 	}
 
@@ -35,7 +41,7 @@ func (d *Deck) AddCard(pid int, c cards.Card) error {
 		return ErrNotYourTurnToPlay
 	}
 
-	d.cards[d.cardscount] = c
+	d.cards[d.cardscount] = card
 	d.cardscount++
 
 	if d.cardscount == 4 {
@@ -49,16 +55,16 @@ func (d *Deck) Score() (int, int) {
 	return 0, 0
 }
 
-func (d *Deck) validateCard(c cards.Card) error {
+func (d *Deck) validateCard(card cards.Card) error {
 	if d.cardscount == 4 {
 		return ErrCannotAddMoreThanFourCardsToDeck
 	}
 
-	if c.Genre == "" && c.Couleur == "" {
+	if card.Genre == "" && card.Couleur == "" {
 		return ErrCannotAddEmptyCardToDeck
 	}
 
-	if d.hasCard(c) {
+	if d.hasCard(card) {
 		return ErrCannotAddExistingCardToDeck
 	}
 
@@ -79,12 +85,13 @@ func (d *Deck) findWinner() int {
 	d.winner = d.players[0]
 	winningCard := d.cards[0]
 
-	for i := 1; i < 4; i++ {
-		currentCard := d.cards[i]
+	for idx := 1; idx < 4; idx++ {
+		currentCard := d.cards[idx]
 		winner := d.gametake.Winner(currentCard, winningCard)
+
 		if winner == currentCard {
 			winningCard = currentCard
-			d.winner = d.players[i]
+			d.winner = d.players[idx]
 		}
 	}
 

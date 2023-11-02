@@ -1,6 +1,7 @@
 package player
 
 import (
+	"fmt"
 	"sort"
 
 	"github.com/gofiber/contrib/websocket"
@@ -10,7 +11,7 @@ import (
 
 type Player struct {
 	Hand        Hand               `json:"hand"`
-	PlayingHand PlayingHand        `json:"playing_hand"`
+	PlayingHand PlayingHand        `json:"playingHand"`
 	Transport   IPlayerTransport   `json:"-"`
 	Take        *gametake.GameTake `json:"take"`
 	ID          int                `json:"id"`
@@ -19,10 +20,12 @@ type Player struct {
 
 func NewPlayer() *Player {
 	return &Player{
-		Hand:        Hand{},
-		PlayingHand: PlayingHand{},
+		Hand:        Hand{Cards: [5]cards.Card{}},
+		PlayingHand: PlayingHand{Cards: []cards.Card{}},
 		Transport:   JSONMarshaler{},
 		Take:        nil,
+		ID:          0,
+		Conn:        nil,
 	}
 }
 
@@ -45,78 +48,83 @@ func (p *Player) HasCard(c cards.Card) (bool, int) {
 }
 
 func (p *Player) SetForTransport() ([]byte, error) {
-	return p.Transport.Marshal(*p)
+	b, err := p.Transport.Marshal(*p)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal player %w", err)
+	}
+
+	return b, nil
 }
 
 func (p *Player) GetFromTransport(b []byte) error {
 	err := p.Transport.UnMarshal(b, p)
-
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to unmarshal player %w", err)
 	}
 
 	return nil
 }
 
 func (p *Player) OrderedCards() map[string][]cards.Card {
-	m := make(map[string][]cards.Card)
+	cardsMap := make(map[string][]cards.Card)
 
-	for _, c := range p.Hand.Cards {
-		_, ok := m[c.Couleur]
+	for _, card := range p.Hand.Cards {
+		_, ok := cardsMap[card.Couleur]
 
 		if ok {
-			m[c.Couleur] = append(m[c.Couleur], c)
+			cardsMap[card.Couleur] = append(cardsMap[card.Couleur], card)
 		} else {
-			m[c.Couleur] = []cards.Card{c}
+			cardsMap[card.Couleur] = []cards.Card{card}
 		}
-
 	}
 
-	return m
+	return cardsMap
 }
 
-func (p *Player) OrderedCardsForTake(t gametake.GameTake) [5]cards.Card {
-	m := make(map[string][]cards.Card)
+func (p *Player) OrderedCardsForTake(take gametake.GameTake) [5]cards.Card {
+	cardsMap := make(map[string][]cards.Card)
 
-	for _, c := range p.Hand.Cards {
-		_, ok := m[c.Couleur]
+	for _, card := range p.Hand.Cards {
+		_, ok := cardsMap[card.Couleur]
 
 		if ok {
-			m[c.Couleur] = append(m[c.Couleur], c)
+			cardsMap[card.Couleur] = append(cardsMap[card.Couleur], card)
 		} else {
-			m[c.Couleur] = []cards.Card{c}
+			cardsMap[card.Couleur] = []cards.Card{card}
 		}
-		sorter := SortByColorAndType{m[c.Couleur], t}
+
+		sorter := SortByColorAndType{cardsMap[card.Couleur], take}
 		sort.Sort(sorter)
 	}
 
 	result := []cards.Card{}
 
-	for _, cards := range m {
+	for _, cards := range cardsMap {
 		result = append(result, cards...)
 	}
 
 	return [5]cards.Card(result)
 }
 
-func (p *Player) OrderedCardsForPlaying(t gametake.GameTake) [8]cards.Card {
-	m := make(map[string][]cards.Card)
+func (p *Player) OrderedCardsForPlaying(take gametake.GameTake) [8]cards.Card {
+	cardsMap := make(map[string][]cards.Card)
 
-	for _, c := range p.PlayingHand.Cards {
-		_, ok := m[c.Couleur]
+	for _, card := range p.PlayingHand.Cards {
+		_, ok := cardsMap[card.Couleur]
 
 		if ok {
-			m[c.Couleur] = append(m[c.Couleur], c)
+			cardsMap[card.Couleur] = append(cardsMap[card.Couleur], card)
 		} else {
-			m[c.Couleur] = []cards.Card{c}
+			cardsMap[card.Couleur] = []cards.Card{card}
 		}
-		sorter := SortByColorAndType{m[c.Couleur], t}
+
+		sorter := SortByColorAndType{cardsMap[card.Couleur], take}
 		sort.Sort(sorter)
 	}
 
 	result := []cards.Card{}
 
-	for _, cards := range m {
+	for _, cards := range cardsMap {
 		result = append(result, cards...)
 	}
 

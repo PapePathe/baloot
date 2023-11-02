@@ -25,11 +25,13 @@ func (s *SocketHandler) StartPlayerRegistration(c *websocket.Conn) {
 	if s.g.NombreJoueurs < 4 {
 		p := player.NewPlayer()
 		p.Conn = c
-		s.g.AddPlayer(p)
-		log.Println(p)
+		err := s.g.AddPlayer(p)
+		log.Println(p, err)
 
-		r := game.ReceiveTakeHandMsg(*p, gametake.AllTakes)
-		m, _ := json.Marshal(r)
+		r := game.ReceiveTakeHandEvt(*p, gametake.AllTakes)
+		m, err := json.Marshal(r)
+		fmt.Println(err)
+
 		if err := c.WriteMessage(1, m); err != nil {
 			log.Println("write:", err)
 		}
@@ -44,13 +46,16 @@ func (s *SocketHandler) Handle(c *websocket.Conn) {
 		msg []byte
 		err error
 	)
+
 	for {
 		if mt, msg, err = c.ReadMessage(); err != nil {
 			log.Println("error reading message:", err)
+
 			break
 		}
 
 		log.Printf("recv: %s %d", msg, mt)
+
 		obj := map[string]string{}
 		_ = json.Unmarshal(msg, &obj)
 
@@ -65,20 +70,25 @@ func (s *SocketHandler) Handle(c *websocket.Conn) {
 	}
 }
 
-func (s *SocketHandler) HandlePlayerTake(c *websocket.Conn, obj map[string]string) {
+func (s *SocketHandler) HandlePlayerTake(_ *websocket.Conn, obj map[string]string) {
 	id, _ := strconv.Atoi(obj["id"])
 	pid, _ := strconv.Atoi(obj["player_id"])
 	err := s.g.AddTake(pid, gametake.AllTakesByName[obj["gametake"]])
+
 	if err != nil {
 		log.Println(err.Error())
 	}
+
 	log.Println(s.g.GetTake().Name())
 
 	if !s.g.TakesFinished {
-		b := game.BroadcastPlayerTakeMsg(obj["gametake"], id, s.g.AvailableTakes())
+		b := game.BroadcastPlayerTakeEvt(obj["gametake"], id, s.g.AvailableTakes())
+
 		for _, p := range s.g.GetPlayers() {
 			if p != nil {
-				m, _ := json.Marshal(b)
+				m, err := json.Marshal(b)
+				fmt.Println(err)
+
 				if err := p.Conn.WriteMessage(1, m); err != nil {
 					log.Println("write:", err)
 				}
@@ -87,7 +97,7 @@ func (s *SocketHandler) HandlePlayerTake(c *websocket.Conn, obj map[string]strin
 	}
 }
 
-func (s *SocketHandler) HandlePlayerCard(c *websocket.Conn, obj map[string]string) {
+func (s *SocketHandler) HandlePlayerCard(_ *websocket.Conn, obj map[string]string) {
 	pid, _ := strconv.Atoi(obj["player_id"])
 	card := cards.Card{Couleur: obj["color"], Genre: obj["genre"]}
 
@@ -99,10 +109,13 @@ func (s *SocketHandler) HandlePlayerCard(c *websocket.Conn, obj map[string]strin
 	}
 
 	deck, _ := s.g.CurrentDeck()
+
 	for _, p := range s.g.GetPlayers() {
 		if p != nil && p.Conn != nil {
-			b := game.ReceiveDeckMsg(*p, deck)
-			m, _ := json.Marshal(b)
+			b := game.ReceiveDeckEvt(*p, deck)
+			m, err := json.Marshal(b)
+			fmt.Println(err)
+
 			if err := p.Conn.WriteMessage(1, m); err != nil {
 				log.Println("write:", err)
 			}

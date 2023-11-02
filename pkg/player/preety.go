@@ -8,17 +8,17 @@ import (
 )
 
 func (p Player) PreetyHand() {
-	t := table.NewWriter()
+	tbl := table.NewWriter()
 
 	for key, cards := range p.OrderedCards() {
-		var sb strings.Builder
+		var builder strings.Builder
 		for _, card := range cards {
-			sb.WriteString(card.Genre)
-			sb.WriteString(",")
+			builder.WriteString(card.Genre)
+			builder.WriteString(",")
 		}
 
-		t.AppendRow(table.Row{key, sb.String()})
+		tbl.AppendRow(table.Row{key, builder.String()})
 	}
 
-	fmt.Println(t.Render())
+	fmt.Println(tbl.Render())
 }

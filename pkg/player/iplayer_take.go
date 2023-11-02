@@ -10,20 +10,20 @@ import (
 type IPlayerTakes interface {
 	GetBestTake() gametake.GameTake
 	GetTakes() map[gametake.GameTake]gametake.GameTakeEntry
-	SetTake(*gametake.GameTake)
+	SetTake(take *gametake.GameTake)
 }
 
 func (p *Player) GetTakes() map[gametake.GameTake]gametake.GameTakeEntry {
-	m := make(map[gametake.GameTake]gametake.GameTakeEntry)
+	takes := make(map[gametake.GameTake]gametake.GameTakeEntry)
 
-	m[&gametake.CARREAU] = gametake.CARREAU.EvaluateHand(p.Hand.Cards)
-	m[gametake.CENT] = gametake.CENT.EvaluateHand(p.Hand.Cards)
-	m[gametake.COEUR] = gametake.COEUR.EvaluateHand(p.Hand.Cards)
-	m[gametake.PIQUE] = gametake.PIQUE.EvaluateHand(p.Hand.Cards)
-	m[gametake.TREFLE] = gametake.TREFLE.EvaluateHand(p.Hand.Cards)
-	m[gametake.TOUT] = gametake.TOUT.EvaluateHand(p.Hand.Cards)
+	takes[&gametake.CARREAU] = gametake.CARREAU.EvaluateHand(p.Hand.Cards)
+	takes[gametake.CENT] = gametake.CENT.EvaluateHand(p.Hand.Cards)
+	takes[gametake.COEUR] = gametake.COEUR.EvaluateHand(p.Hand.Cards)
+	takes[gametake.PIQUE] = gametake.PIQUE.EvaluateHand(p.Hand.Cards)
+	takes[gametake.TREFLE] = gametake.TREFLE.EvaluateHand(p.Hand.Cards)
+	takes[gametake.TOUT] = gametake.TOUT.EvaluateHand(p.Hand.Cards)
 
-	return m
+	return takes
 }
 
 func (p *Player) ShowTakes() string {
@@ -35,8 +35,7 @@ func (p *Player) ShowTakes() string {
 	return sb.String()
 }
 
-func (p *Player) GetBestTake() (take gametake.GameTake) {
-
+func (p *Player) GetBestTake() gametake.GameTake {
 	takes := []gametake.GameTake{}
 
 	for take, takeEntry := range p.GetTakes() {
@@ -46,18 +45,14 @@ func (p *Player) GetBestTake() (take gametake.GameTake) {
 	}
 
 	if len(takes) == 1 {
-		take = takes[0]
-		return take
+		return takes[0]
 	}
 
 	if len(takes) == 2 {
-		take = takes[0]
-		return take
+		return takes[0]
 	}
 
-	take = gametake.PASSE
-
-	return take
+	return gametake.PASSE
 }
 
 func (p *Player) SetTake(gt *gametake.GameTake) {

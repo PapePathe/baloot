@@ -2,6 +2,7 @@ package gametake
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"pathe.co/zinx/pkg/cards"
 )
@@ -25,7 +26,9 @@ func (t Tout) GetValue() int {
 	return 6
 }
 
-func (t Tout) EvaluateDeck(cards [4]cards.Card) (result int) {
+func (t Tout) EvaluateDeck(cards [4]cards.Card) int {
+	result := 0
+
 	for _, c := range cards {
 		value, _ := t.EvaluateCard(c)
 		result += value
@@ -34,10 +37,10 @@ func (t Tout) EvaluateDeck(cards [4]cards.Card) (result int) {
 	return result
 }
 
-func (t Tout) EvaluateHand(cards [5]cards.Card) (entry GameTakeEntry) {
+func (t Tout) EvaluateHand(cards [5]cards.Card) GameTakeEntry {
 	result := 0
 	valetsCount := 0
-	entry.Flags = make(map[string]flag)
+	entry := NewGameTakeEntry()
 
 	for _, c := range cards {
 		if c.IsValet() {
@@ -67,11 +70,17 @@ func (t Tout) parseCard(c cards.Card) int {
 
 func (t Tout) MarshalJSON() ([]byte, error) {
 	customStruct := struct {
-		Name string
+		Name string `json:"name"`
 	}{
 		Name: t.Name(),
 	}
-	return json.Marshal(customStruct)
+
+	result, err := json.Marshal(customStruct)
+	if err != nil {
+		return []byte{}, fmt.Errorf("error marshaling tout  %w", err)
+	}
+
+	return result, nil
 }
 
 func (t Tout) EvaluateCard(card cards.Card) (int, bool) {
@@ -99,6 +108,7 @@ func (t Tout) Winner(a cards.Card, b cards.Card) cards.Card {
 	if a.Couleur == b.Couleur && aValue > bValue {
 		return a
 	}
+
 	return b
 }
 

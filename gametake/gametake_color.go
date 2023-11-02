@@ -2,6 +2,7 @@ package gametake
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"pathe.co/zinx/pkg/cards"
 )
@@ -26,7 +27,9 @@ func (t ColorTake) GetValue() int {
 	return t.Value
 }
 
-func (t ColorTake) EvaluateDeck(cards [4]cards.Card) (result int) {
+func (t ColorTake) EvaluateDeck(cards [4]cards.Card) int {
+	result := 0
+
 	for _, c := range cards {
 		value, _ := t.EvaluateCard(c)
 		result += value
@@ -35,7 +38,9 @@ func (t ColorTake) EvaluateDeck(cards [4]cards.Card) (result int) {
 	return result
 }
 
-func (t ColorTake) EvaluateHand(cards [5]cards.Card) (entry GameTakeEntry) {
+func (t ColorTake) EvaluateHand(cards [5]cards.Card) GameTakeEntry {
+	entry := NewGameTakeEntry()
+
 	t.parseCard(&entry, cards[0])
 	t.parseCard(&entry, cards[1])
 	t.parseCard(&entry, cards[2])
@@ -50,6 +55,7 @@ func (t ColorTake) EvaluateHand(cards [5]cards.Card) (entry GameTakeEntry) {
 func (t ColorTake) parseCard(gt *GameTakeEntry, c cards.Card) {
 	value, sameColor := t.EvaluateCard(c)
 	gt.AllCardsValue += value
+
 	if sameColor {
 		gt.PlayerCardsOfTakeValue += value
 		gt.AllPlayerCardsValue += value
@@ -59,26 +65,23 @@ func (t ColorTake) parseCard(gt *GameTakeEntry, c cards.Card) {
 	}
 }
 
-func (t ColorTake) EvaluateCard(card cards.Card) (value int, sameColor bool) {
+func (t ColorTake) EvaluateCard(card cards.Card) (int, bool) {
 	if card.Couleur == t.Couleur {
-		value = evaluateCardOfColor(card.Genre)
-		sameColor = true
-	} else {
-		value = evaluateCardOfOtherColor(card.Genre)
-		sameColor = false
+		return evaluateCardOfColor(card.Genre), false
 	}
 
-	return value, sameColor
+	return evaluateCardOfOtherColor(card.Genre), false
 }
 
-var WinValues map[string]int = map[string]int{
+var WinValues = map[string]int{
 	"V": 20, "9": 14, "A": 11, "10": 10, "R": 4, "D": 3, "8": 1, "7": 0,
 }
-var OtherWinValues map[string]int = map[string]int{
+
+var OtherWinValues = map[string]int{
 	"V": 2, "9": 0, "A": 11, "10": 10, "R": 4, "D": 3,
 }
 
-func (t ColorTake) EvaluateCardForWin(card cards.Card) int {
+func (t ColorTake) EvaluateCardForWin(_ cards.Card) int {
 	return 0
 }
 
@@ -88,26 +91,28 @@ func (t ColorTake) Winner(a cards.Card, b cards.Card) cards.Card {
 			aValue, bValue := evaluateCardOfColor(a.Genre), evaluateCardOfColor(b.Genre)
 			if aValue > bValue {
 				return a
-			} else {
-				return b
 			}
-		} else {
-			aValue, bValue := evaluateCardOfOtherColor(a.Genre), evaluateCardOfOtherColor(b.Genre)
-			if aValue > bValue {
-				return a
-			} else {
-				return b
-			}
-		}
-	} else {
-		if a.Couleur == t.Couleur {
-			return a
-		}
-		if b.Couleur == t.Couleur {
+
 			return b
 		}
+
+		aValue, bValue := evaluateCardOfOtherColor(a.Genre), evaluateCardOfOtherColor(b.Genre)
+		if aValue > bValue {
+			return a
+		}
+
 		return b
 	}
+
+	if a.Couleur == t.Couleur {
+		return a
+	}
+
+	if b.Couleur == t.Couleur {
+		return b
+	}
+
+	return b
 }
 
 func evaluateCardOfOtherColor(genre string) int {
@@ -158,9 +163,15 @@ func evaluateCardOfColor(genre string) int {
 
 func (t ColorTake) MarshalJSON() ([]byte, error) {
 	customStruct := struct {
-		Name string
+		Name string `json:"name"`
 	}{
 		Name: t.Name(),
 	}
-	return json.Marshal(customStruct)
+
+	result, err := json.Marshal(customStruct)
+	if err != nil {
+		return []byte{}, fmt.Errorf("error marshaling ColorTake  %w", err)
+	}
+
+	return result, nil
 }

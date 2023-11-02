@@ -27,8 +27,19 @@ var (
 	Flag34Color   = flag{"two-valets"}
 )
 
-func (gte GameTakeEntry) CanTake(gt GameTake) bool {
+func NewGameTakeEntry() GameTakeEntry {
+	return GameTakeEntry{
+		AllCardsValue:          0,
+		AllPlayerCardsValue:    0,
+		CardsOfTakeValue:       0,
+		PlayerCardsOfTakeValue: 0,
+		OtherCardsValue:        0,
+		ImportantCards:         [5]cards.Card{},
+		Flags:                  map[string]flag{},
+	}
+}
 
+func (gte GameTakeEntry) CanTake(gt GameTake) bool {
 	if gt == TOUT {
 		if _, ok := gte.Flags[FlagTwoValets.name]; ok {
 			return true
@@ -49,18 +60,20 @@ func (gte GameTakeEntry) CanTake(gt GameTake) bool {
 	return false
 }
 
-func (gte GameTakeEntry) TakeRatio(gt GameTake) int {
+func (gte GameTakeEntry) TakeRatio(_ GameTake) int {
 	if gte.AllCardsValue > 0 {
 		ratio := (gte.PlayerCardsOfTakeValue * 100) / gte.CardsOfTakeValue
+
 		return ratio
 	}
 
 	return 0
 }
 
-func (gte GameTakeEntry) Ratio(gt GameTake) int {
+func (gte GameTakeEntry) Ratio(_ GameTake) int {
 	if gte.AllCardsValue > 0 {
 		ratio := (gte.PlayerCardsOfTakeValue * 100) / gte.AllCardsValue
+
 		return ratio
 	}
 
@@ -76,7 +89,16 @@ func (gte GameTakeEntry) String() string {
 }
 
 func (gte GameTakeEntry) Print(gt GameTake) table.Row {
-	return table.Row{gt.Name(), gte.AllCardsValue, gte.AllPlayerCardsValue, gte.CardsOfTakeValue, gte.PlayerCardsOfTakeValue, gte.Ratio(gt), gte.TakeRatio(gt), gte.CanTake(gt)}
+	return table.Row{
+		gt.Name(),
+		gte.AllCardsValue,
+		gte.AllPlayerCardsValue,
+		gte.CardsOfTakeValue,
+		gte.PlayerCardsOfTakeValue,
+		gte.Ratio(gt),
+		gte.TakeRatio(gt),
+		gte.CanTake(gt),
+	}
 }
 
 type IGameTakeEntryPersisTence interface {

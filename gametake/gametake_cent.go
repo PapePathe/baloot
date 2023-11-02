@@ -2,6 +2,7 @@ package gametake
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"pathe.co/zinx/pkg/cards"
 )
@@ -24,7 +25,9 @@ func (t Cent) GetValue() int {
 	return 5
 }
 
-func (t Cent) EvaluateDeck(cards [4]cards.Card) (result int) {
+func (t Cent) EvaluateDeck(cards [4]cards.Card) int {
+	result := 0
+
 	for _, c := range cards {
 		value, _ := t.EvaluateCard(c)
 		result += value
@@ -33,12 +36,13 @@ func (t Cent) EvaluateDeck(cards [4]cards.Card) (result int) {
 	return result
 }
 
-func (t Cent) EvaluateHand(cards [5]cards.Card) (entry GameTakeEntry) {
-	entry.Flags = make(map[string]flag)
+func (t Cent) EvaluateHand(cards [5]cards.Card) GameTakeEntry {
+	entry := NewGameTakeEntry()
 	result, acesCount := 0, 0
 
 	for _, c := range cards {
 		result += t.parseCard(c)
+
 		if c.IsAce() {
 			acesCount++
 
@@ -85,6 +89,7 @@ func (t Cent) Winner(a cards.Card, b cards.Card) cards.Card {
 	if a.Couleur == b.Couleur && aValue > bValue {
 		return a
 	}
+
 	return b
 }
 
@@ -111,9 +116,15 @@ func (t Cent) EvaluateCardForWin(card cards.Card) int {
 
 func (t Cent) MarshalJSON() ([]byte, error) {
 	customStruct := struct {
-		Name string
+		Name string `json:"name"`
 	}{
 		Name: t.Name(),
 	}
-	return json.Marshal(customStruct)
+
+	result, err := json.Marshal(customStruct)
+	if err != nil {
+		return []byte{}, fmt.Errorf("error marshaling take  %w", err)
+	}
+
+	return result, nil
 }
