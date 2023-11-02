@@ -88,6 +88,8 @@ type testCase struct {
 	cards    [4]cards.Card
 	players  [4]int
 	winner   int
+	ascore   int
+	bscore   int
 	gametake gametake.GameTake
 }
 
@@ -97,6 +99,8 @@ var testsFindWinner = []testCase{
 		cards:    [4]cards.Card{cards.ValetCarreau, cards.SeptCarreau, cards.HuitCarreau, cards.DixCarreau},
 		players:  [4]int{0, 1, 2, 3},
 		gametake: gametake.TOUT,
+		ascore:   30,
+		bscore:   0,
 		winner:   0,
 	},
 	{
@@ -104,6 +108,8 @@ var testsFindWinner = []testCase{
 		cards:    [4]cards.Card{cards.SeptCarreau, cards.ValetCarreau, cards.HuitCarreau, cards.DixCarreau},
 		players:  [4]int{0, 3, 1, 2},
 		gametake: gametake.TOUT,
+		ascore:   0,
+		bscore:   30,
 		winner:   3,
 	},
 	{
@@ -111,6 +117,8 @@ var testsFindWinner = []testCase{
 		cards:    [4]cards.Card{cards.SeptCarreau, cards.AsCoeur, cards.HuitPique, cards.HuitTrefle},
 		players:  [4]int{0, 3, 1, 2},
 		gametake: gametake.TOUT,
+		ascore:   11,
+		bscore:   0,
 		winner:   0,
 	},
 	{
@@ -118,6 +126,8 @@ var testsFindWinner = []testCase{
 		cards:    [4]cards.Card{cards.SeptCarreau, cards.HuitCarreau, cards.HuitPique, cards.HuitTrefle},
 		players:  [4]int{3, 0, 1, 2},
 		gametake: gametake.TOUT,
+		ascore:   0,
+		bscore:   0,
 		winner:   0,
 	},
 	{
@@ -125,6 +135,8 @@ var testsFindWinner = []testCase{
 		cards:    [4]cards.Card{cards.DixCarreau, cards.NeufCarreau, cards.AsCarreau, cards.ValetCarreau},
 		players:  [4]int{0, 1, 2, 3},
 		gametake: gametake.TOUT,
+		ascore:   0,
+		bscore:   55,
 		winner:   3,
 	},
 	{
@@ -132,6 +144,8 @@ var testsFindWinner = []testCase{
 		cards:    [4]cards.Card{cards.RoiCarreau, cards.NeufPique, cards.AsCoeur, cards.ValetCoeur},
 		players:  [4]int{0, 1, 2, 3},
 		gametake: gametake.TOUT,
+		ascore:   49,
+		bscore:   0,
 		winner:   0,
 	},
 	{
@@ -139,6 +153,8 @@ var testsFindWinner = []testCase{
 		cards:    [4]cards.Card{cards.RoiCarreau, cards.NeufPique, cards.AsCoeur, cards.ValetCoeur},
 		players:  [4]int{0, 1, 2, 3},
 		gametake: gametake.CENT,
+		ascore:   17,
+		bscore:   0,
 		winner:   0,
 	},
 	{
@@ -146,6 +162,8 @@ var testsFindWinner = []testCase{
 		cards:    [4]cards.Card{cards.RoiCarreau, cards.DixCarreau, cards.AsCoeur, cards.ValetCoeur},
 		players:  [4]int{0, 1, 2, 3},
 		gametake: gametake.CENT,
+		ascore:   0,
+		bscore:   27,
 		winner:   1,
 	},
 	{
@@ -153,6 +171,8 @@ var testsFindWinner = []testCase{
 		cards:    [4]cards.Card{cards.RoiCarreau, cards.DixCarreau, cards.AsCoeur, cards.AsCarreau},
 		players:  [4]int{0, 1, 2, 3},
 		gametake: gametake.CENT,
+		ascore:   0,
+		bscore:   36,
 		winner:   3,
 	},
 	{
@@ -160,6 +180,8 @@ var testsFindWinner = []testCase{
 		cards:    [4]cards.Card{cards.SeptCarreau, cards.HuitCarreau, cards.AsCoeur, cards.ValetCoeur},
 		players:  [4]int{0, 1, 2, 3},
 		gametake: gametake.CENT,
+		ascore:   0,
+		bscore:   13,
 		winner:   1,
 	},
 	{
@@ -167,6 +189,8 @@ var testsFindWinner = []testCase{
 		cards:    [4]cards.Card{cards.SeptCarreau, cards.HuitCarreau, cards.AsCoeur, cards.ValetCoeur},
 		players:  [4]int{0, 1, 2, 3},
 		gametake: gametake.COEUR,
+		ascore:   0,
+		bscore:   31,
 		winner:   3,
 	},
 	{
@@ -174,6 +198,8 @@ var testsFindWinner = []testCase{
 		cards:    [4]cards.Card{cards.SeptCarreau, cards.HuitCarreau, cards.AsCoeur, cards.AsPique},
 		players:  [4]int{0, 1, 2, 3},
 		gametake: gametake.COEUR,
+		ascore:   22,
+		bscore:   0,
 		winner:   2,
 	},
 }
@@ -190,6 +216,17 @@ func TestFindWinner(t *testing.T) {
 			for i, c := range testcase.cards {
 				err := deck.AddCard(i, c)
 				require.NoError(t, err)
+			}
+
+			scoreTeamA, scoreTeamB := deck.Score()
+
+			if deck.winner == 0 || deck.winner == 2 {
+				assert.Equal(t, scoreTeamA, testcase.ascore)
+				assert.Equal(t, 0, scoreTeamB)
+
+			} else {
+				assert.Equal(t, scoreTeamB, testcase.bscore)
+				assert.Equal(t, 0, scoreTeamA)
 			}
 
 			assert.Equal(t, testcase.winner, deck.winner)

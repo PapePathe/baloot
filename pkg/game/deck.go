@@ -15,10 +15,11 @@ var (
 )
 
 type Deck struct {
-	cards      [4]cards.Card
 	cardscount int
-	players    [4]int
 	winner     int
+	score      int
+	cards      [4]cards.Card
+	players    [4]int
 	gametake   gametake.GameTake
 }
 
@@ -29,6 +30,7 @@ func NewDeck(p [4]int, gt gametake.GameTake) Deck {
 		gametake:   gt,
 		cards:      [4]cards.Card{},
 		cardscount: 0,
+		score:      0,
 	}
 }
 
@@ -46,13 +48,18 @@ func (d *Deck) AddCard(pid int, card cards.Card) error {
 
 	if d.cardscount == 4 {
 		d.findWinner()
+		d.score = d.gametake.EvaluateDeck(d.cards)
 	}
 
 	return nil
 }
 
 func (d *Deck) Score() (int, int) {
-	return 0, 0
+	if d.winner == 0 || d.winner == 2 {
+		return d.score, 0
+	}
+
+	return 0, d.score
 }
 
 func (d *Deck) validateCard(card cards.Card) error {
