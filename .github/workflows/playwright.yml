@@ -6,6 +6,8 @@ jobs:
     services:
       baloot:
         image: ghcr.io/papepathe/baloot:test-grpc
+        ports:
+          - 7777:7777
     timeout-minutes: 60
     runs-on: ubuntu-latest
     container:
