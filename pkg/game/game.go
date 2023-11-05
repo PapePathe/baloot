@@ -188,7 +188,7 @@ func (g *Game) sendPlayingHands() {
 		if plyr != nil {
 			fmt.Println("sending playing hand to player")
 
-			r := receivePlayingHandMsg(*plyr, g.GetTake())
+			r := ReceivePlayingHandEvt(*plyr, g.GetTake())
 			jsonMsg, err := json.Marshal(r)
 
 			if err != nil {

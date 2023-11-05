@@ -43,7 +43,7 @@ type ReceivePlayingHandMsg struct {
 	Player player.Player     `json:"player"`
 }
 
-func receivePlayingHandMsg(p player.Player, take gametake.GameTake) ReceivePlayingHandMsg {
+func ReceivePlayingHandEvt(p player.Player, take gametake.GameTake) ReceivePlayingHandMsg {
 	clientMessage := ReceivePlayingHandMsg{ID: ReceivePlayingHand, Player: p, Take: take}
 
 	return clientMessage
@@ -60,18 +60,6 @@ func ReceiveTakeHandEvt(p player.Player, takes []gametake.GameTake) ReceiveTakeH
 
 	return clientMessage
 }
-
-type SetPlayerTake struct {
-	ID       messageID `json:"id"`
-	PlayerID int       `json:"playerId"`
-	Gametake string    `json:"gametake"`
-}
-
-// func setTakeMsg(gt string, pid int) SetPlayerTake {
-// 	clientMessage := SetPlayerTake{ID: SetTake, PlayerID: pid, Gametake: gt}
-//
-// 	return clientMessage
-// }
 
 type BroadcastPlayerTakeMsg struct {
 	ID             messageID           `json:"id"`
