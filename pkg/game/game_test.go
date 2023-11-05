@@ -335,23 +335,24 @@ func TestPlayCardNext(t *testing.T) {
 
 			player1.PlayingHand.Cards, player2.PlayingHand.Cards = test.p1, test.p2
 			player3.PlayingHand.Cards, player4.PlayingHand.Cards = test.p3, test.p4
-			for _, p := range game1.players {
-				err := game1.PlayCardNext(p.GetID(), p.PlayingHand.Cards[0])
-				require.NoError(t, err)
-			}
-
 			pli := [4]cards.Card{
 				player1.PlayingHand.Cards[0],
 				player2.PlayingHand.Cards[0],
 				player3.PlayingHand.Cards[0],
 				player4.PlayingHand.Cards[0],
 			}
+			for _, p := range game1.players {
+				err := game1.PlayCardNext(p.GetID(), p.PlayingHand.Cards[0])
+				require.NoError(t, err)
+			}
+
 			winner := game1.Decks[0].winner
+			fmt.Println(game1.Decks)
 
 			t.Run("Test deck winner", func(t *testing.T) {
-				assert.Equal(t, game1.Decks[0].cards, pli)
 				assert.Equal(t, 1, game1.nombrePli)
 				assert.Equal(t, player1.GetID(), winner)
+				assert.Equal(t, game1.Decks[0].cards, pli)
 			})
 
 			t.Run("Test deck scoring", func(t *testing.T) {

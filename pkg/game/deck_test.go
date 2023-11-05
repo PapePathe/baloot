@@ -219,7 +219,7 @@ func TestFindWinner(t *testing.T) {
 
 			deck := NewDeck(testcase.players, testcase.gametake)
 			for i, c := range testcase.cards {
-				err := deck.AddCard(i, c)
+				err := deck.AddCard(deck.players[i], c)
 				require.NoError(t, err)
 			}
 

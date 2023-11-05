@@ -41,7 +41,7 @@ func (d *Deck) AddCard(pid int, card cards.Card) error {
 		return err
 	}
 
-	fmt.Println("player id:", pid, "cardscount:", d.cardscount)
+	fmt.Println("player id:", pid, "card", card, "cardscount:", d.cardscount)
 	if pid != d.players[d.cardscount] {
 		return ErrNotYourTurnToPlay
 	}
