@@ -3,6 +3,7 @@ import CardView from "./CardView";
 
 function PlayingCardsView({
   cards,
+  id,
   onDragStart,
   onDragEnter,
   onDragEnd,
@@ -12,6 +13,7 @@ function PlayingCardsView({
     <SimpleGrid
       spacing={2}
       templateColumns="repeat(auto-fill, minmax(120px, 1fr))"
+      id={id}
     >
       {cards.map((c) => {
         return c ? (

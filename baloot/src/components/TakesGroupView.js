@@ -6,7 +6,7 @@ function TakesGroupView({ onClickHandler, playerID, takes }) {
       <ButtonGroup size="sm" isAttached variant="outline" spacing={1}>
         {takes.map((t) => {
           return (
-            <Button onClick={(e) => onClickHandler(t.name, playerID)}>
+            <Button name={t.name} onClick={(e) => onClickHandler(t.name, playerID)}>
               {t.name}
             </Button>
           );

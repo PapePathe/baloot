@@ -12,6 +12,7 @@ const WS_URL = "ws://127.0.0.1:7777/ws/100";
 function App() {
   const [messageHistory, setMessageHistory] = useState([]);
   const [playingCards, setPlayingCards] = useState([]);
+  const [score, setScore] = useState([]);
   const [deck, setDeck] = useState([]);
   const [cards, setCards] = useState([]);
   const [takes, setTakes] = useState([]);
@@ -60,6 +61,7 @@ function App() {
       setPlayerTakes,
       setCards,
       setTakes,
+      setScore,
     );
   }, [lastJsonMessage, setMessageHistory]);
 
@@ -76,7 +78,7 @@ function App() {
           <GridItem colSpan={4} rowSpan={3} bg="papayawhip">
             <VStack spacing={0} align="stretch" height="100%">
               <Box h="25%" bg="yellow.200"></Box>
-              <DeckView deck={deck} gametake={gametake} />
+              <DeckView deck={deck} gametake={gametake} score={score} />
               <PlayerCardsView
                 takes={takes}
                 playingCards={playingCards}
@@ -88,6 +90,7 @@ function App() {
                 dragEnter={dragEnter}
                 drop={drop}
                 playerID={playerID}
+                setScore={setScore}
               />
             </VStack>
           </GridItem>

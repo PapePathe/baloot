@@ -8,6 +8,7 @@ const messageStore = (
   setPlayerTakes,
   setCards,
   setTakes,
+  setScore
 ) => {
   console.log(lastJsonMessage);
   if (lastJsonMessage !== null) {
@@ -32,6 +33,7 @@ const messageStore = (
         case 6:
           setDeck((prev) => lastJsonMessage.deck);
           setPlayingCards((prev) => lastJsonMessage.player.playingHand.cards);
+          setScore((prev) => [lastJsonMessage.scoreTeamA, lastJsonMessage.scoreTeamB])
           break;
         default:
           throw new Error("Error message id not found");

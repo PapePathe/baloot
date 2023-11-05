@@ -30,6 +30,7 @@ const PlayerCardsView = ({
           onDragEnter={dragEnter}
           onDragStart={dragStart}
           onClick={handleClickPlayMessage}
+          id='playingCards'
         />
       ) : null}
       {cards ? (
@@ -38,6 +39,7 @@ const PlayerCardsView = ({
           onDragEnd={drop}
           onDragEnter={dragEnter}
           onDragStart={dragStart}
+          id='takingCards'
         />
       ) : null}
     </Box>
