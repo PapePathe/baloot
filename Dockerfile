@@ -15,4 +15,4 @@ WORKDIR /
 COPY --from=build-stage /app/server /app/server
 EXPOSE 7777
 USER nonroot:nonroot
-ENTRYPOINT ["/server"]
+ENTRYPOINT ["/app/server"]
