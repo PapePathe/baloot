@@ -5,7 +5,7 @@ jobs:
   test:
     services:
       baloot:
-        image: ghcr.io/papepathe/baloot
+        image: ghcr.io/papepathe/baloot:test-grpc
     timeout-minutes: 60
     runs-on: ubuntu-latest
     container:
