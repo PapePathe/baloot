@@ -109,9 +109,7 @@ func (s *SocketHandler) HandlePlayerCard(_ *websocket.Conn, obj map[string]strin
 	pid, _ := strconv.Atoi(obj["player_id"])
 	card := cards.Card{Couleur: obj["color"], Genre: obj["genre"]}
 
-	fmt.Println(pid)
-
-	err := s.g.PlayCard(pid, card)
+	err := s.g.PlayCardNext(pid, card)
 	if err != nil {
 		log.Println(err.Error())
 	}
@@ -120,7 +118,8 @@ func (s *SocketHandler) HandlePlayerCard(_ *websocket.Conn, obj map[string]strin
 
 	for _, p := range s.g.GetPlayers() {
 		if p != nil && p.Conn != nil {
-			b := game.ReceiveDeckEvt(*p, deck)
+			scoreTeamA, scoreTeamB := s.g.Score()
+			b := game.ReceiveDeckEvt(*p, deck, scoreTeamA, scoreTeamB)
 			m, err := json.Marshal(b)
 			fmt.Println(err)
 
