@@ -18,13 +18,21 @@ var (
 )
 
 type ReceiveDeckMsg struct {
-	ID     messageID     `json:"id"`
-	Player player.Player `json:"player"`
-	Deck   [4]cards.Card `json:"deck"`
+	ID         messageID     `json:"id"`
+	Player     player.Player `json:"player"`
+	Deck       [4]cards.Card `json:"deck"`
+	ScoreTeamA int           `json:"scoreTeamA"`
+	ScoreTeamB int           `json:"scoreTeamB"`
 }
 
-func ReceiveDeckEvt(p player.Player, d [4]cards.Card) ReceiveDeckMsg {
-	msg := ReceiveDeckMsg{ID: ReceiveDeck, Player: p, Deck: d}
+func ReceiveDeckEvt(p player.Player, d [4]cards.Card, a int, b int) ReceiveDeckMsg {
+	msg := ReceiveDeckMsg{
+		ID:         ReceiveDeck,
+		Player:     p,
+		Deck:       d,
+		ScoreTeamA: a,
+		ScoreTeamB: b,
+	}
 
 	return msg
 }

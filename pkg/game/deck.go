@@ -2,6 +2,7 @@ package game
 
 import (
 	"errors"
+	"fmt"
 
 	"pathe.co/zinx/gametake"
 	"pathe.co/zinx/pkg/cards"
@@ -35,11 +36,13 @@ func NewDeck(p [4]int, gt gametake.GameTake) Deck {
 }
 
 func (d *Deck) AddCard(pid int, card cards.Card) error {
+	fmt.Println("Deck debug - ring:", d.players)
 	if err := d.validateCard(card); err != nil {
 		return err
 	}
 
-	if pid != d.cardscount {
+	fmt.Println("player id:", pid, "cardscount:", d.cardscount)
+	if pid != d.players[d.cardscount] {
 		return ErrNotYourTurnToPlay
 	}
 

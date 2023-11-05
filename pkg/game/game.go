@@ -22,17 +22,18 @@ var (
 )
 
 type Game struct {
-	CartesDistribuees int
-	nombrePli         int
-	pliCardsCount     int
-	NombreJoueurs     int
-	TakesFinished     bool
-	Cartes            [32]cards.Card
-	Decks             [8]Deck
-	Plis              [8][4]cards.Card
-	players           [4]*player.Player
-	ring              [4]int
-	take              gametake.GameTake
+	CartesDistribuees      int
+	nombrePli              int
+	pliCardsCount          int
+	NombreJoueurs          int
+	TakesFinished          bool
+	scoreTeamA, scoreTeamB int
+	Cartes                 [32]cards.Card
+	Decks                  [8]Deck
+	Plis                   [8][4]cards.Card
+	players                [4]*player.Player
+	ring                   [4]int
+	take                   gametake.GameTake
 }
 
 func NewGame() *Game {
@@ -51,9 +52,14 @@ func NewGame() *Game {
 		take:              gametake.PASSE,
 		nombrePli:         0,
 		pliCardsCount:     0,
+		ring:              [4]int{0, 1, 2, 3},
 	}
 
 	return &newGame
+}
+
+func (g *Game) Score() (int, int) {
+	return g.scoreTeamA, g.scoreTeamB
 }
 
 func (g *Game) NextRound(playerID int) [4]int {
@@ -72,18 +78,36 @@ func (g *Game) NextRound(playerID int) [4]int {
 }
 
 func (g *Game) PlayCardNext(playerID int, c cards.Card) error {
+	plyr := g.players[playerID]
+	hasCard, idx := plyr.HasCard(c)
+
+	if !hasCard {
+		return ErrCardNotFoundInPlayerHand
+	}
+
+	fmt.Println("Game ring debug before processing", g.ring)
 	if g.Decks[g.nombrePli].cardscount == 0 {
-		g.Decks[g.nombrePli] = NewDeck([4]int{0, 1, 2, 3}, g.take)
+		g.Decks[g.nombrePli] = NewDeck(g.ring, g.take)
 	}
 
 	if err := g.Decks[g.nombrePli].AddCard(playerID, c); err != nil {
 		return err
 	}
 
+	plyr.PlayingHand.Cards[idx] = cards.Card{Genre: "", Couleur: ""}
 	if g.Decks[g.nombrePli].cardscount == 4 {
+		fmt.Println("Winner debug", g.Decks[g.nombrePli].winner)
+		fmt.Println("Winner debug", g.Decks[g.nombrePli])
 		g.ring = g.NextRound(g.Decks[g.nombrePli].winner)
+		fmt.Println("Game ring debug", g.ring)
+		a, b := g.Decks[g.nombrePli].Score()
+		g.scoreTeamA += a
+		g.scoreTeamB += b
 		g.nombrePli++
 	}
+
+	fmt.Println(g.ring)
+
 	return nil
 }
 
@@ -113,7 +137,7 @@ func (g *Game) CurrentDeck() ([4]cards.Card, error) {
 		return [4]cards.Card{}, ErrDeckNotFound
 	}
 
-	return g.Plis[g.nombrePli], nil
+	return g.Decks[g.nombrePli].cards, nil
 }
 
 func (g *Game) AddPlayer(plyr *player.Player) error {
@@ -136,7 +160,6 @@ func (g *Game) AddTake(playerID int, take gametake.GameTake) error {
 
 	g.players[playerID].Take = &take
 
-	fmt.Println(take)
 	if g.take.GreaterThan(take) && take != gametake.PASSE {
 		return ErrBadTake
 	}

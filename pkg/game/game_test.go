@@ -239,40 +239,80 @@ func TestNextRound(t *testing.T) {
 	assert.Equal(t, [4]int{3, 0, 1, 2}, g.NextRound(3))
 }
 
+type score struct {
+	a int
+	b int
+}
+
 var playcardNextTestcases = []struct {
 	name string
 	game *Game
 	take gametake.GameTake
+	p1   []cards.Card
+	p2   []cards.Card
+	p3   []cards.Card
+	p4   []cards.Card
+	s0   score
 }{
 	{
 		name: gametake.TOUT.Name(),
 		take: gametake.TOUT,
 		game: setupGame(4),
+		p1:   []cards.Card{cards.ValetCoeur, cards.NeufCoeur, cards.AsCoeur, cards.DixCoeur, cards.RoiCoeur, cards.ValetCarreau, cards.NeufCarreau, cards.AsCarreau},
+		p2:   []cards.Card{cards.ValetTrefle, cards.NeufTrefle, cards.AsTrefle, cards.DixTrefle, cards.HuitCarreau, cards.SeptCarreau, cards.HuitPique, cards.NeufPique},
+		p3:   []cards.Card{cards.DameCoeur, cards.HuitCoeur, cards.SeptCoeur, cards.RoiTrefle, cards.DameTrefle, cards.HuitTrefle, cards.RoiCarreau, cards.SeptPique},
+		p4:   []cards.Card{cards.ValetPique, cards.AsPique, cards.DixPique, cards.RoiPique, cards.DamePique, cards.SeptTrefle, cards.DixCarreau, cards.DameCarreau},
+		s0:   score{63, 0},
 	},
 	{
 		name: gametake.CENT.Name(),
 		take: gametake.CENT,
 		game: setupGame(4),
+		p1:   []cards.Card{cards.AsCoeur, cards.DixCoeur, cards.RoiCoeur, cards.ValetCoeur, cards.NeufCoeur, cards.AsCarreau, cards.DixCarreau, cards.DameCarreau},
+		p2:   []cards.Card{cards.ValetTrefle, cards.NeufTrefle, cards.AsTrefle, cards.DixTrefle, cards.HuitCarreau, cards.HuitPique, cards.SeptCarreau, cards.NeufPique},
+		p3:   []cards.Card{cards.DameCoeur, cards.HuitCoeur, cards.SeptCoeur, cards.RoiTrefle, cards.DameTrefle, cards.HuitTrefle, cards.RoiCarreau, cards.SeptPique},
+		p4:   []cards.Card{cards.ValetPique, cards.AsPique, cards.DixPique, cards.RoiPique, cards.DamePique, cards.SeptTrefle, cards.ValetCarreau, cards.NeufCarreau},
+		s0:   score{18, 0},
 	},
 	{
 		name: gametake.COEUR.Name(),
 		take: gametake.COEUR,
 		game: setupGame(4),
+		p1:   []cards.Card{cards.ValetCoeur, cards.NeufCoeur, cards.AsCoeur, cards.DixCoeur, cards.RoiCoeur, cards.ValetCarreau, cards.NeufCarreau, cards.AsCarreau},
+		p2:   []cards.Card{cards.ValetTrefle, cards.NeufTrefle, cards.AsTrefle, cards.DixTrefle, cards.HuitCarreau, cards.HuitPique, cards.SeptCarreau, cards.NeufPique},
+		p3:   []cards.Card{cards.DameCoeur, cards.HuitCoeur, cards.SeptCoeur, cards.RoiTrefle, cards.DameTrefle, cards.HuitTrefle, cards.RoiCarreau, cards.SeptPique},
+		p4:   []cards.Card{cards.ValetPique, cards.AsPique, cards.DixPique, cards.RoiPique, cards.DamePique, cards.SeptTrefle, cards.DixCarreau, cards.DameCarreau},
+		s0:   score{27, 0},
 	},
 	{
 		name: gametake.CARREAU.Name(),
 		take: gametake.CARREAU,
 		game: setupGame(4),
+		p1:   []cards.Card{cards.ValetCarreau, cards.NeufCarreau, cards.AsCarreau, cards.DixCarreau, cards.DameCarreau, cards.AsCoeur, cards.DixCoeur, cards.RoiCoeur},
+		p2:   []cards.Card{cards.ValetTrefle, cards.NeufTrefle, cards.AsTrefle, cards.DixTrefle, cards.HuitCarreau, cards.HuitPique, cards.SeptCarreau, cards.NeufPique},
+		p3:   []cards.Card{cards.DameCoeur, cards.HuitCoeur, cards.SeptCoeur, cards.RoiTrefle, cards.DameTrefle, cards.HuitTrefle, cards.RoiCarreau, cards.SeptPique},
+		p4:   []cards.Card{cards.ValetPique, cards.AsPique, cards.DixPique, cards.RoiPique, cards.DamePique, cards.SeptTrefle, cards.ValetCoeur, cards.NeufCoeur},
+		s0:   score{27, 0},
 	},
 	{
 		name: gametake.PIQUE.Name(),
 		take: gametake.PIQUE,
 		game: setupGame(4),
+		p1:   []cards.Card{cards.ValetPique, cards.AsPique, cards.DixPique, cards.RoiPique, cards.DamePique, cards.SeptTrefle, cards.DixCarreau, cards.DameCarreau},
+		p2:   []cards.Card{cards.ValetTrefle, cards.NeufTrefle, cards.AsTrefle, cards.DixTrefle, cards.HuitCarreau, cards.HuitPique, cards.SeptCarreau, cards.NeufPique},
+		p3:   []cards.Card{cards.DameCoeur, cards.HuitCoeur, cards.SeptCoeur, cards.RoiTrefle, cards.DameTrefle, cards.HuitTrefle, cards.RoiCarreau, cards.SeptPique},
+		p4:   []cards.Card{cards.ValetCoeur, cards.NeufCoeur, cards.AsCoeur, cards.DixCoeur, cards.RoiCoeur, cards.ValetCarreau, cards.NeufCarreau, cards.AsCarreau},
+		s0:   score{27, 0},
 	},
 	{
 		name: gametake.TREFLE.Name(),
 		take: gametake.TREFLE,
 		game: setupGame(4),
+		p1:   []cards.Card{cards.ValetTrefle, cards.NeufTrefle, cards.AsTrefle, cards.DixTrefle, cards.AsCarreau, cards.AsCoeur, cards.DixCoeur, cards.DixCarreau},
+		p2:   []cards.Card{cards.ValetCoeur, cards.NeufCoeur, cards.HuitPique, cards.SeptCarreau, cards.RoiCoeur, cards.ValetCarreau, cards.NeufCarreau, cards.HuitCarreau},
+		p3:   []cards.Card{cards.DameCoeur, cards.HuitCoeur, cards.SeptCoeur, cards.RoiTrefle, cards.DameTrefle, cards.HuitTrefle, cards.RoiCarreau, cards.SeptPique},
+		p4:   []cards.Card{cards.ValetPique, cards.AsPique, cards.DixPique, cards.RoiPique, cards.DamePique, cards.SeptTrefle, cards.NeufPique, cards.DameCarreau},
+		s0:   score{27, 0},
 	},
 }
 
@@ -293,6 +333,8 @@ func TestPlayCardNext(t *testing.T) {
 				require.NoError(t, err)
 			}
 
+			player1.PlayingHand.Cards, player2.PlayingHand.Cards = test.p1, test.p2
+			player3.PlayingHand.Cards, player4.PlayingHand.Cards = test.p3, test.p4
 			for _, p := range game1.players {
 				err := game1.PlayCardNext(p.GetID(), p.PlayingHand.Cards[0])
 				require.NoError(t, err)
@@ -304,12 +346,24 @@ func TestPlayCardNext(t *testing.T) {
 				player3.PlayingHand.Cards[0],
 				player4.PlayingHand.Cards[0],
 			}
-			assert.Equal(t, game1.Decks[0].cards, pli)
-			assert.Equal(t, 1, game1.nombrePli)
 			winner := game1.Decks[0].winner
 
-			nextRing := game1.NextRound(winner)
-			assert.Equal(t, nextRing, game1.ring)
+			t.Run("Test deck winner", func(t *testing.T) {
+				assert.Equal(t, game1.Decks[0].cards, pli)
+				assert.Equal(t, 1, game1.nombrePli)
+				assert.Equal(t, player1.GetID(), winner)
+			})
+
+			t.Run("Test deck scoring", func(t *testing.T) {
+				sTeamA, sTeamB := game1.scoreTeamA, game1.scoreTeamB
+				assert.Equal(t, test.s0.a, sTeamA)
+				assert.Equal(t, test.s0.b, sTeamB)
+			})
+
+			t.Run("Test game ring for next round", func(t *testing.T) {
+				nextRing := game1.NextRound(winner)
+				assert.Equal(t, nextRing, game1.ring)
+			})
 
 			fmt.Println("take ", game1.GetTake().Name(), "deck", pli, "winner:", winner)
 		})

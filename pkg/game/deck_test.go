@@ -80,6 +80,11 @@ func TestAddCard(t *testing.T) {
 		err := d.AddCard(1, cards.ValetCarreau)
 
 		assert.Equal(t, err, ErrNotYourTurnToPlay)
+
+		d = NewDeck([4]int{3, 0, 1, 2}, gametake.TOUT)
+		err = d.AddCard(0, cards.ValetCarreau)
+
+		assert.Equal(t, err, ErrNotYourTurnToPlay)
 	})
 }
 
@@ -223,7 +228,6 @@ func TestFindWinner(t *testing.T) {
 			if deck.winner == 0 || deck.winner == 2 {
 				assert.Equal(t, scoreTeamA, testcase.ascore)
 				assert.Equal(t, 0, scoreTeamB)
-
 			} else {
 				assert.Equal(t, scoreTeamB, testcase.bscore)
 				assert.Equal(t, 0, scoreTeamA)
