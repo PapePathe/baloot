@@ -3,6 +3,13 @@ const { test, expect } = require('@playwright/test');
 
 test('game play', async ({ page }) => {
   await page.goto('http://localhost:3000');
+  page.on('console', msg => {
+    if (msg.type() === 'error') {
+      console.log(`Error text: "${msg.text()}"`);
+    } else {
+      console.table(msg)
+    }
+  });
 
   const passe   = await page.getByRole('button', { name: 'Passe' });
   const trefle  = await page.getByRole('button', { name: 'Trefle' });
