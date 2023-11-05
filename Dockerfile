@@ -12,7 +12,7 @@ RUN go test -v ./...
 
 FROM gcr.io/distroless/base-debian11 AS build-release-stage
 WORKDIR /
-COPY --from=build-stage /baloot-api /baloot-api
+COPY --from=build-stage /server /server
 EXPOSE 7777
 USER nonroot:nonroot
-ENTRYPOINT ["/baloot-api"]
+ENTRYPOINT ["/server"]
