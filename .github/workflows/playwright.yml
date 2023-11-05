@@ -3,6 +3,9 @@ on:
   push: []
 jobs:
   test:
+    services:
+      baloot:
+        image: ghcr.io/papepathe/baloot
     timeout-minutes: 60
     runs-on: ubuntu-latest
     container:
