@@ -10,6 +10,8 @@ import (
 )
 
 func TestReceivePlayingHandEvt(t *testing.T) {
+	t.Parallel()
+
 	p := player.NewPlayer()
 	evt := ReceivePlayingHandEvt(*p, gametake.TOUT)
 
@@ -19,6 +21,8 @@ func TestReceivePlayingHandEvt(t *testing.T) {
 }
 
 func TestReceiveDeckEvt(t *testing.T) {
+	t.Parallel()
+
 	p := player.NewPlayer()
 	evt := ReceiveDeckEvt(*p, [4]cards.Card{}, 0, 23)
 
@@ -30,6 +34,8 @@ func TestReceiveDeckEvt(t *testing.T) {
 }
 
 func TestReceiveTakeHandEvt(t *testing.T) {
+	t.Parallel()
+
 	p := player.NewPlayer()
 	takes := []gametake.GameTake{gametake.PASSE, gametake.TOUT}
 	evt := ReceiveTakeHandEvt(*p, takes)
@@ -39,6 +45,8 @@ func TestReceiveTakeHandEvt(t *testing.T) {
 }
 
 func TestBroadcastPlayerTakeEvt(t *testing.T) {
+	t.Parallel()
+
 	takes := []gametake.GameTake{gametake.PASSE, gametake.TOUT}
 	evt := BroadcastPlayerTakeEvt("Carreau", 0, takes)
 

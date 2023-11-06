@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"math/rand"
-	"time"
 
 	"pathe.co/zinx/gametake"
 	"pathe.co/zinx/pkg/cards"
@@ -37,8 +35,6 @@ type Game struct {
 }
 
 func NewGame() *Game {
-	rand.New(rand.NewSource(time.Now().UnixNano()))
-
 	jeu := cards.CardSet{Cards: [32]cards.Card{}}
 
 	newGame := Game{
@@ -86,6 +82,7 @@ func (g *Game) PlayCardNext(playerID int, c cards.Card) error {
 	}
 
 	fmt.Println("Game ring debug before processing", g.ring)
+
 	if g.Decks[g.nombrePli].cardscount == 0 {
 		g.Decks[g.nombrePli] = NewDeck(g.ring, g.take)
 	}
@@ -95,6 +92,7 @@ func (g *Game) PlayCardNext(playerID int, c cards.Card) error {
 	}
 
 	plyr.PlayingHand.Cards[idx] = cards.Card{Genre: "", Couleur: ""}
+
 	if g.Decks[g.nombrePli].cardscount == 4 {
 		fmt.Println("Winner debug", g.Decks[g.nombrePli].winner)
 		fmt.Println("Winner debug", g.Decks[g.nombrePli])
