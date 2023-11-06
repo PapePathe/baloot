@@ -10,14 +10,16 @@ import (
 
 func TestMarshalJSONPASSE(t *testing.T) {
 	t.Parallel()
+
 	result, err := Passe{}.MarshalJSON()
 
 	require.NoError(t, err)
-	assert.Equal(t, string(result), "{\"name\":\"Passe\"}")
+	assert.Equal(t, "{\"name\":\"Passe\"}", string(result))
 }
 
 func TestMarshalWinnerPASSE(t *testing.T) {
 	t.Parallel()
+
 	result := Passe{}.Winner(cards.ValetCoeur, cards.RoiCoeur)
 
 	assert.Equal(t, result, cards.ValetCoeur)
@@ -25,6 +27,7 @@ func TestMarshalWinnerPASSE(t *testing.T) {
 
 func TestMarshalEvaluateCardForWinPASSE(t *testing.T) {
 	t.Parallel()
+
 	result := Passe{}.EvaluateCardForWin(cards.RoiCoeur)
 
 	assert.Equal(t, 0, result)
@@ -32,6 +35,7 @@ func TestMarshalEvaluateCardForWinPASSE(t *testing.T) {
 
 func TestMarshalEvaluateCardPASSE(t *testing.T) {
 	t.Parallel()
+
 	result, sameColor := Passe{}.EvaluateCard(cards.RoiCoeur)
 
 	assert.Equal(t, 0, result)
@@ -40,6 +44,7 @@ func TestMarshalEvaluateCardPASSE(t *testing.T) {
 
 func TestEvaluateDeckPASSE(t *testing.T) {
 	t.Parallel()
+
 	result := Passe{}.EvaluateDeck([4]cards.Card{})
 
 	assert.Equal(t, 0, result)

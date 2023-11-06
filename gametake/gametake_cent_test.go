@@ -151,6 +151,8 @@ func TestCENTEvaluateDeck(t *testing.T) {
 }
 
 func TestEvaluateCardForWinCENT(t *testing.T) {
+	t.Parallel()
+
 	result := CENT.EvaluateCardForWin(cards.AsCarreau)
 	assert.Equal(t, 11, result)
 
@@ -180,6 +182,8 @@ func TestEvaluateCardForWinCENT(t *testing.T) {
 }
 
 func TestWinnerCENT(t *testing.T) {
+	t.Parallel()
+
 	winner := CENT.Winner(cards.ValetCoeur, cards.DixCoeur)
 	assert.Equal(t, cards.DixCoeur, winner)
 
@@ -203,9 +207,10 @@ func TestWinnerCENT(t *testing.T) {
 }
 
 func TestMarshalJSONCENT(t *testing.T) {
-	cent := Cent{}
-	result, err := cent.MarshalJSON()
+	t.Parallel()
+
+	result, err := Cent{}.MarshalJSON()
 
 	require.NoError(t, err)
-	assert.Equal(t, string(result), "{\"name\":\"Cent\"}")
+	assert.Equal(t, "{\"name\":\"Cent\"}", string(result))
 }

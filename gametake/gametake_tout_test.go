@@ -165,7 +165,7 @@ func TestMarshalJSONTOUT(t *testing.T) {
 	result, err := tout.MarshalJSON()
 
 	require.NoError(t, err)
-	assert.Equal(t, string(result), "{\"name\":\"Tout\"}")
+	assert.Equal(t, "{\"name\":\"Tout\"}", string(result))
 }
 
 func TestWinnerTOUT(t *testing.T) {

@@ -246,6 +246,7 @@ func TestMarshalJSONColorTake(t *testing.T) {
 	}
 
 	for _, test := range testcases {
+		test := test
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
 			result, err := test.take.MarshalJSON()
