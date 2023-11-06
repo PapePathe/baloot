@@ -66,21 +66,16 @@ func (t Cent) parseCard(c cards.Card) int {
 	return value
 }
 
+var centEvaluateValues = map[string]int{"A": 11, "10": 10, "R": 4, "D": 3, "V": 2}
+
 func (t Cent) EvaluateCard(card cards.Card) (int, bool) {
-	switch card.Genre {
-	case "A":
-		return 11, true
-	case "10":
-		return 10, true
-	case "R":
-		return 4, true
-	case "D":
-		return 3, true
-	case "V":
-		return 2, true
-	default:
+	result, ok := centEvaluateValues[card.Genre]
+
+	if !ok {
 		return 0, true
 	}
+
+	return result, true
 }
 
 func (t Cent) Winner(a cards.Card, b cards.Card) cards.Card {
@@ -93,25 +88,16 @@ func (t Cent) Winner(a cards.Card, b cards.Card) cards.Card {
 	return b
 }
 
+var centWinValues = map[string]int{"A": 11, "10": 10, "R": 4, "D": 3, "V": 2, "9": 1, "8": 0, "7": -1}
+
 func (t Cent) EvaluateCardForWin(card cards.Card) int {
-	switch card.Genre {
-	case "A":
-		return 11
-	case "10":
-		return 10
-	case "R":
-		return 4
-	case "D":
-		return 3
-	case "V":
-		return 2
-	case "8":
-		return 1
-	case "7":
-		return 0
-	default:
-		return 0
+	result, ok := centWinValues[card.Genre]
+
+	if !ok {
+		return -1
 	}
+
+	return result
 }
 
 func (t Cent) MarshalJSON() ([]byte, error) {

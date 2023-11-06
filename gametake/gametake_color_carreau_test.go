@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"pathe.co/zinx/pkg/cards"
 )
 
@@ -226,6 +227,31 @@ func TestWinnerCARREAU(t *testing.T) {
 			t.Parallel()
 			w := CARREAU.Winner(test.a, test.b)
 			assert.Equal(t, test.w, w)
+		})
+	}
+}
+
+func TestMarshalJSONColorTake(t *testing.T) {
+	t.Parallel()
+
+	testcases := []struct {
+		name   string
+		take   ColorTake
+		result string
+	}{
+		{name: "test marshal coeur", take: ColorTake{Couleur: "Coeur"}, result: "{\"name\":\"Coeur\"}"},
+		{name: "test marshal carreau", take: ColorTake{Couleur: "Carreau"}, result: "{\"name\":\"Carreau\"}"},
+		{name: "test marshal trefle", take: ColorTake{Couleur: "Trefle"}, result: "{\"name\":\"Trefle\"}"},
+		{name: "test marshal pique", take: ColorTake{Couleur: "Pique"}, result: "{\"name\":\"Pique\"}"},
+	}
+
+	for _, test := range testcases {
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+			result, err := test.take.MarshalJSON()
+
+			require.NoError(t, err)
+			assert.Equal(t, string(result), test.result)
 		})
 	}
 }

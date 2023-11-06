@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"pathe.co/zinx/pkg/cards"
 )
 
@@ -155,4 +156,45 @@ func TestTOUTEvaluateDeck(t *testing.T) {
 			assert.Equal(t, result, test.result)
 		})
 	}
+}
+
+func TestMarshalJSONTOUT(t *testing.T) {
+	t.Parallel()
+
+	tout := Tout{}
+	result, err := tout.MarshalJSON()
+
+	require.NoError(t, err)
+	assert.Equal(t, string(result), "{\"name\":\"Tout\"}")
+}
+
+func TestWinnerTOUT(t *testing.T) {
+	t.Parallel()
+
+	winner := TOUT.Winner(cards.ValetCoeur, cards.DixCoeur)
+	assert.Equal(t, cards.ValetCoeur, winner)
+
+	winner = TOUT.Winner(cards.AsCoeur, cards.DixCoeur)
+	assert.Equal(t, cards.AsCoeur, winner)
+
+	winner = TOUT.Winner(cards.HuitCoeur, cards.SeptCoeur)
+	assert.Equal(t, cards.HuitCoeur, winner)
+
+	winner = TOUT.Winner(cards.SeptCoeur, cards.HuitCoeur)
+	assert.Equal(t, cards.HuitCoeur, winner)
+
+	winner = TOUT.Winner(cards.RoiPique, cards.HuitCoeur)
+	assert.Equal(t, cards.HuitCoeur, winner)
+
+	winner = TOUT.Winner(cards.RoiPique, cards.DamePique)
+	assert.Equal(t, cards.RoiPique, winner)
+
+	winner = TOUT.Winner(cards.NeufCarreau, cards.ValetCarreau)
+	assert.Equal(t, cards.ValetCarreau, winner)
+
+	winner = TOUT.Winner(cards.ValetTrefle, cards.NeufCarreau)
+	assert.Equal(t, cards.NeufCarreau, winner)
+
+	winner = TOUT.Winner(cards.NeufCarreau, cards.ValetTrefle)
+	assert.Equal(t, cards.ValetTrefle, winner)
 }

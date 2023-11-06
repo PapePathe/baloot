@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"pathe.co/zinx/pkg/cards"
 )
 
@@ -147,4 +148,64 @@ func TestCENTEvaluateDeck(t *testing.T) {
 			assert.Equal(t, result, test.result)
 		})
 	}
+}
+
+func TestEvaluateCardForWinCENT(t *testing.T) {
+	result := CENT.EvaluateCardForWin(cards.AsCarreau)
+	assert.Equal(t, 11, result)
+
+	result = CENT.EvaluateCardForWin(cards.DixTrefle)
+	assert.Equal(t, 10, result)
+
+	result = CENT.EvaluateCardForWin(cards.RoiCarreau)
+	assert.Equal(t, 4, result)
+
+	result = CENT.EvaluateCardForWin(cards.DameCarreau)
+	assert.Equal(t, 3, result)
+
+	result = CENT.EvaluateCardForWin(cards.ValetCarreau)
+	assert.Equal(t, 2, result)
+
+	result = CENT.EvaluateCardForWin(cards.NeufCarreau)
+	assert.Equal(t, 1, result)
+
+	result = CENT.EvaluateCardForWin(cards.HuitPique)
+	assert.Equal(t, 0, result)
+
+	result = CENT.EvaluateCardForWin(cards.SeptCarreau)
+	assert.Equal(t, -1, result)
+
+	result = CENT.EvaluateCardForWin(cards.Card{})
+	assert.Equal(t, -1, result)
+}
+
+func TestWinnerCENT(t *testing.T) {
+	winner := CENT.Winner(cards.ValetCoeur, cards.DixCoeur)
+	assert.Equal(t, cards.DixCoeur, winner)
+
+	winner = CENT.Winner(cards.HuitCoeur, cards.SeptCoeur)
+	assert.Equal(t, cards.HuitCoeur, winner)
+
+	winner = CENT.Winner(cards.SeptCoeur, cards.HuitCoeur)
+	assert.Equal(t, cards.HuitCoeur, winner)
+
+	winner = CENT.Winner(cards.NeufCarreau, cards.ValetCarreau)
+	assert.Equal(t, cards.ValetCarreau, winner)
+
+	winner = CENT.Winner(cards.ValetCarreau, cards.NeufCarreau)
+	assert.Equal(t, cards.ValetCarreau, winner)
+
+	winner = CENT.Winner(cards.ValetTrefle, cards.NeufCarreau)
+	assert.Equal(t, cards.NeufCarreau, winner)
+
+	winner = CENT.Winner(cards.NeufCarreau, cards.ValetTrefle)
+	assert.Equal(t, cards.ValetTrefle, winner)
+}
+
+func TestMarshalJSONCENT(t *testing.T) {
+	cent := Cent{}
+	result, err := cent.MarshalJSON()
+
+	require.NoError(t, err)
+	assert.Equal(t, string(result), "{\"name\":\"Cent\"}")
 }
