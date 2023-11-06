@@ -5,9 +5,9 @@ test('game play', async ({ page }) => {
   await page.goto('http://localhost:3000');
   page.on('console', msg => {
     if (msg.type() === 'error') {
-      console.log(`Error text: "${msg.text()}"`);
+      console.error(`Error text: "${msg.text()}"`);
     } else {
-      console.table(msg)
+      console.log(msg)
     }
   });
 
