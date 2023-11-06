@@ -1,7 +1,6 @@
 package player
 
 import (
-	"fmt"
 	"sort"
 
 	"github.com/gofiber/contrib/websocket"
@@ -45,24 +44,6 @@ func (p *Player) HasCard(c cards.Card) (bool, int) {
 	}
 
 	return false, -1
-}
-
-func (p *Player) SetForTransport() ([]byte, error) {
-	b, err := p.Transport.Marshal(*p)
-	if err != nil {
-		return nil, fmt.Errorf("failed to marshal player %w", err)
-	}
-
-	return b, nil
-}
-
-func (p *Player) GetFromTransport(b []byte) error {
-	err := p.Transport.UnMarshal(b, p)
-	if err != nil {
-		return fmt.Errorf("failed to unmarshal player %w", err)
-	}
-
-	return nil
 }
 
 func (p *Player) OrderedCards() map[string][]cards.Card {
