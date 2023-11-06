@@ -11,7 +11,6 @@ import (
 type Player struct {
 	Hand        Hand               `json:"hand"`
 	PlayingHand PlayingHand        `json:"playingHand"`
-	Transport   IPlayerTransport   `json:"-"`
 	Take        *gametake.GameTake `json:"take"`
 	ID          int                `json:"id"`
 	Conn        *websocket.Conn    `json:"-"`
@@ -21,7 +20,6 @@ func NewPlayer() *Player {
 	return &Player{
 		Hand:        Hand{Cards: [5]cards.Card{}},
 		PlayingHand: PlayingHand{Cards: []cards.Card{}},
-		Transport:   JSONMarshaler{},
 		Take:        nil,
 		ID:          0,
 		Conn:        nil,

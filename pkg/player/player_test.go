@@ -19,6 +19,7 @@ func TestSetTake(t *testing.T) {
 
 func TestNewHasCard(t *testing.T) {
 	t.Parallel()
+
 	tests := []struct {
 		name      string
 		hand      []cards.Card
@@ -50,6 +51,7 @@ func TestNewHasCard(t *testing.T) {
 	}
 
 	for _, test := range tests {
+		test := test
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
 			p := NewPlayer()
@@ -66,7 +68,8 @@ func TestNewPlayer(t *testing.T) {
 	t.Parallel()
 
 	p := NewPlayer()
-	assert.Equal(t, JSONMarshaler{}, p.Transport)
+	assert.Nil(t, p.Take)
+	assert.Nil(t, p.Conn)
 }
 
 func TestGetID(t *testing.T) {
