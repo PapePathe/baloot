@@ -37,6 +37,7 @@ var PIQUE = ColorTake{
 }
 
 var AllTakes = []GameTake{PASSE, TREFLE, CARREAU, COEUR, PIQUE, CENT, TOUT}
+var AllTakeNames = []string{"Passe", "Trefle", "Carreau", "Coeur", "Pique", "Cent", "Tout"}
 
 var AllTakesByName = map[string]GameTake{
 	"Passe":   PASSE,
