@@ -44,7 +44,7 @@ func NewGame() *Game {
 		CartesDistribuees: 0,
 		NombreJoueurs:     0,
 		TakesFinished:     false,
-		players:           [4]*player.Player{},
+		players:           [4]*player.Player{nil, nil, nil, nil},
 		take:              gametake.PASSE,
 		nombrePli:         0,
 		pliCardsCount:     0,
@@ -168,7 +168,8 @@ func (g *Game) AddTake(playerID int, take gametake.GameTake) error {
 		g.take = take
 	}
 
-	if g.take == gametake.TOUT || g.takesComplete() {
+	if g.takesComplete() {
+		fmt.Println("takes complete")
 		g.TakesFinished = true
 
 		if err := g.DispatchCards(); err != nil {
@@ -181,12 +182,39 @@ func (g *Game) AddTake(playerID int, take gametake.GameTake) error {
 	return nil
 }
 
+func (g *Game) takesComplete() bool {
+	if g.take == gametake.TOUT {
+		return true
+	}
+
+	takesCount := 0
+	for _, p := range g.players {
+		if p == nil {
+			return false
+		}
+
+		if p.Take == nil {
+			fmt.Println("Player", p, "Take", p.Take)
+			return false
+		} else {
+			takesCount++
+			fmt.Println("Takes count:", takesCount)
+		}
+	}
+
+	if takesCount == 4 {
+		return true
+	}
+
+	return false
+}
+
 func (g *Game) sendPlayingHands() {
 	for _, plyr := range g.players {
 		if plyr != nil {
 			fmt.Println("sending playing hand to player")
 
-			r := ReceivePlayingHandEvt(*plyr, g.GetTake())
+			r := ReceivePlayingHandEvt(plyr.PlayingHand.Cards, g.GetTake().Name())
 			jsonMsg, err := json.Marshal(r)
 
 			if err != nil {
@@ -200,16 +228,6 @@ func (g *Game) sendPlayingHands() {
 			}
 		}
 	}
-}
-
-func (g *Game) takesComplete() bool {
-	for _, p := range g.players {
-		if p != nil && p.Take == nil {
-			return false
-		}
-	}
-
-	return true
 }
 
 func (g *Game) distribute() [5]cards.Card {

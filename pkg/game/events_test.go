@@ -13,11 +13,10 @@ func TestReceivePlayingHandEvt(t *testing.T) {
 	t.Parallel()
 
 	p := player.NewPlayer()
-	evt := ReceivePlayingHandEvt(*p, gametake.TOUT)
+	evt := ReceivePlayingHandEvt(p.PlayingHand.Cards, gametake.TOUT.Name())
 
 	assert.Equal(t, ReceivePlayingHand, evt.ID)
-	assert.Equal(t, 0, evt.Player.ID)
-	assert.Equal(t, gametake.TOUT, evt.Take)
+	assert.Equal(t, "Tout", evt.Take)
 }
 
 func TestReceiveDeckEvt(t *testing.T) {
@@ -29,7 +28,7 @@ func TestReceiveDeckEvt(t *testing.T) {
 	assert.Equal(t, ReceiveDeck, evt.ID)
 	assert.Equal(t, 0, evt.ScoreTeamA)
 	assert.Equal(t, 23, evt.ScoreTeamB)
-	assert.Equal(t, 0, evt.Player.ID)
+	assert.Equal(t, p.PlayingHand.Cards, evt.Player)
 	assert.Equal(t, [4]cards.Card{}, evt.Deck)
 }
 
@@ -37,7 +36,7 @@ func TestReceiveTakeHandEvt(t *testing.T) {
 	t.Parallel()
 
 	p := player.NewPlayer()
-	takes := []gametake.GameTake{gametake.PASSE, gametake.TOUT}
+	takes := []string{"Passe", "Cent"}
 	evt := ReceiveTakeHandEvt(*p, takes)
 
 	assert.Equal(t, ReceiveTakeHand, evt.ID)
@@ -47,7 +46,7 @@ func TestReceiveTakeHandEvt(t *testing.T) {
 func TestBroadcastPlayerTakeEvt(t *testing.T) {
 	t.Parallel()
 
-	takes := []gametake.GameTake{gametake.PASSE, gametake.TOUT}
+	takes := []string{"Passe", "Cent"}
 	evt := BroadcastPlayerTakeEvt("Carreau", 0, takes)
 
 	assert.Equal(t, BroadcastPlayerTake, evt.ID)

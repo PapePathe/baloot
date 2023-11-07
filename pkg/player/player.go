@@ -1,6 +1,7 @@
 package player
 
 import (
+	"fmt"
 	"sort"
 
 	"github.com/gofiber/contrib/websocket"
@@ -76,10 +77,18 @@ func (p *Player) OrderedCardsForTake(take gametake.GameTake) [5]cards.Card {
 		sort.Sort(sorter)
 	}
 
-	result := []cards.Card{}
+	keys := make([]string, 0, len(cardsMap))
+	for k, _ := range cardsMap {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
 
-	for _, cards := range cardsMap {
-		result = append(result, cards...)
+	fmt.Println(keys)
+
+	result := []cards.Card{}
+	for _, key := range keys {
+		mapCards := cardsMap[key]
+		result = append(result, mapCards...)
 	}
 
 	return [5]cards.Card(result)
@@ -101,10 +110,19 @@ func (p *Player) OrderedCardsForPlaying(take gametake.GameTake) [8]cards.Card {
 		sort.Sort(sorter)
 	}
 
+	keys := make([]string, 0, len(cardsMap))
+	for k, _ := range cardsMap {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	fmt.Println(keys)
+
 	result := []cards.Card{}
 
-	for _, cards := range cardsMap {
-		result = append(result, cards...)
+	for _, key := range keys {
+		mapCards := cardsMap[key]
+		result = append(result, mapCards...)
 	}
 
 	return [8]cards.Card(result)

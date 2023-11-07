@@ -101,3 +101,94 @@ func TestOrderedCards(t *testing.T) {
 
 	assert.Equal(t, expected, p.OrderedCards())
 }
+
+func TestOrderedCardsForTake(t *testing.T) {
+	t.Parallel()
+
+	testcases := []struct {
+		name     string
+		take     gametake.GameTake
+		hand     [5]cards.Card
+		expected [5]cards.Card
+	}{
+		{
+			name: "cent",
+			take: gametake.CENT,
+			hand: [5]cards.Card{
+				cards.ValetPique, cards.HuitPique, cards.NeufPique,
+				cards.AsPique, cards.ValetCoeur},
+			expected: [5]cards.Card{
+				cards.ValetCoeur, cards.AsPique, cards.ValetPique,
+				cards.HuitPique, cards.NeufPique},
+		},
+		{
+			name: "tout",
+			take: gametake.TOUT,
+			hand: [5]cards.Card{
+				cards.ValetPique, cards.HuitCoeur, cards.NeufPique,
+				cards.NeufTrefle, cards.ValetCoeur},
+			expected: [5]cards.Card{
+				cards.ValetCoeur, cards.HuitCoeur, cards.ValetPique,
+				cards.NeufPique, cards.NeufTrefle},
+		},
+		{
+			name: "pique",
+			take: gametake.PIQUE,
+			hand: [5]cards.Card{
+				cards.ValetPique, cards.HuitCoeur, cards.NeufPique,
+				cards.NeufTrefle, cards.ValetCoeur},
+			expected: [5]cards.Card{
+				cards.ValetCoeur, cards.HuitCoeur, cards.ValetPique,
+				cards.NeufPique, cards.NeufTrefle},
+		},
+		{
+			name: "coeur",
+			take: gametake.COEUR,
+			hand: [5]cards.Card{
+				cards.ValetPique, cards.HuitCoeur, cards.NeufPique,
+				cards.NeufTrefle, cards.ValetCoeur},
+			expected: [5]cards.Card{
+				cards.ValetCoeur, cards.HuitCoeur, cards.ValetPique,
+				cards.NeufPique, cards.NeufTrefle},
+		},
+		{
+			name: "trefle",
+			take: gametake.TREFLE,
+			hand: [5]cards.Card{
+				cards.ValetPique, cards.HuitCoeur, cards.NeufPique,
+				cards.NeufTrefle, cards.ValetCoeur},
+			expected: [5]cards.Card{
+				cards.ValetCoeur, cards.HuitCoeur, cards.ValetPique,
+				cards.NeufPique, cards.NeufTrefle},
+		},
+		{
+			name: "carreau",
+			take: gametake.CARREAU,
+			hand: [5]cards.Card{
+				cards.ValetPique, cards.HuitCoeur, cards.NeufPique,
+				cards.NeufTrefle, cards.ValetCoeur},
+			expected: [5]cards.Card{
+				cards.ValetCoeur, cards.HuitCoeur, cards.ValetPique,
+				cards.NeufPique, cards.NeufTrefle},
+		},
+		{
+			name: "trefle",
+			take: gametake.TREFLE,
+			hand: [5]cards.Card{
+				cards.ValetPique, cards.HuitCoeur, cards.NeufPique,
+				cards.NeufTrefle, cards.ValetCoeur},
+			expected: [5]cards.Card{
+				cards.ValetCoeur, cards.HuitCoeur, cards.ValetPique,
+				cards.NeufPique, cards.NeufTrefle},
+		},
+	}
+
+	for _, test := range testcases {
+		t.Run(test.name, func(t *testing.T) {
+			p := NewPlayer()
+			p.Hand = Hand{test.hand}
+
+			assert.Equal(t, test.expected, p.OrderedCardsForTake(test.take))
+		})
+	}
+}

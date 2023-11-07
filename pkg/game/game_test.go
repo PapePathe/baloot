@@ -443,6 +443,50 @@ func TestPlayCardNext(t *testing.T) {
 	}
 }
 
+func TestTakesComplete(t *testing.T) {
+	t.Parallel()
+
+	t.Run("first player taking tout completes takes", func(t *testing.T) {
+		t.Parallel()
+
+		game1 := setupGame(4)
+
+		game1.AddTake(game1.GetPlayers()[0].GetID(), gametake.TOUT)
+		assert.True(t, game1.takesComplete())
+	})
+
+	t.Run("second player takes tout completes the takes", func(t *testing.T) {
+		t.Parallel()
+
+		game1 := setupGame(4)
+
+		game1.AddTake(game1.GetPlayers()[0].GetID(), gametake.TREFLE)
+		assert.False(t, game1.takesComplete())
+
+		game1.AddTake(game1.GetPlayers()[1].GetID(), gametake.TOUT)
+		assert.True(t, game1.takesComplete())
+	})
+
+	t.Run("four takes without tout completes the takes", func(t *testing.T) {
+		t.Parallel()
+
+		game1 := setupGame(4)
+
+		game1.AddTake(game1.GetPlayers()[0].GetID(), gametake.TREFLE)
+		assert.False(t, game1.takesComplete())
+
+		game1.AddTake(game1.GetPlayers()[1].GetID(), gametake.CARREAU)
+		assert.False(t, game1.takesComplete())
+
+		game1.AddTake(game1.GetPlayers()[2].GetID(), gametake.PASSE)
+		assert.False(t, game1.takesComplete())
+
+		game1.AddTake(game1.GetPlayers()[3].GetID(), gametake.COEUR)
+
+		assert.True(t, game1.takesComplete())
+	})
+}
+
 func setupGame(playersCount int) *Game {
 	game1 := NewGame()
 	for i := 0; i < playersCount; i++ {
