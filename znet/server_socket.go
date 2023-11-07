@@ -24,17 +24,21 @@ func NewSocketHandler() SocketHandler {
 
 func (s *SocketHandler) StartPlayerRegistration(c *websocket.Conn) {
 	log.Println("starting player registration")
+
 	if s.g.NombreJoueurs < 4 {
 		log.Println("adding new player")
+
 		p := player.NewPlayer()
 		p.Conn = c
 		err := s.g.AddPlayer(p)
+
 		if err != nil {
 			log.Println("error adding player : ", err)
 		}
 
 		r := game.ReceiveTakeHandEvt(*p, gametake.AllTakeNames)
 		m, err := json.Marshal(r)
+
 		if err != nil {
 			log.Println("marshaling take hand msg", err)
 		}
@@ -80,12 +84,14 @@ func (s *SocketHandler) Handle(c *websocket.Conn) {
 
 		if err != nil {
 			log.Println(err)
+
 			break
 		}
 
 		log.Println(obj)
 
 		id, _ := strconv.Atoi(obj["id"])
+
 		if id == 2 {
 			log.Println("handling player take")
 			s.HandlePlayerTake(c, obj)
@@ -104,6 +110,7 @@ func (s *SocketHandler) HandlePlayerTake(_ *websocket.Conn, obj map[string]strin
 
 	if !ok {
 		log.Println("could not find gametake", obj["gametake"])
+
 		return
 	}
 
@@ -115,10 +122,11 @@ func (s *SocketHandler) HandlePlayerTake(_ *websocket.Conn, obj map[string]strin
 
 	if !s.g.TakesFinished {
 		log.Println("Takes are not finished yet")
+
 		return
 	}
 
-	var takes []string
+	takes := []string{}
 
 	for _, t := range s.g.AvailableTakes() {
 		takes = append(takes, t.Name())

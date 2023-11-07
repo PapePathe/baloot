@@ -15,40 +15,44 @@ import (
 
 func TestNewSocketHandler2(t *testing.T) {
 	t.Parallel()
+
 	setupTestApp("7778")
-	//	defer app.Stop()
 
 	conn, resp, err := websocket.DefaultDialer.Dial("ws://localhost:7778/ws/gm100", nil)
+	require.NoError(t, err)
+
 	defer conn.Close()
 
-	require.NoError(t, err)
 	assert.Equal(t, fiber.StatusSwitchingProtocols, resp.StatusCode)
 	assert.Equal(t, "websocket", resp.Header.Get("Upgrade"))
 
 	var msg game.ReceiveTakeHandMsg
+
 	_, rawmsg, err := conn.ReadMessage()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	err = json.Unmarshal(rawmsg, &msg)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 }
 
 func TestNewSocketHandler(t *testing.T) {
 	t.Parallel()
 	setupTestApp("7779")
-	//	defer app.Stop()
 
 	conn, resp, err := websocket.DefaultDialer.Dial("ws://localhost:7779/ws/gm100", nil)
-	defer conn.Close()
 
 	require.NoError(t, err)
+
+	defer conn.Close()
+
 	assert.Equal(t, fiber.StatusSwitchingProtocols, resp.StatusCode)
 	assert.Equal(t, "websocket", resp.Header.Get("Upgrade"))
 
 	var msg game.ReceiveTakeHandMsg
+
 	_, rawmsg, err := conn.ReadMessage()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	err = json.Unmarshal(rawmsg, &msg)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	assert.Len(t, msg.Player.Hand.Cards, 5)
 	assert.Equal(t, game.ReceiveTakeHand, msg.ID)
@@ -58,16 +62,18 @@ func TestNewSocketHandler(t *testing.T) {
 	require.NoError(t, err)
 
 	_, rawmsg, err = conn.ReadMessage()
-	assert.Nil(t, err)
+	require.NoError(t, err)
+
 	var playMsg game.ReceivePlayingHandMsg
+
 	err = json.Unmarshal(rawmsg, &playMsg)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, game.ReceivePlayingHand, playMsg.ID)
 	assert.Equal(t, "Tout", playMsg.Take)
 	assert.Len(t, playMsg.Cards, 8)
 }
 
-func setupTestApp(port string) sApp {
+func setupTestApp(port string) SocketApp {
 	s := NewSocketHandler()
 	app := NewSocketApp(port)
 
@@ -85,12 +91,15 @@ func setupTestApp(port string) sApp {
 
 			if conn != nil {
 				readyCh <- struct{}{}
+
 				conn.Close()
+
 				break
 			}
 		}
 	}()
 
 	<-readyCh
+
 	return app
 }
