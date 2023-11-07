@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/gofiber/contrib/websocket"
+	"github.com/gofiber/fiber/v2"
 	"pathe.co/zinx/gametake"
 	"pathe.co/zinx/pkg/cards"
 	"pathe.co/zinx/pkg/game"
@@ -22,15 +23,21 @@ func NewSocketHandler() SocketHandler {
 }
 
 func (s *SocketHandler) StartPlayerRegistration(c *websocket.Conn) {
+	log.Println("starting player registration")
 	if s.g.NombreJoueurs < 4 {
+		log.Println("adding new player")
 		p := player.NewPlayer()
 		p.Conn = c
 		err := s.g.AddPlayer(p)
-		log.Println(p, err)
+		if err != nil {
+			log.Println("error adding player : ", err)
+		}
 
-		r := game.ReceiveTakeHandEvt(*p, gametake.AllTakes)
+		r := game.ReceiveTakeHandEvt(*p, gametake.AllTakeNames)
 		m, err := json.Marshal(r)
-		fmt.Println(err)
+		if err != nil {
+			log.Println("marshaling take hand msg", err)
+		}
 
 		if err := c.WriteMessage(1, m); err != nil {
 			log.Println("write:", err)
@@ -38,7 +45,19 @@ func (s *SocketHandler) StartPlayerRegistration(c *websocket.Conn) {
 	}
 }
 
+func (s *SocketHandler) Upgrade(c *fiber.Ctx) error {
+	if websocket.IsWebSocketUpgrade(c) {
+		fmt.Println("Socket neeeds upgrade")
+		c.Locals("allowed", true)
+
+		return c.Next()
+	}
+
+	return fiber.ErrUpgradeRequired
+}
+
 func (s *SocketHandler) Handle(c *websocket.Conn) {
+	fmt.Println("Start new connection handler")
 	s.StartPlayerRegistration(c)
 
 	var (
@@ -57,10 +76,18 @@ func (s *SocketHandler) Handle(c *websocket.Conn) {
 		log.Printf("recv: %s %d", msg, mt)
 
 		obj := map[string]string{}
-		_ = json.Unmarshal(msg, &obj)
+		err = json.Unmarshal(msg, &obj)
+
+		if err != nil {
+			log.Println(err)
+			break
+		}
+
+		log.Println(obj)
 
 		id, _ := strconv.Atoi(obj["id"])
 		if id == 2 {
+			log.Println("handling player take")
 			s.HandlePlayerTake(c, obj)
 		}
 
@@ -76,22 +103,28 @@ func (s *SocketHandler) HandlePlayerTake(_ *websocket.Conn, obj map[string]strin
 	tk, ok := gametake.AllTakesByName[obj["gametake"]]
 
 	if !ok {
+		log.Println("could not find gametake", obj["gametake"])
 		return
 	}
 
 	err := s.g.AddTake(pid, tk)
 
 	if err != nil {
-		log.Println(err.Error())
+		log.Println("error adding take", err.Error())
 	}
 
-	log.Println(s.g.GetTake().Name())
-
 	if !s.g.TakesFinished {
+		log.Println("Takes are not finished yet")
 		return
 	}
 
-	b := game.BroadcastPlayerTakeEvt(obj["gametake"], id, s.g.AvailableTakes())
+	var takes []string
+
+	for _, t := range s.g.AvailableTakes() {
+		takes = append(takes, t.Name())
+	}
+
+	b := game.BroadcastPlayerTakeEvt(obj["gametake"], id, takes)
 
 	for _, p := range s.g.GetPlayers() {
 		if p != nil {
