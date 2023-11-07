@@ -7,10 +7,14 @@ import (
 )
 
 func TestString(t *testing.T) {
+	t.Parallel()
+
 	assert.Equal(t, "(V Coeur)", ValetCoeur.String())
 }
 
 func TestDistribute(t *testing.T) {
+	t.Parallel()
+
 	set := CardSet{Jeu32Cartes}
 	result := set.Distribute()
 
@@ -20,6 +24,8 @@ func TestDistribute(t *testing.T) {
 }
 
 func TestIsValet(t *testing.T) {
+	t.Parallel()
+
 	assert.True(t, ValetCoeur.IsValet())
 	assert.True(t, ValetTrefle.IsValet())
 	assert.True(t, ValetCarreau.IsValet())
@@ -30,6 +36,8 @@ func TestIsValet(t *testing.T) {
 }
 
 func TestIsAce(t *testing.T) {
+	t.Parallel()
+
 	assert.True(t, AsCoeur.IsAce())
 	assert.True(t, AsTrefle.IsAce())
 	assert.True(t, AsCarreau.IsAce())
@@ -40,6 +48,8 @@ func TestIsAce(t *testing.T) {
 }
 
 func TestIsNine(t *testing.T) {
+	t.Parallel()
+
 	assert.True(t, NeufCoeur.IsNine())
 	assert.True(t, NeufTrefle.IsNine())
 	assert.True(t, NeufCarreau.IsNine())

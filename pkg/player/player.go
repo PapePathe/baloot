@@ -78,14 +78,15 @@ func (p *Player) OrderedCardsForTake(take gametake.GameTake) [5]cards.Card {
 	}
 
 	keys := make([]string, 0, len(cardsMap))
-	for k, _ := range cardsMap {
+	for k := range cardsMap {
 		keys = append(keys, k)
 	}
-	sort.Strings(keys)
 
+	sort.Strings(keys)
 	fmt.Println(keys)
 
 	result := []cards.Card{}
+
 	for _, key := range keys {
 		mapCards := cardsMap[key]
 		result = append(result, mapCards...)
@@ -111,11 +112,11 @@ func (p *Player) OrderedCardsForPlaying(take gametake.GameTake) [8]cards.Card {
 	}
 
 	keys := make([]string, 0, len(cardsMap))
-	for k, _ := range cardsMap {
+	for k := range cardsMap {
 		keys = append(keys, k)
 	}
-	sort.Strings(keys)
 
+	sort.Strings(keys)
 	fmt.Println(keys)
 
 	result := []cards.Card{}

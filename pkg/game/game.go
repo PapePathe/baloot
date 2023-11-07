@@ -170,6 +170,7 @@ func (g *Game) AddTake(playerID int, take gametake.GameTake) error {
 
 	if g.takesComplete() {
 		fmt.Println("takes complete")
+
 		g.TakesFinished = true
 
 		if err := g.DispatchCards(); err != nil {
@@ -188,6 +189,7 @@ func (g *Game) takesComplete() bool {
 	}
 
 	takesCount := 0
+
 	for _, p := range g.players {
 		if p == nil {
 			return false
@@ -195,18 +197,15 @@ func (g *Game) takesComplete() bool {
 
 		if p.Take == nil {
 			fmt.Println("Player", p, "Take", p.Take)
+
 			return false
-		} else {
-			takesCount++
-			fmt.Println("Takes count:", takesCount)
 		}
+
+		takesCount++
+		fmt.Println("Takes count:", takesCount)
 	}
 
-	if takesCount == 4 {
-		return true
-	}
-
-	return false
+	return takesCount == 4
 }
 
 func (g *Game) sendPlayingHands() {

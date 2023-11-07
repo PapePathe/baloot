@@ -451,7 +451,8 @@ func TestTakesComplete(t *testing.T) {
 
 		game1 := setupGame(4)
 
-		game1.AddTake(game1.GetPlayers()[0].GetID(), gametake.TOUT)
+		err := game1.AddTake(game1.GetPlayers()[0].GetID(), gametake.TOUT)
+		require.NoError(t, err)
 		assert.True(t, game1.takesComplete())
 	})
 
@@ -460,10 +461,12 @@ func TestTakesComplete(t *testing.T) {
 
 		game1 := setupGame(4)
 
-		game1.AddTake(game1.GetPlayers()[0].GetID(), gametake.TREFLE)
+		err := game1.AddTake(game1.GetPlayers()[0].GetID(), gametake.TREFLE)
+		require.NoError(t, err)
 		assert.False(t, game1.takesComplete())
 
-		game1.AddTake(game1.GetPlayers()[1].GetID(), gametake.TOUT)
+		err = game1.AddTake(game1.GetPlayers()[1].GetID(), gametake.TOUT)
+		require.NoError(t, err)
 		assert.True(t, game1.takesComplete())
 	})
 
@@ -472,17 +475,20 @@ func TestTakesComplete(t *testing.T) {
 
 		game1 := setupGame(4)
 
-		game1.AddTake(game1.GetPlayers()[0].GetID(), gametake.TREFLE)
+		err := game1.AddTake(game1.GetPlayers()[0].GetID(), gametake.TREFLE)
+		require.NoError(t, err)
 		assert.False(t, game1.takesComplete())
 
-		game1.AddTake(game1.GetPlayers()[1].GetID(), gametake.CARREAU)
+		err = game1.AddTake(game1.GetPlayers()[1].GetID(), gametake.CARREAU)
+		require.NoError(t, err)
 		assert.False(t, game1.takesComplete())
 
-		game1.AddTake(game1.GetPlayers()[2].GetID(), gametake.PASSE)
+		err = game1.AddTake(game1.GetPlayers()[2].GetID(), gametake.PASSE)
+		require.NoError(t, err)
 		assert.False(t, game1.takesComplete())
 
-		game1.AddTake(game1.GetPlayers()[3].GetID(), gametake.COEUR)
-
+		err = game1.AddTake(game1.GetPlayers()[3].GetID(), gametake.COEUR)
+		require.NoError(t, err)
 		assert.True(t, game1.takesComplete())
 	})
 }
