@@ -29,7 +29,7 @@ func main() {
 
 	r, err := c.GetHand(ctx, &proto.GametakeRequest{Id: "MyID"})
 	if err != nil {
-		log.Fatalf("could not greet: %v", err)
+		log.Printf("could not greet: %v", err)
 	}
 
 	log.Printf("Greeting: %s", r)
