@@ -23,8 +23,8 @@ const messageStore = (
           setCards((prev) => []);
           setTakes((prev) => []);
           setPlayerTakes((prev) => []);
-          setPlayingCards((prev) => lastJsonMessage.player.playingHand.cards);
-          setGametake((prev) => lastJsonMessage.gametake.name);
+          setPlayingCards((prev) => lastJsonMessage.player);
+          setGametake((prev) => lastJsonMessage.gametake);
           break;
         case 5:
           setPlayerTakes((prev) => [...prev, lastJsonMessage.take]);
@@ -32,7 +32,7 @@ const messageStore = (
           break;
         case 6:
           setDeck((prev) => lastJsonMessage.deck);
-          setPlayingCards((prev) => lastJsonMessage.player.playingHand.cards);
+          setPlayingCards((prev) => lastJsonMessage.player);
           setScore((prev) => [lastJsonMessage.scoreTeamA, lastJsonMessage.scoreTeamB])
           break;
         default:

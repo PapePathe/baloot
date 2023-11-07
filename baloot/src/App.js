@@ -7,7 +7,7 @@ import messageStore from "./utils/messageStore";
 import playCard from "./utils/playCard";
 import { Grid, GridItem, VStack, Box } from "@chakra-ui/react";
 
-const WS_URL = "ws://127.0.0.1:7777/ws/100";
+const WS_URL = "ws://0.0.0.0:7777/ws/100";
 
 function App() {
   const [messageHistory, setMessageHistory] = useState([]);

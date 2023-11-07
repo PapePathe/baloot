@@ -1,7 +1,38 @@
-// @ts-check
 const { test, expect } = require('@playwright/test');
 
-test('game play', async ({ page }) => {
+test('game take carreau', async ({ page }) => {
+  await page.goto('http://localhost:3000');
+
+  const takingCards = await page.locator('#takingCards > div');
+  await expect(takingCards).toHaveCount(5)
+
+  const playingCards = await page.locator('#playingCards > div');
+  await expect(playingCards).toHaveCount(0)
+
+  const carreau = await page.getByRole('button', { name: 'Carreau' });
+  await carreau.click()
+
+  await expect(takingCards).toHaveCount(5)
+});
+
+test('game take coeur', async ({ page }) => {
+  await page.goto('http://localhost:3000');
+
+  const takingCards = await page.locator('#takingCards > div');
+  await expect(takingCards).toHaveCount(5)
+
+  const playingCards = await page.locator('#playingCards > div');
+  await expect(playingCards).toHaveCount(0)
+
+  const carreau = await page.getByRole('button', { name: 'Coeur' });
+  await carreau.click()
+
+  await expect(takingCards).toHaveCount(5)
+});
+
+
+
+test('game take tout', async ({ page }) => {
   await page.goto('http://localhost:3000');
   page.on('console', msg => {
     if (msg.type() === 'error') {
