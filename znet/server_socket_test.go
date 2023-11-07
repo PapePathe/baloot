@@ -73,7 +73,7 @@ func TestNewSocketHandler(t *testing.T) {
 	assert.Len(t, playMsg.Cards, 8)
 }
 
-func setupTestApp(port string) SocketApp {
+func setupTestApp(port string) {
 	s := NewSocketHandler()
 	app := NewSocketApp(port)
 
@@ -100,6 +100,4 @@ func setupTestApp(port string) SocketApp {
 	}()
 
 	<-readyCh
-
-	return app
 }
