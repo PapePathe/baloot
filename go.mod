@@ -12,6 +12,9 @@ require (
 	github.com/go-openapi/strfmt v0.21.7 // indirect
 	github.com/gofiber/contrib/websocket v1.2.2 // indirect
 	github.com/gofiber/fiber/v2 v2.50.0 // indirect
+	github.com/gofiber/template v1.8.2 // indirect
+	github.com/gofiber/template/html/v2 v2.0.5 // indirect
+	github.com/gofiber/utils v1.1.0 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/google/uuid v1.3.1 // indirect

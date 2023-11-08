@@ -49,6 +49,12 @@ func (s *SocketHandler) StartPlayerRegistration(c *websocket.Conn) {
 	}
 }
 
+func (s *SocketHandler) Index(c *fiber.Ctx) error {
+	return c.Render("views/index", fiber.Map{
+		"Title": "Hello, Your are in the playground!",
+	})
+}
+
 func (s *SocketHandler) Upgrade(c *fiber.Ctx) error {
 	if websocket.IsWebSocketUpgrade(c) {
 		fmt.Println("Socket neeeds upgrade")

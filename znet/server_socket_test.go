@@ -2,7 +2,9 @@ package znet
 
 import (
 	"encoding/json"
+	"fmt"
 	"net"
+	"net/http/httptest"
 	"testing"
 
 	"github.com/fasthttp/websocket"
@@ -10,21 +12,23 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"pathe.co/zinx/gametake"
+	"pathe.co/zinx/pkg/cards"
 	"pathe.co/zinx/pkg/game"
 )
 
-func TestNewSocketHandler2(t *testing.T) {
+func TestIndexPage(t *testing.T) {
 	t.Parallel()
 
-	setupTestApp("7778")
+	app := setupTestApp("7780")
+	req := httptest.NewRequest("GET", "/", nil)
+	resp, _ := app.app.Test(req, 1)
 
-	conn, resp, err := websocket.DefaultDialer.Dial("ws://localhost:7778/ws/gm100", nil)
+	assert.Equal(t, 200, resp.StatusCode)
+}
+
+func assertPlayerReceiveTakingHand(t *testing.T, i int, take string) *websocket.Conn {
+	conn, _, err := websocket.DefaultDialer.Dial("ws://localhost:7778/ws/gm100", nil)
 	require.NoError(t, err)
-
-	defer conn.Close()
-
-	assert.Equal(t, fiber.StatusSwitchingProtocols, resp.StatusCode)
-	assert.Equal(t, "websocket", resp.Header.Get("Upgrade"))
 
 	var msg game.ReceiveTakeHandMsg
 
@@ -32,6 +36,64 @@ func TestNewSocketHandler2(t *testing.T) {
 	require.NoError(t, err)
 	err = json.Unmarshal(rawmsg, &msg)
 	require.NoError(t, err)
+
+	clientMsg := fmt.Sprintf("{\"id\":\"2\",\"gametake\":\"%s\", \"player_id\":\"%d\"}", take, i)
+	err = conn.WriteMessage(websocket.TextMessage, []byte(clientMsg))
+	require.NoError(t, err)
+
+	assert.Len(t, msg.Player.Hand.Cards, 5)
+	assert.Equal(t, game.ReceiveTakeHand, msg.ID)
+	assert.Equal(t, gametake.AllTakeNames, msg.AvailableTakes)
+
+	return conn
+}
+
+func assertPlayerReceivesPlayingHand(t *testing.T, conn *websocket.Conn, take string) []cards.Card {
+	_, rawmsg, err := conn.ReadMessage()
+	require.NoError(t, err)
+
+	var playMsg game.ReceivePlayingHandMsg
+
+	err = json.Unmarshal(rawmsg, &playMsg)
+	require.NoError(t, err)
+	assert.Equal(t, game.ReceivePlayingHand, playMsg.ID)
+	assert.Equal(t, take, playMsg.Take)
+	assert.Len(t, playMsg.Cards, 8)
+
+	return playMsg.Cards
+}
+
+func TestNewSocketHandler2(t *testing.T) {
+	t.Parallel()
+
+	setupTestApp("7778")
+
+	takes := []string{"Trefle", "Carreau", "Passe", "Cent"}
+	conns := []*websocket.Conn{}
+	playerCards := make([][]cards.Card, 4)
+
+	for i := 0; i < 4; i++ {
+		t.Run(fmt.Sprintf("start new player connection %d", i), func(t *testing.T) {
+			c := assertPlayerReceiveTakingHand(t, i, takes[i])
+			conns = append(conns, c)
+		})
+	}
+
+	for i := 0; i < 4; i++ {
+		t.Run(fmt.Sprintf("receive playing hand %d", i), func(t *testing.T) {
+			playerCards[i] = assertPlayerReceivesPlayingHand(t, conns[i], takes[3])
+		})
+	}
+
+	for i := 0; i < 4; i++ {
+		conn := conns[i]
+
+		cardToPlay := playerCards[i][0]
+
+		clientMsg := fmt.Sprintf("{\"id\":\"4\",\"genre\":\"%s\",\"color\":\"%s\", \"player_id\":\"%d\"}", cardToPlay.Genre, cardToPlay.Couleur, i)
+		err := conn.WriteMessage(websocket.TextMessage, []byte(clientMsg))
+		require.NoError(t, err)
+	}
 }
 
 func TestNewSocketHandler(t *testing.T) {
@@ -58,7 +120,8 @@ func TestNewSocketHandler(t *testing.T) {
 	assert.Equal(t, game.ReceiveTakeHand, msg.ID)
 	assert.Equal(t, gametake.AllTakeNames, msg.AvailableTakes)
 
-	err = conn.WriteMessage(websocket.TextMessage, []byte("{\"id\":\"2\",\"gametake\":\"Tout\", \"player_id\":\"0\"}"))
+	clientMsg := "{\"id\":\"2\",\"gametake\":\"Tout\", \"player_id\":\"0\"}"
+	err = conn.WriteMessage(websocket.TextMessage, []byte(clientMsg))
 	require.NoError(t, err)
 
 	_, rawmsg, err = conn.ReadMessage()
@@ -73,7 +136,7 @@ func TestNewSocketHandler(t *testing.T) {
 	assert.Len(t, playMsg.Cards, 8)
 }
 
-func setupTestApp(port string) {
+func setupTestApp(port string) SocketApp {
 	s := NewSocketHandler()
 	app := NewSocketApp(port)
 
@@ -84,7 +147,7 @@ func setupTestApp(port string) {
 
 	go func() {
 		for {
-			conn, err := net.Dial("tcp", "localhost:7777")
+			conn, err := net.Dial("tcp", fmt.Sprintf("localhost:%s", port))
 			if err != nil {
 				continue
 			}
@@ -100,4 +163,6 @@ func setupTestApp(port string) {
 	}()
 
 	<-readyCh
+
+	return app
 }
