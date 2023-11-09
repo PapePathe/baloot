@@ -1,10 +1,15 @@
 package znet
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
 	"strconv"
+	"time"
+
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/gofiber/contrib/websocket"
 	"github.com/gofiber/fiber/v2"
@@ -12,14 +17,23 @@ import (
 	"pathe.co/zinx/pkg/cards"
 	"pathe.co/zinx/pkg/game"
 	"pathe.co/zinx/pkg/player"
+	gt_proto "pathe.co/zinx/proto/gametake_history/v1"
 )
 
 type SocketHandler struct {
-	g *game.Game
+	g                  *game.Game
+	gTakeHistoryClient gt_proto.GameTakeHistoryClient
 }
 
 func NewSocketHandler() SocketHandler {
-	return SocketHandler{g: game.NewGame()}
+	conn, err := grpc.Dial("localhost:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		log.Fatalf("did not connect: %v", err)
+	}
+
+	cli := gt_proto.NewGameTakeHistoryClient(conn)
+
+	return SocketHandler{g: game.NewGame(), gTakeHistoryClient: cli}
 }
 
 func (s *SocketHandler) StartPlayerRegistration(c *websocket.Conn) {
@@ -109,6 +123,36 @@ func (s *SocketHandler) Handle(c *websocket.Conn) {
 	}
 }
 
+func (s *SocketHandler) saveTakeHistory(pid int) error {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+
+	cards := []*gt_proto.Card{}
+	for _, c := range s.g.GetPlayers()[pid].Hand.Cards {
+		cards = append(cards, &gt_proto.Card{Type: c.Genre, Color: c.Couleur})
+	}
+
+	playerTakes := []string{}
+	for _, p := range s.g.GetPlayers() {
+		if p != nil && p.GetID() != pid && p.Take != nil {
+			playerTakes = append(playerTakes, (*p.Take).Name())
+		}
+	}
+	resp, err := s.gTakeHistoryClient.Add(ctx, &gt_proto.GameTakeHistoryRequest{
+		Constraints: playerTakes,
+		Take:        (*s.g.GetPlayers()[pid].Take).Name(),
+		Cards:       cards,
+	})
+
+	if err != nil {
+		return err
+	}
+
+	log.Printf("Greeting: %s", resp)
+
+	return nil
+}
+
 func (s *SocketHandler) HandlePlayerTake(_ *websocket.Conn, obj map[string]string) {
 	id, _ := strconv.Atoi(obj["id"])
 	pid, _ := strconv.Atoi(obj["player_id"])
@@ -121,6 +165,12 @@ func (s *SocketHandler) HandlePlayerTake(_ *websocket.Conn, obj map[string]strin
 	}
 
 	err := s.g.AddTake(pid, tk)
+
+	if err != nil {
+		log.Println("error adding take", err.Error())
+	}
+
+	err = s.saveTakeHistory(pid)
 
 	if err != nil {
 		log.Println("error adding take", err.Error())
