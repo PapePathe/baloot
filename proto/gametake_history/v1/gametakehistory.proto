@@ -1,0 +1,24 @@
+syntax = 'proto3';
+option go_package="zinx/proto";
+
+
+package proto.gametake_history.v1;
+
+message Card {
+  string type = 1;
+  string color = 2;
+}
+
+message GameTakeHistoryRequest {
+  repeated string constraints = 1;
+  string take = 2;
+  repeated Card cards = 3;
+}
+
+message GameTakeHistoryResponse {
+  string response = 1;
+}
+
+service GameTakeHistory {
+  rpc Add(GameTakeHistoryRequest) returns (GameTakeHistoryResponse);
+}

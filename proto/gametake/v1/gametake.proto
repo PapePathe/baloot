@@ -16,7 +16,6 @@ message Card {
   string color = 2;
 }
 
-
 message RecommendGameTakeRequest{
   repeated Card cards = 1;
 }
@@ -38,3 +37,5 @@ service GameTakeLearning {
   rpc GetHand(GametakeRequest) returns (GametakeResponse);
   rpc RecommendGameTake(RecommendGameTakeRequest) returns (RecommendGameTakeRequest);
 }
+
+
