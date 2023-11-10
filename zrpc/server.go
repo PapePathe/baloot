@@ -19,7 +19,8 @@ func NewZGrpcServer(port int) (*ZGrpcServer, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to listen: %v", err)
 	}
-	s := grpc.NewServer()
+	logger := grpc.UnaryInterceptor(GrpcLogger)
+	s := grpc.NewServer(logger)
 
 	return &ZGrpcServer{Listener: lis, Server: s}, nil
 }

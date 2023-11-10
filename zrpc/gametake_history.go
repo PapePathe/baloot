@@ -3,8 +3,9 @@ package zrpc
 import (
 	"context"
 	"errors"
-	"fmt"
 	"time"
+
+	"github.com/rs/zerolog/log"
 
 	"pathe.co/zinx/pkg/cards"
 	proto "pathe.co/zinx/proto/gametake_history/v1"
@@ -40,18 +41,18 @@ func NewGameTakeHistoryServer() *GameTakeHistoryServer {
 var ErrInvalidCardsCount = errors.New("must have 5 cards")
 
 func (gh GameTakeHistoryServer) Add(ctx context.Context, req *proto.GameTakeHistoryRequest) (*proto.GameTakeHistoryResponse, error) {
-	fmt.Println(req)
-
 	if len(req.Cards) < 5 {
 		return &proto.GameTakeHistoryResponse{}, ErrInvalidCardsCount
 	}
+
+	log.Debug().Msg("adding a new take history")
 
 	gh.addToHistory(req)
 
 	return &proto.GameTakeHistoryResponse{Response: time.Now().String()}, nil
 }
 
-func (gh GameTakeHistoryServer) addToHistory(req *proto.GameTakeHistoryRequest) error {
+func (gh GameTakeHistoryServer) addToHistory(req *proto.GameTakeHistoryRequest) {
 	h := TakeHistory{
 		Take:        req.Take,
 		Constraints: []string{},
@@ -63,8 +64,5 @@ func (gh GameTakeHistoryServer) addToHistory(req *proto.GameTakeHistoryRequest) 
 
 	gh.store.Add(h)
 
-	fmt.Println(len(gh.store.collection))
-	fmt.Println(gh.store.collection[0])
-
-	return nil
+	log.Info().Int("Collection length", len(gh.store.collection))
 }
