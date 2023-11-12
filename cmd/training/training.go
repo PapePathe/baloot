@@ -1,11 +1,18 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"strings"
+	"time"
+
+	gt_proto "pathe.co/zinx/proto/gametake_history/v1"
 
 	"github.com/segmentio/kafka-go"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"pathe.co/zinx/gametake"
 	"pathe.co/zinx/pkg/broker"
 	"pathe.co/zinx/pkg/cards"
@@ -14,24 +21,25 @@ import (
 )
 
 func main() {
-	for {
+	conn, err := grpc.Dial("localhost:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
+		if err != nil {
+			log.Println("did not connect to gametake history service: ", err)
+		}
+	for  {
 		g := newSampleGame()
-		playerTakes(g)
+		playerTakes(g, conn)
 		fmt.Println(g.GetTake().Name())
-
-		err := g.DispatchCards()
-		fmt.Println(err)
 
 		for _, p := range g.GetPlayers() {
 			fmt.Println(p.OrderedCardsForPlaying(g.GetTake()))
 		}
 
-		fmt.Scanf("Hey")
+		//		fmt.Scanf("Hey")
 		fmt.Println("\n\n\n -------------")
 	}
 }
 
-func playerTakes(g *game.Game) []constrainedTake {
+func playerTakes(g *game.Game, conn *grpc.ClientConn) []constrainedTake {
 	_ptk := []gametake.GameTake{}
 	kakfaMessages := []kafka.Message{}
 	publisher := broker.NewPublisher([]string{"localhost:9092", "localhost:9093", "localhost:9093"}, true)
@@ -65,6 +73,36 @@ func playerTakes(g *game.Game) []constrainedTake {
 		ctk.Takes = append(ctk.Takes, _ptk...)
 		_ptk = append(_ptk, *playerObj.Take)
 		takes = append(takes, ctk)
+
+		
+
+		cli := gt_proto.NewGameTakeHistoryClient(conn)
+		ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+		defer cancel()
+
+		crds := []*gt_proto.Card{}
+		for _, c := range playerObj.Hand.Cards {
+			crds = append(crds, &gt_proto.Card{Type: c.Genre, Color: c.Couleur})
+		}
+
+		playerTakes := []string{}
+		for _, p := range g.GetPlayers() {
+			if p != nil && p.GetID() != playerObj.GetID() && p.Take != nil {
+				playerTakes = append(playerTakes, (*p.Take).Name())
+			}
+		}
+		resp, err := cli.Add(ctx, &gt_proto.GameTakeHistoryRequest{
+			Constraints: playerTakes,
+			Take:        (*playerObj.Take).Name(),
+			Cards:       crds,
+		})
+
+		if err != nil {
+			log.Printf("Error calling rpc: %s", err)
+		}
+
+		log.Printf("Greeting: %s", resp)
+
 	}
 
 	err := publisher.Publish(kakfaMessages)

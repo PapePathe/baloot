@@ -9,27 +9,35 @@ import (
 )
 
 type ZGrpcServer struct {
-	Listener net.Listener
-	Server   *grpc.Server
+	Listeners []net.Listener
+	Server    *grpc.Server
+	Backends  []*grpc.Server
 }
 
-func NewZGrpcServer(port int) (*ZGrpcServer, error) {
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
-
-	if err != nil {
-		return nil, fmt.Errorf("failed to listen: %v", err)
-	}
+func NewZGrpcServer(ports []int) (*ZGrpcServer, error) {
 	logger := grpc.UnaryInterceptor(GrpcLogger)
-	s := grpc.NewServer(logger)
+	backends := []*grpc.Server{}
+	listeners := []net.Listener{}
+	for _, port := range ports {
+		lis, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 
-	return &ZGrpcServer{Listener: lis, Server: s}, nil
+		if err != nil {
+			return nil, fmt.Errorf("failed to listen: %v", err)
+		}
+		listeners = append(listeners, lis)
+		backends = append(backends, grpc.NewServer(logger))
+	}
+
+	return &ZGrpcServer{Listeners: listeners, Backends: backends}, nil
 }
 
 func (z ZGrpcServer) Start() error {
-	log.Println("Starting rpc server")
+	log.Println("Starting rpc servers")
 
-	if err := z.Server.Serve(z.Listener); err != nil {
-		return fmt.Errorf("failed to start rpc server : %v", err)
+	for i, b := range z.Backends {
+		if err := b.Serve(z.Listeners[i]); err != nil {
+			return fmt.Errorf("failed to start rpc server : %v", err)
+		}
 	}
 
 	return nil

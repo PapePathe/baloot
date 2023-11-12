@@ -5,6 +5,8 @@ import (
 	"errors"
 	"time"
 
+	"sync"
+
 	"github.com/rs/zerolog/log"
 
 	"pathe.co/zinx/pkg/cards"
@@ -47,22 +49,25 @@ func (gh GameTakeHistoryServer) Add(ctx context.Context, req *proto.GameTakeHist
 
 	log.Debug().Msg("adding a new take history")
 
-	gh.addToHistory(req)
+	wg := sync.WaitGroup{}
+
+	wg.Add(1)
+	go gh.addToHistory(req, &wg)
+
+	wg.Wait()
 
 	return &proto.GameTakeHistoryResponse{Response: time.Now().String()}, nil
 }
 
-func (gh GameTakeHistoryServer) addToHistory(req *proto.GameTakeHistoryRequest) {
-	h := TakeHistory{
-		Take:        req.Take,
-		Constraints: []string{},
-	}
+func (gh GameTakeHistoryServer) addToHistory(req *proto.GameTakeHistoryRequest, wg *sync.WaitGroup) {
+	defer wg.Done()
+
+	h := TakeHistory{Take: req.Take, Constraints: []string{}}
 
 	for _, c := range req.Constraints {
 		h.Constraints = append(h.Constraints, c)
 	}
 
 	gh.store.Add(h)
-
 	log.Info().Int("Collection length", len(gh.store.collection))
 }
