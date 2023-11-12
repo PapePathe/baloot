@@ -3,14 +3,6 @@ option go_package="zinx/proto";
 
 package proto.gametake.v1;
 
-message GametakeRequest {
-  string id = 1;
-}
-
-message GametakeResponse {
-  repeated Card cards = 1;
-}
-
 message Card {
   string type = 1;
   string color = 2;
@@ -34,8 +26,5 @@ message RecommendedGameTake {
 }
 
 service GameTakeLearning {
-  rpc GetHand(GametakeRequest) returns (GametakeResponse);
-  rpc RecommendGameTake(RecommendGameTakeRequest) returns (RecommendGameTakeRequest);
+  rpc RecommendGameTake(RecommendGameTakeRequest) returns (RecommendGameTakeResponse);
 }
-
-
