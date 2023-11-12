@@ -3,9 +3,10 @@ package zrpc
 import (
 	"context"
 
-	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"pathe.co/zinx/gametake"
+	"pathe.co/zinx/pkg/cards"
 	proto "pathe.co/zinx/proto/gametake/v1"
 )
 
@@ -21,11 +22,28 @@ func (s *RecommendGameTakeServer) RecommendGameTake(
 	ctx context.Context,
 	req *proto.RecommendGameTakeRequest,
 ) (*proto.RecommendGameTakeResponse, error) {
-	log.Debug().Interface("Cards", req.Cards).Msg("")
-
 	if len(req.Cards) != 5 {
 		return &proto.RecommendGameTakeResponse{}, status.Errorf(codes.InvalidArgument, "Cards must be a collection of 5 items")
 	}
 
-	return &proto.RecommendGameTakeResponse{}, nil
+	hCards := [5]cards.Card{}
+	for i, c := range req.Cards {
+		hCards[i] = cards.Card{Genre: c.Type, Couleur: c.Color}
+	}
+
+	response := proto.RecommendGameTakeResponse{}
+
+	for _, gt := range gametake.AllTakes {
+		res := gt.EvaluateHand(hCards)
+		flags := []*proto.Flag{}
+		for _, f := range res.Flags {
+			flags = append(flags, &proto.Flag{Name: f.String()})
+		}
+		response.AvailableTakes = append(response.AvailableTakes, &proto.RecommendedGameTake{
+			Take:  gt.Name(),
+			Flags: flags,
+		})
+	}
+
+	return &response, nil
 }
