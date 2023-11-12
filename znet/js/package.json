@@ -4,13 +4,31 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "esbuild baloot/index.js --bundle --outfile=../../public/baloot.js --loader:.js=jsx --format=cjs"
+    "build": "esbuild baloot/index.js --bundle --outfile=../../public/baloot.js --loader:.js=jsx --format=cjs",
+    "storybook": "storybook dev --debug-webpack -p 6006",
+    "build-storybook": "storybook build"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "esbuild": "^0.19.5"
+    "@chakra-ui/storybook-addon": "^5.0.1",
+    "@storybook/addon-essentials": "^7.5.3",
+    "@storybook/addon-interactions": "^7.5.3",
+    "@storybook/addon-links": "^7.5.3",
+    "@storybook/addon-onboarding": "^1.0.8",
+    "@storybook/blocks": "^7.5.3",
+    "@storybook/preset-create-react-app": "^7.5.3",
+    "@storybook/react": "^7.5.3",
+    "@storybook/react-webpack5": "^7.5.3",
+    "@storybook/testing-library": "^0.2.2",
+    "babel-core": "^7.0.0-bridge.0",
+    "babel-loader": "^9.1.3",
+    "babel-plugin-named-exports-order": "^0.0.2",
+    "esbuild": "^0.19.5",
+    "prop-types": "^15.8.1",
+    "storybook": "^7.5.3",
+    "webpack": "^5.89.0"
   },
   "dependencies": {
     "@chakra-ui/react": "^2.8.1",
