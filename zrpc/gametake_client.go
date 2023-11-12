@@ -7,6 +7,7 @@ import (
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"pathe.co/zinx/pkg/cards"
 	gt_proto "pathe.co/zinx/proto/gametake/v1"
 )
 
@@ -21,8 +22,6 @@ func NewZGrpcClient(scheme, serviceName string, addrs []string) (*ZGrpcClient, e
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 
-	fmt.Println(conn)
-
 	if err != nil {
 		return nil, err
 	}
@@ -36,13 +35,15 @@ func (c ZGrpcClient) Send() error {
 
 	defer cancel()
 
+	set := cards.CardSet{Cards: cards.CardSet{}.Distribute()}
+	hand := set.Serve()
 	resp, err := cli.RecommendGameTake(ctx, &gt_proto.RecommendGameTakeRequest{
 		Cards: []*gt_proto.Card{
-			&gt_proto.Card{Type: "V", Color: "Pique"},
-			&gt_proto.Card{Type: "V", Color: "Pique"},
-			&gt_proto.Card{Type: "V", Color: "Pique"},
-			&gt_proto.Card{Type: "V", Color: "Pique"},
-			&gt_proto.Card{Type: "V", Color: "Pique"},
+			&gt_proto.Card{Type: hand[0].Genre, Color: hand[0].Couleur},
+			&gt_proto.Card{Type: hand[1].Genre, Color: hand[1].Couleur},
+			&gt_proto.Card{Type: hand[2].Genre, Color: hand[2].Couleur},
+			&gt_proto.Card{Type: hand[3].Genre, Color: hand[3].Couleur},
+			&gt_proto.Card{Type: hand[4].Genre, Color: hand[4].Couleur},
 		},
 	})
 
@@ -50,9 +51,10 @@ func (c ZGrpcClient) Send() error {
 		return err
 	}
 
-	fmt.Println(resp)
-	resp, err = cli.RecommendGameTake(ctx, &gt_proto.RecommendGameTakeRequest{})
-	fmt.Println(resp)
+	fmt.Println(hand)
+	for _, recommandation := range resp.AvailableTakes {
+		fmt.Println(recommandation)
+	}
 
 	return nil
 }
