@@ -21,10 +21,23 @@ type flag struct {
 	name string
 }
 
+func (f flag) String() string {
+	return f.name
+}
+
 var (
-	FlagTwoValets = flag{"two-valets"}
-	FlagTwoAces   = flag{"two-aces"}
-	Flag34Color   = flag{"two-valets"}
+	FlagValetOfColor    = flag{"valet-of-color"}
+	FlagTwoValets       = flag{"two-valets"}
+	FlagTwoAces         = flag{"two-aces"}
+	FlagNoAce           = flag{"no-ace"}
+	FlagNoValet         = flag{"no-valet"}
+	FlagNoTen           = flag{"no-ten"}
+	FlagNineOfColor     = flag{"nine-of-color"}
+	FlagAceOfOtherColor = flag{"ace-of-other-color"}
+	FlagAceOfColor      = flag{"ace-of-color"}
+	FlagOneAce          = flag{"one-ace"}
+	FlagOneValet        = flag{"one-valet"}
+	Flag34Color         = flag{"34-color"}
 )
 
 func NewGameTakeEntry() GameTakeEntry {

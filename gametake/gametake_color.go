@@ -59,15 +59,28 @@ func (t ColorTake) parseCard(gt *GameTakeEntry, c cards.Card) {
 	if sameColor {
 		gt.PlayerCardsOfTakeValue += value
 		gt.AllPlayerCardsValue += value
+
+		if c.IsValet() {
+			gt.Flags[FlagValetOfColor.name] = FlagValetOfColor
+		}
+
+		if c.IsNine() {
+			gt.Flags[FlagNineOfColor.name] = FlagNineOfColor
+		}
+
 	} else {
 		gt.OtherCardsValue += value
 		gt.AllPlayerCardsValue += value
+
+		if c.IsAce() {
+			gt.Flags[FlagAceOfOtherColor.name] = FlagAceOfOtherColor
+		}
 	}
 }
 
 func (t ColorTake) EvaluateCard(card cards.Card) (int, bool) {
 	if card.Couleur == t.Couleur {
-		return evaluateCardOfColor(card.Genre), false
+		return evaluateCardOfColor(card.Genre), true
 	}
 
 	return evaluateCardOfOtherColor(card.Genre), false

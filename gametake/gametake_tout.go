@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/rs/zerolog/log"
 	"pathe.co/zinx/pkg/cards"
 )
 
@@ -37,20 +38,39 @@ func (t Tout) EvaluateDeck(cards [4]cards.Card) int {
 	return result
 }
 
-func (t Tout) EvaluateHand(cards [5]cards.Card) GameTakeEntry {
+func (t Tout) EvaluateHand(hand [5]cards.Card) GameTakeEntry {
 	result := 0
-	valetsCount := 0
+	valets, nines, aces := []cards.Card{}, []cards.Card{}, []cards.Card{}
 	entry := NewGameTakeEntry()
 
-	for _, c := range cards {
+	for _, c := range hand {
 		if c.IsValet() {
-			valetsCount++
-			if valetsCount == 2 {
+			valets = append(valets, c)
+
+			if len(valets) == 2 {
 				entry.Flags[FlagTwoValets.name] = FlagTwoValets
 			}
+			log.Debug().Int("nombre valets", len(valets)).Msg("")
+		}
+
+		if c.IsNine() {
+			nines = append(nines, c)
+		}
+
+		if c.IsAce() {
+			aces = append(aces, c)
+			log.Debug().Int("nombre aces", len(aces)).Msg("")
 		}
 
 		result += t.parseCard(c)
+	}
+
+	if 0 == len(valets) {
+		entry.Flags[FlagNoValet.name] = FlagNoValet
+	}
+
+	if 1 == len(valets) {
+		entry.Flags[FlagOneValet.name] = FlagOneValet
 	}
 
 	entry.AllCardsValue = t.AllCardsValue

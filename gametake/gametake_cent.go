@@ -52,6 +52,14 @@ func (t Cent) EvaluateHand(cards [5]cards.Card) GameTakeEntry {
 		}
 	}
 
+	if 0 == acesCount {
+		entry.Flags[FlagNoAce.name] = FlagNoAce
+	}
+
+	if 1 == acesCount {
+		entry.Flags[FlagOneAce.name] = FlagOneAce
+	}
+
 	entry.CardsOfTakeValue = t.AllCardsValue
 	entry.AllCardsValue = t.AllCardsValue
 	entry.PlayerCardsOfTakeValue = result
