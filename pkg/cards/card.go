@@ -42,6 +42,16 @@ type CardSet struct {
 	Cards [32]Card
 }
 
+func (j CardSet) Serve() [5]Card {
+	set := [5]Card{}
+
+	for i := 0; i < 5; i++ {
+		set[i] = j.Cards[i]
+	}
+
+	return set
+}
+
 func (j CardSet) Distribute() [32]Card {
 	rand.New(rand.NewSource(time.Now().UnixNano()))
 
