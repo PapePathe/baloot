@@ -3,11 +3,12 @@ package znet
 import (
 	"context"
 	"encoding/json"
-	"fmt"
-	"log"
+	"os"
 	"strconv"
 	"time"
 
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	gt_proto "pathe.co/zinx/proto/gametake_history/v1"
@@ -20,6 +21,10 @@ import (
 	"pathe.co/zinx/pkg/player"
 )
 
+func init() {
+	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
+}
+
 type SocketHandler struct {
 	g                  *game.Game
 	gTakeHistoryClient gt_proto.GameTakeHistoryClient
@@ -28,7 +33,7 @@ type SocketHandler struct {
 func NewSocketHandler() SocketHandler {
 	conn, err := grpc.Dial("localhost:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		log.Println("did not connect to gametake history service: ", err)
+		log.Error().Err(err).Msg("did not connect to gametake history service")
 	}
 
 	cli := gt_proto.NewGameTakeHistoryClient(conn)
@@ -37,28 +42,28 @@ func NewSocketHandler() SocketHandler {
 }
 
 func (s *SocketHandler) StartPlayerRegistration(c *websocket.Conn) {
-	log.Println("starting player registration")
+	log.Debug().Msg("starting player registration")
 
 	if s.g.NombreJoueurs < 4 {
-		log.Println("adding new player")
+		log.Debug().Msg("adding new player")
 
 		p := player.NewPlayer()
 		p.Conn = c
 		err := s.g.AddPlayer(p)
 
 		if err != nil {
-			log.Println("error adding player : ", err)
+			log.Warn().Err(err).Msg("error adding player : ")
 		}
 
 		r := game.ReceiveTakeHandEvt(*p, gametake.AllTakeNames)
 		m, err := json.Marshal(r)
 
 		if err != nil {
-			log.Println("marshaling take hand msg", err)
+			log.Error().Err(err).Msg("marshaling take hand msg")
 		}
 
 		if err := c.WriteMessage(1, m); err != nil {
-			log.Println("write:", err)
+			log.Error().Err(err).Msg("error writing message to socket")
 		}
 	}
 }
@@ -71,7 +76,7 @@ func (s *SocketHandler) Index(c *fiber.Ctx) error {
 
 func (s *SocketHandler) Upgrade(c *fiber.Ctx) error {
 	if websocket.IsWebSocketUpgrade(c) {
-		fmt.Println("Socket neeeds upgrade")
+		log.Debug().Msg("Socket neeeds upgrade")
 		c.Locals("allowed", true)
 
 		return c.Next()
@@ -81,7 +86,7 @@ func (s *SocketHandler) Upgrade(c *fiber.Ctx) error {
 }
 
 func (s *SocketHandler) Handle(c *websocket.Conn) {
-	fmt.Println("Start new connection handler")
+	log.Debug().Msg("Start new connection handler")
 	s.StartPlayerRegistration(c)
 
 	var (
@@ -92,28 +97,26 @@ func (s *SocketHandler) Handle(c *websocket.Conn) {
 
 	for {
 		if mt, msg, err = c.ReadMessage(); err != nil {
-			log.Println("error reading message:", err)
+			log.Error().Err(err).Msg("error reading message:")
 
 			break
 		}
 
-		log.Printf("recv: %s %d", msg, mt)
+		log.Debug().Str("Message", string(msg)).Int("MessageType", mt).Msg("")
 
 		obj := map[string]string{}
 		err = json.Unmarshal(msg, &obj)
 
 		if err != nil {
-			log.Println(err)
+			log.Error().Err(err).Msg("")
 
 			break
 		}
 
-		log.Println(obj)
-
 		id, _ := strconv.Atoi(obj["id"])
 
 		if id == 2 {
-			log.Println("handling player take")
+			log.Debug().Msg("handling player take")
 			s.HandlePlayerTake(c, obj)
 		}
 
@@ -148,7 +151,7 @@ func (s *SocketHandler) saveTakeHistory(pid int) error {
 		return err
 	}
 
-	log.Printf("Greeting: %s", resp)
+	log.Info().Str("Save take history response", resp.String())
 
 	return nil
 }
@@ -159,7 +162,7 @@ func (s *SocketHandler) HandlePlayerTake(_ *websocket.Conn, obj map[string]strin
 	tk, ok := gametake.AllTakesByName[obj["gametake"]]
 
 	if !ok {
-		log.Println("could not find gametake", obj["gametake"])
+		log.Error().Str("GameTake", obj["gametake"]).Msg("could not find gametake")
 
 		return
 	}
@@ -167,7 +170,7 @@ func (s *SocketHandler) HandlePlayerTake(_ *websocket.Conn, obj map[string]strin
 	err := s.g.AddTake(pid, tk)
 
 	if err != nil {
-		log.Println("error adding take", err.Error())
+		log.Error().Err(err).Msg("error adding take")
 
 		return
 	}
@@ -175,23 +178,25 @@ func (s *SocketHandler) HandlePlayerTake(_ *websocket.Conn, obj map[string]strin
 	err = s.saveTakeHistory(pid)
 
 	if err != nil {
-		log.Println("error adding take", err.Error())
+		log.Error().Err(err).Msg("error saving take history")
 	}
 
 	if !s.g.TakesFinished {
-		log.Println("Takes are not finished yet")
+		log.Debug().Msg("Takes are not finished yet")
 
-		return
+		//		return
 	}
 
-	s.broadcastPlayerTake(id, obj)
+	s.broadcastPlayerTake(id, obj, tk)
 }
 
-func (s *SocketHandler) broadcastPlayerTake(id int, obj map[string]string) {
+func (s *SocketHandler) broadcastPlayerTake(id int, obj map[string]string, tk gametake.GameTake) {
 	takes := []string{}
 
 	for _, t := range s.g.AvailableTakes() {
-		takes = append(takes, t.Name())
+		if t == gametake.PASSE || t.GreaterThan(tk) {
+			takes = append(takes, t.Name())
+		}
 	}
 
 	b := game.BroadcastPlayerTakeEvt(obj["gametake"], id, takes)
@@ -200,11 +205,11 @@ func (s *SocketHandler) broadcastPlayerTake(id int, obj map[string]string) {
 		if p != nil {
 			m, err := json.Marshal(b)
 			if err != nil {
-				fmt.Println(err)
+				log.Error().Err(err).Msg("error marshaling broadcast take event")
 			}
 
 			if err := p.Conn.WriteMessage(1, m); err != nil {
-				log.Println("write:", err)
+				log.Error().Err(err).Msg("")
 			}
 		}
 	}
@@ -216,7 +221,7 @@ func (s *SocketHandler) HandlePlayerCard(_ *websocket.Conn, obj map[string]strin
 
 	err := s.g.PlayCardNext(pid, card)
 	if err != nil {
-		log.Println(err.Error())
+		log.Error().Err(err).Msg("error playing card")
 	}
 
 	deck, _ := s.g.CurrentDeck()
@@ -226,10 +231,13 @@ func (s *SocketHandler) HandlePlayerCard(_ *websocket.Conn, obj map[string]strin
 			scoreTeamA, scoreTeamB := s.g.Score()
 			b := game.ReceiveDeckEvt(*p, deck, scoreTeamA, scoreTeamB)
 			m, err := json.Marshal(b)
-			fmt.Println(err)
+
+			if err != nil {
+				log.Error().Err(err).Msg("error marshaling player to json")
+			}
 
 			if err := p.Conn.WriteMessage(1, m); err != nil {
-				log.Println("write:", err)
+				log.Error().Err(err).Msg("error socket msg to socket")
 			}
 		}
 	}
