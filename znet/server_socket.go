@@ -10,6 +10,7 @@ import (
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	gt_proto "pathe.co/zinx/proto/gametake_history/v1"
 
 	"github.com/gofiber/contrib/websocket"
 	"github.com/gofiber/fiber/v2"
@@ -17,7 +18,6 @@ import (
 	"pathe.co/zinx/pkg/cards"
 	"pathe.co/zinx/pkg/game"
 	"pathe.co/zinx/pkg/player"
-	gt_proto "pathe.co/zinx/proto/gametake_history/v1"
 )
 
 type SocketHandler struct {
@@ -28,7 +28,7 @@ type SocketHandler struct {
 func NewSocketHandler() SocketHandler {
 	conn, err := grpc.Dial("localhost:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		log.Fatalf("did not connect: %v", err)
+		log.Println("did not connect to gametake history service: ", err)
 	}
 
 	cli := gt_proto.NewGameTakeHistoryClient(conn)
@@ -168,6 +168,8 @@ func (s *SocketHandler) HandlePlayerTake(_ *websocket.Conn, obj map[string]strin
 
 	if err != nil {
 		log.Println("error adding take", err.Error())
+
+		return
 	}
 
 	err = s.saveTakeHistory(pid)
@@ -182,6 +184,10 @@ func (s *SocketHandler) HandlePlayerTake(_ *websocket.Conn, obj map[string]strin
 		return
 	}
 
+	s.broadcastPlayerTake(id, obj)
+}
+
+func (s *SocketHandler) broadcastPlayerTake(id int, obj map[string]string) {
 	takes := []string{}
 
 	for _, t := range s.g.AvailableTakes() {
