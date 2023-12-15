@@ -13,7 +13,7 @@ import (
 	"pathe.co/zinx/zrpc"
 )
 
-var port = flag.Int("port", 50051, "The server port")
+var port = flag.Int("port", 50052, "The server port")
 
 func main() {
 	flag.Parse()
