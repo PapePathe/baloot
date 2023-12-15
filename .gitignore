@@ -2,3 +2,6 @@ coverage.out
 public/*.js
 public/*.css
 znet/js/node_modules/
+.DS_Store
+public/*.js
+public/*.js*
