@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/gofiber/contrib/websocket"
@@ -29,7 +30,9 @@ func NewSocketApp(port string) SocketApp {
 		ViewsLayout: "views/layouts/main",
 	})
 
-	app.Static("/assets", "./public", fiber.Static{
+	staticPath := os.Getenv("ZINX_STATIC_PATH")
+
+	app.Static("/assets", staticPath, fiber.Static{
 		CacheDuration: 10 * time.Second,
 		Compress:      true,
 		MaxAge:        3600,

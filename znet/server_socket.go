@@ -31,7 +31,8 @@ type SocketHandler struct {
 }
 
 func NewSocketHandler() SocketHandler {
-	conn, err := grpc.Dial("localhost:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	takesSvcAddr := os.Getenv("ZINX_TAKES_SERVER")
+	conn, err := grpc.Dial(takesSvcAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Error().Err(err).Msg("did not connect to gametake history service")
 	}
@@ -178,13 +179,11 @@ func (s *SocketHandler) HandlePlayerTake(_ *websocket.Conn, obj map[string]strin
 	err = s.saveTakeHistory(pid)
 
 	if err != nil {
-		log.Error().Err(err).Msg("error saving take history")
+		log.Error().Err(err).Caller().Msg("error saving take history")
 	}
 
 	if !s.g.TakesFinished {
-		log.Debug().Msg("Takes are not finished yet")
-
-		//		return
+		log.Trace().Msg("Takes are not finished yet")
 	}
 
 	s.broadcastPlayerTake(id, obj, tk)
