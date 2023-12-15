@@ -2,7 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
 import App from "./App";
-import reportWebVitals from "./reportWebVitals";
+// import reportWebVitals from "./reportWebVitals";
 import { ChakraProvider } from "@chakra-ui/react";
 
 document.addEventListener("DOMContentLoaded", function(event) {
@@ -16,5 +16,5 @@ document.addEventListener("DOMContentLoaded", function(event) {
     </ChakraProvider>,
   );
 
-  reportWebVitals(console.log);
+//  reportWebVitals(console.log);
 });

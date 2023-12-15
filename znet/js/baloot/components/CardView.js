@@ -65,13 +65,13 @@ function CardView({
   );
 }
 
-CardView.PropTypes = {
+CardView.propTypes = {
   Genre: PropTypes.string.isRequired,
   Couleur: PropTypes.string.isRequired,
   onDragStart: PropTypes.func,
   onDragEnter: PropTypes.func,
   onDragEnd: PropTypes.func,
-  onClick: PropTypes.string.func,
+  onClick: PropTypes.func,
   width: PropTypes.number,
   height: PropTypes.number,
 }
