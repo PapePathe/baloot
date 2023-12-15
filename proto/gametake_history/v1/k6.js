@@ -18,7 +18,7 @@ export const options = {
 };
 
 export default () => {
-  client.connect('localhost:50051', {
+  client.connect('localhost:50052', {
      plaintext: true
   });
 
