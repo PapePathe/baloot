@@ -31,7 +31,11 @@ type SocketHandler struct {
 }
 
 func NewSocketHandler() SocketHandler {
-	takesSvcAddr := os.Getenv("ZINX_TAKES_SERVER")
+	takesSvcAddr := "localhost:50052"
+	if os.Getenv("ZINX_TAKES_SERVER") != "" {
+		takesSvcAddr = os.Getenv("ZINX_TAKES_SERVER")
+	}
+
 	conn, err := grpc.Dial(takesSvcAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Error().Err(err).Msg("did not connect to gametake history service")
@@ -132,19 +136,19 @@ func (s *SocketHandler) saveTakeHistory(pid int) error {
 	defer cancel()
 
 	cards := []*gt_proto.Card{}
-	for _, c := range s.g.GetPlayers()[pid].Hand.Cards {
+	for _, c := range s.g.GetPlayers()[pid].GetHand().Cards {
 		cards = append(cards, &gt_proto.Card{Type: c.Genre, Color: c.Couleur})
 	}
 
 	playerTakes := []string{}
 	for _, p := range s.g.GetPlayers() {
-		if p != nil && p.GetID() != pid && p.Take != nil {
-			playerTakes = append(playerTakes, (*p.Take).Name())
+		if p != nil && p.GetID() != pid && p.GetTake() != nil {
+			playerTakes = append(playerTakes, (*p.GetTake()).Name())
 		}
 	}
 	resp, err := s.gTakeHistoryClient.Add(ctx, &gt_proto.GameTakeHistoryRequest{
 		Constraints: playerTakes,
-		Take:        (*s.g.GetPlayers()[pid].Take).Name(),
+		Take:        (*s.g.GetPlayers()[pid].GetTake()).Name(),
 		Cards:       cards,
 	})
 
@@ -207,7 +211,7 @@ func (s *SocketHandler) broadcastPlayerTake(id int, obj map[string]string, tk ga
 				log.Error().Err(err).Msg("error marshaling broadcast take event")
 			}
 
-			if err := p.Conn.WriteMessage(1, m); err != nil {
+			if err := p.GetConn().WriteMessage(1, m); err != nil {
 				log.Error().Err(err).Msg("")
 			}
 		}
@@ -226,16 +230,16 @@ func (s *SocketHandler) HandlePlayerCard(_ *websocket.Conn, obj map[string]strin
 	deck, _ := s.g.CurrentDeck()
 
 	for _, p := range s.g.GetPlayers() {
-		if p != nil && p.Conn != nil {
+		if p != nil && p.GetConn() != nil {
 			scoreTeamA, scoreTeamB := s.g.Score()
-			b := game.ReceiveDeckEvt(*p, deck, scoreTeamA, scoreTeamB)
+			b := game.ReceiveDeckEvt(p, deck, scoreTeamA, scoreTeamB)
 			m, err := json.Marshal(b)
 
 			if err != nil {
 				log.Error().Err(err).Msg("error marshaling player to json")
 			}
 
-			if err := p.Conn.WriteMessage(1, m); err != nil {
+			if err := p.GetConn().WriteMessage(1, m); err != nil {
 				log.Error().Err(err).Msg("error socket msg to socket")
 			}
 		}

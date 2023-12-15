@@ -24,10 +24,10 @@ type ReceiveDeckMsg struct {
 	ScoreTeamB int           `json:"scoreTeamB"`
 }
 
-func ReceiveDeckEvt(p player.Player, d [4]cards.Card, a int, b int) ReceiveDeckMsg {
+func ReceiveDeckEvt(p player.BelotePlayer, d [4]cards.Card, a int, b int) ReceiveDeckMsg {
 	msg := ReceiveDeckMsg{
 		ID:         ReceiveDeck,
-		Player:     p.PlayingHand.Cards,
+		Player:     p.GetPlayingHand().Cards,
 		Deck:       d,
 		ScoreTeamA: a,
 		ScoreTeamB: b,

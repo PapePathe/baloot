@@ -29,7 +29,7 @@ type Game struct {
 	Cartes                 [32]cards.Card
 	Decks                  [8]Deck
 	Plis                   [8][4]cards.Card
-	players                [4]*player.Player
+	players                [4]player.BelotePlayer
 	ring                   [4]int
 	take                   gametake.GameTake
 }
@@ -44,7 +44,7 @@ func NewGame() *Game {
 		CartesDistribuees: 0,
 		NombreJoueurs:     0,
 		TakesFinished:     false,
-		players:           [4]*player.Player{nil, nil, nil, nil},
+		players:           [4]player.BelotePlayer{nil, nil, nil, nil},
 		take:              gametake.PASSE,
 		nombrePli:         0,
 		pliCardsCount:     0,
@@ -91,7 +91,7 @@ func (g *Game) PlayCardNext(playerID int, c cards.Card) error {
 		return err
 	}
 
-	plyr.PlayingHand.Cards[idx] = cards.Card{Genre: "", Couleur: ""}
+	plyr.GetPlayingHand().Cards[idx] = cards.Card{Genre: "", Couleur: ""}
 
 	if g.Decks[g.nombrePli].cardscount == 4 {
 		fmt.Println("Winner debug", g.Decks[g.nombrePli].winner)
@@ -118,7 +118,7 @@ func (g *Game) PlayCard(playerID int, card cards.Card) error {
 	}
 
 	g.Plis[g.nombrePli][g.pliCardsCount] = card
-	plyr.PlayingHand.Cards[idx] = cards.Card{Genre: "", Couleur: ""}
+	plyr.GetPlayingHand().Cards[idx] = cards.Card{Genre: "", Couleur: ""}
 
 	g.pliCardsCount++
 
@@ -152,11 +152,11 @@ func (g *Game) AddPlayer(plyr *player.Player) error {
 }
 
 func (g *Game) AddTake(playerID int, take gametake.GameTake) error {
-	if g.players[playerID].Take != nil {
+	if g.players[playerID].GetTake() != nil {
 		return ErrDuplicatePlayerTake
 	}
 
-	g.players[playerID].Take = &take
+	g.players[playerID].SetTake(&take)
 
 	if g.take.GreaterThan(take) && take != gametake.PASSE {
 		return ErrBadTake
@@ -195,8 +195,8 @@ func (g *Game) takesComplete() bool {
 			return false
 		}
 
-		if p.Take == nil {
-			fmt.Println("Player", p, "Take", p.Take)
+		if p.GetTake() == nil {
+			fmt.Println("Player", p, "Take", p.GetTake())
 
 			return false
 		}
@@ -213,15 +213,15 @@ func (g *Game) sendPlayingHands() {
 		if plyr != nil {
 			fmt.Println("sending playing hand to player")
 
-			r := ReceivePlayingHandEvt(plyr.PlayingHand.Cards, g.GetTake().Name())
+			r := ReceivePlayingHandEvt(plyr.GetPlayingHand().Cards, g.GetTake().Name())
 			jsonMsg, err := json.Marshal(r)
 
 			if err != nil {
 				fmt.Println(err)
 			}
 
-			if plyr.Conn != nil {
-				if err := plyr.Conn.WriteMessage(1, jsonMsg); err != nil {
+			if plyr.GetConn() != nil {
+				if err := plyr.GetConn().WriteMessage(1, jsonMsg); err != nil {
 					fmt.Println(err)
 				}
 			}
@@ -240,7 +240,7 @@ func (g *Game) distribute() [5]cards.Card {
 	return cards
 }
 
-func (g *Game) GetPlayers() [4]*player.Player {
+func (g *Game) GetPlayers() [4]player.BelotePlayer {
 	return g.players
 }
 
@@ -270,7 +270,7 @@ func (g *Game) DispatchCards() error {
 		cards := []cards.Card{}
 
 		if plyr != nil {
-			for _, c := range plyr.Hand.Cards {
+			for _, c := range plyr.GetHand().Cards {
 				cards = append(cards, c)
 			}
 
@@ -279,7 +279,7 @@ func (g *Game) DispatchCards() error {
 				g.CartesDistribuees++
 			}
 
-			plyr.PlayingHand = player.PlayingHand{Cards: cards}
+			plyr.SetPlayingHand(player.PlayingHand{Cards: cards})
 		}
 	}
 

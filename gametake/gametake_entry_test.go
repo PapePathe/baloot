@@ -41,7 +41,7 @@ func TestGameTakeEntryFlags(t *testing.T) {
 			name:          "Hand with valet carreau and valet pique",
 			cardsValue:    37,
 			allCardsValue: 37,
-			flags:         map[string]flag{},
+			flags:         map[string]flag{FlagOneValet.name: FlagOneValet},
 		},
 	}
 

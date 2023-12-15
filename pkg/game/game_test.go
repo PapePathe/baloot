@@ -140,7 +140,7 @@ func TestDispatchCards(t *testing.T) {
 	assert.Equal(t, 32, game1.CartesDistribuees)
 
 	for _, p := range game1.players {
-		assert.Len(t, p.PlayingHand.Cards, 8)
+		assert.Len(t, p.GetPlayingHand().Cards, 8)
 	}
 }
 
@@ -173,15 +173,15 @@ func TestPlayCard(t *testing.T) {
 		require.NoError(t, err)
 		player1, player2, player3, player4 := game1.players[0], game1.players[1], game1.players[3], game1.players[3]
 
-		card1 := player1.PlayingHand.Cards[0]
-		err = game1.PlayCard(player1.GetID(), player1.PlayingHand.Cards[0])
+		card1 := player1.GetPlayingHand().Cards[0]
+		err = game1.PlayCard(player1.GetID(), player1.GetPlayingHand().Cards[0])
 		pli := [4]cards.Card{card1}
 		require.NoError(t, err)
 		assert.Equal(t, pli, game1.Plis[0])
 		assert.Equal(t, 1, game1.pliCardsCount)
 		assert.Equal(t, 0, game1.nombrePli)
 
-		card2 := player2.PlayingHand.Cards[0]
+		card2 := player2.GetPlayingHand().Cards[0]
 		err2 := game1.PlayCard(player2.GetID(), card2)
 		pli2 := [4]cards.Card{card1, card2}
 		require.NoError(t, err2)
@@ -189,7 +189,7 @@ func TestPlayCard(t *testing.T) {
 		assert.Equal(t, 2, game1.pliCardsCount)
 		assert.Equal(t, 0, game1.nombrePli)
 
-		card3 := player3.PlayingHand.Cards[0]
+		card3 := player3.GetPlayingHand().Cards[0]
 		err3 := game1.PlayCard(player3.GetID(), card3)
 		pli3 := [4]cards.Card{card1, card2, card3}
 		require.NoError(t, err3)
@@ -197,16 +197,16 @@ func TestPlayCard(t *testing.T) {
 		assert.Equal(t, 3, game1.pliCardsCount)
 		assert.Equal(t, 0, game1.nombrePli)
 
-		c4 := player3.PlayingHand.Cards[0]
-		err4 := game1.PlayCard(player4.GetID(), player4.PlayingHand.Cards[0])
+		c4 := player3.GetPlayingHand().Cards[0]
+		err4 := game1.PlayCard(player4.GetID(), player4.GetPlayingHand().Cards[0])
 		pli4 := [4]cards.Card{card1, card2, card3, c4}
 		require.NoError(t, err4)
 		assert.Equal(t, pli4, game1.Plis[0])
 		assert.Equal(t, 0, game1.pliCardsCount)
 		assert.Equal(t, 1, game1.nombrePli)
 
-		cplayer1 := player1.PlayingHand.Cards[1]
-		err = game1.PlayCard(player1.GetID(), player1.PlayingHand.Cards[1])
+		cplayer1 := player1.GetPlayingHand().Cards[1]
+		err = game1.PlayCard(player1.GetID(), player1.GetPlayingHand().Cards[1])
 		require.NoError(t, err)
 		pli1 := [4]cards.Card{cplayer1}
 		assert.Equal(t, pli1, game1.Plis[1])
@@ -223,7 +223,7 @@ func TestPlayCard(t *testing.T) {
 
 		player1, player2 := game1.players[0], game1.players[1]
 
-		err = game1.PlayCard(player1.GetID(), player2.PlayingHand.Cards[0])
+		err = game1.PlayCard(player1.GetID(), player2.GetPlayingHand().Cards[0])
 		require.ErrorIs(t, err, ErrCardNotFoundInPlayerHand)
 	})
 }
@@ -405,16 +405,18 @@ func TestPlayCardNext(t *testing.T) {
 				require.NoError(t, err)
 			}
 
-			player1.PlayingHand.Cards, player2.PlayingHand.Cards = test.p1, test.p2
-			player3.PlayingHand.Cards, player4.PlayingHand.Cards = test.p3, test.p4
+			player1.SetPlayingHand(player.PlayingHand{Cards: test.p1})
+			player2.SetPlayingHand(player.PlayingHand{Cards: test.p2})
+			player3.SetPlayingHand(player.PlayingHand{Cards: test.p3})
+			player4.SetPlayingHand(player.PlayingHand{Cards: test.p4})
 			pli := [4]cards.Card{
-				player1.PlayingHand.Cards[0],
-				player2.PlayingHand.Cards[0],
-				player3.PlayingHand.Cards[0],
-				player4.PlayingHand.Cards[0],
+				player1.GetPlayingHand().Cards[0],
+				player2.GetPlayingHand().Cards[0],
+				player3.GetPlayingHand().Cards[0],
+				player4.GetPlayingHand().Cards[0],
 			}
 			for _, p := range game1.players {
-				err := game1.PlayCardNext(p.GetID(), p.PlayingHand.Cards[0])
+				err := game1.PlayCardNext(p.GetID(), p.GetPlayingHand().Cards[0])
 				require.NoError(t, err)
 			}
 

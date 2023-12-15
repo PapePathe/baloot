@@ -23,7 +23,7 @@ func TestReceiveDeckEvt(t *testing.T) {
 	t.Parallel()
 
 	p := player.NewPlayer()
-	evt := ReceiveDeckEvt(*p, [4]cards.Card{}, 0, 23)
+	evt := ReceiveDeckEvt(p, [4]cards.Card{}, 0, 23)
 
 	assert.Equal(t, ReceiveDeck, evt.ID)
 	assert.Equal(t, 0, evt.ScoreTeamA)

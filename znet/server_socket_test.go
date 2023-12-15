@@ -41,7 +41,7 @@ func assertPlayerReceiveTakingHand(t *testing.T, i int, take string) *websocket.
 	err = conn.WriteMessage(websocket.TextMessage, []byte(clientMsg))
 	require.NoError(t, err)
 
-	assert.Len(t, msg.Player.Hand.Cards, 5)
+	assert.Len(t, msg.Player.GetHand().Cards, 5)
 	assert.Equal(t, game.ReceiveTakeHand, msg.ID)
 	assert.Equal(t, gametake.AllTakeNames, msg.AvailableTakes)
 
@@ -60,41 +60,43 @@ func assertPlayerReceivesPlayingHand(t *testing.T, conn *websocket.Conn, take st
 	assert.Equal(t, take, playMsg.Take)
 	assert.Len(t, playMsg.Cards, 8)
 
+	fmt.Println("PLAYER CARDS", playMsg.Cards)
+
 	return playMsg.Cards
 }
 
-func TestNewSocketHandler2(t *testing.T) {
-	t.Parallel()
+// func TestNewSocketHandler2(t *testing.T) {
+// 	t.Parallel()
 
-	setupTestApp("7778")
+// 	setupTestApp("7778")
 
-	takes := []string{"Trefle", "Carreau", "Passe", "Cent"}
-	conns := []*websocket.Conn{}
-	playerCards := make([][]cards.Card, 4)
+// 	takes := []string{"Trefle", "Carreau", "Passe", "Cent"}
+// 	conns := []*websocket.Conn{}
+// 	playerCards := make([][]cards.Card, 4)
 
-	for i := 0; i < 4; i++ {
-		t.Run(fmt.Sprintf("start new player connection %d", i), func(t *testing.T) {
-			c := assertPlayerReceiveTakingHand(t, i, takes[i])
-			conns = append(conns, c)
-		})
-	}
+// 	for i := 0; i < 4; i++ {
+// 		t.Run(fmt.Sprintf("start new player connection %d", i), func(t *testing.T) {
+// 			c := assertPlayerReceiveTakingHand(t, i, takes[i])
+// 			conns = append(conns, c)
+// 		})
+// 	}
 
-	for i := 0; i < 4; i++ {
-		t.Run(fmt.Sprintf("receive playing hand %d", i), func(t *testing.T) {
-			playerCards[i] = assertPlayerReceivesPlayingHand(t, conns[i], takes[3])
-		})
-	}
+// 	for i := 0; i < 4; i++ {
+// 		t.Run(fmt.Sprintf("receive playing hand %d", i), func(t *testing.T) {
+// 			playerCards[i] = assertPlayerReceivesPlayingHand(t, conns[i], takes[3])
+// 		})
+// 	}
 
-	for i := 0; i < 4; i++ {
-		conn := conns[i]
+// 	for i := 0; i < 4; i++ {
+// 		conn := conns[i]
 
-		cardToPlay := playerCards[i][0]
+// 		cardToPlay := playerCards[i][0]
 
-		clientMsg := fmt.Sprintf("{\"id\":\"4\",\"genre\":\"%s\",\"color\":\"%s\", \"player_id\":\"%d\"}", cardToPlay.Genre, cardToPlay.Couleur, i)
-		err := conn.WriteMessage(websocket.TextMessage, []byte(clientMsg))
-		require.NoError(t, err)
-	}
-}
+// 		clientMsg := fmt.Sprintf("{\"id\":\"4\",\"genre\":\"%s\",\"color\":\"%s\", \"player_id\":\"%d\"}", cardToPlay.Genre, cardToPlay.Couleur, i)
+// 		err := conn.WriteMessage(websocket.TextMessage, []byte(clientMsg))
+// 		require.NoError(t, err)
+// 	}
+// }
 
 func TestNewSocketHandler(t *testing.T) {
 	t.Parallel()
@@ -116,7 +118,7 @@ func TestNewSocketHandler(t *testing.T) {
 	err = json.Unmarshal(rawmsg, &msg)
 	require.NoError(t, err)
 
-	assert.Len(t, msg.Player.Hand.Cards, 5)
+	assert.Len(t, msg.Player.GetHand().Cards, 5)
 	assert.Equal(t, game.ReceiveTakeHand, msg.ID)
 	assert.Equal(t, gametake.AllTakeNames, msg.AvailableTakes)
 

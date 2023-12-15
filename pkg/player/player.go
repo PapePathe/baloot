@@ -9,6 +9,18 @@ import (
 	"pathe.co/zinx/pkg/cards"
 )
 
+type BelotePlayer interface {
+	GetID() int
+	SetID(i int)
+	HasCard(cards.Card) (bool, int)
+	SetTake(*gametake.GameTake)
+	GetTake() *gametake.GameTake
+	GetPlayingHand() PlayingHand
+	GetHand() Hand
+	SetPlayingHand(PlayingHand)
+	GetConn() *websocket.Conn
+}
+
 type Player struct {
 	Hand        Hand               `json:"hand"`
 	PlayingHand PlayingHand        `json:"playingHand"`
@@ -27,8 +39,27 @@ func NewPlayer() *Player {
 	}
 }
 
+func (p *Player) GetTake() *gametake.GameTake {
+	return p.Take
+}
 func (p *Player) SetID(id int) {
 	p.ID = id
+}
+
+func (p *Player) SetPlayingHand(h PlayingHand) {
+	p.PlayingHand = h
+}
+
+func (p *Player) GetPlayingHand() PlayingHand {
+	return p.PlayingHand
+}
+
+func (p *Player) GetHand() Hand {
+	return p.Hand
+}
+
+func (p *Player) GetConn() *websocket.Conn {
+	return p.Conn
 }
 
 func (p *Player) GetID() int {
