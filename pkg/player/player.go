@@ -1,13 +1,21 @@
 package player
 
 import (
+	"encoding/json"
 	"fmt"
+	"os"
 	"sort"
 
 	"github.com/gofiber/contrib/websocket"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 	"pathe.co/zinx/gametake"
 	"pathe.co/zinx/pkg/cards"
 )
+
+func init() {
+	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
+}
 
 type BelotePlayer interface {
 	GetID() int
@@ -16,9 +24,13 @@ type BelotePlayer interface {
 	SetTake(*gametake.GameTake)
 	GetTake() *gametake.GameTake
 	GetPlayingHand() PlayingHand
-	GetHand() Hand
 	SetPlayingHand(PlayingHand)
+	GetHand() Hand
+	SetHand(Hand)
 	GetConn() *websocket.Conn
+
+	BroadCastPlayerTake(BroadcastPlayerTakeMsg)
+	BroadCastGameDeck(ReceiveDeckMsg)
 }
 
 type Player struct {
@@ -39,13 +51,41 @@ func NewPlayer() *Player {
 	}
 }
 
+func (p *Player) BroadCastGameDeck(e ReceiveDeckMsg) {
+	m, err := json.Marshal(e)
+
+	if err != nil {
+		log.Error().Err(err).Msg("error marshaling player to json")
+	}
+
+	if err := p.GetConn().WriteMessage(1, m); err != nil {
+		log.Error().Err(err).Msg("error socket msg to socket")
+	}
+}
+
+func (p *Player) BroadCastPlayerTake(e BroadcastPlayerTakeMsg) {
+	m, err := json.Marshal(e)
+	if err != nil {
+		log.Error().Err(err).Msg("error marshaling broadcast take event")
+	}
+
+	if err := p.GetConn().WriteMessage(1, m); err != nil {
+		log.Error().Err(err).Msg("")
+	}
+	fmt.Println(e)
+}
+
 func (p *Player) GetTake() *gametake.GameTake {
 	return p.Take
 }
+
 func (p *Player) SetID(id int) {
 	p.ID = id
 }
 
+func (p *Player) SetHand(h Hand) {
+	p.Hand = h
+}
 func (p *Player) SetPlayingHand(h PlayingHand) {
 	p.PlayingHand = h
 }

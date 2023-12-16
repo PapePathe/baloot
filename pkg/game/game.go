@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"time"
 
 	"pathe.co/zinx/gametake"
 	"pathe.co/zinx/pkg/cards"
@@ -32,6 +33,7 @@ type Game struct {
 	players                [4]player.BelotePlayer
 	ring                   [4]int
 	take                   gametake.GameTake
+	Takechannel            chan player.PlayEvent
 }
 
 func NewGame() *Game {
@@ -49,9 +51,18 @@ func NewGame() *Game {
 		nombrePli:         0,
 		pliCardsCount:     0,
 		ring:              [4]int{0, 1, 2, 3},
+		Takechannel:       make(chan player.PlayEvent, 100),
 	}
 
 	return &newGame
+}
+
+func (g *Game) StartPlayChannel() {
+	for pc := range g.Takechannel {
+		err := g.PlayCardNext(pc.PlayerID, pc.Card)
+		fmt.Println(pc, "ERR PLAYING", err)
+		fmt.Println(g.CurrentDeck())
+	}
 }
 
 func (g *Game) Score() (int, int) {
@@ -101,10 +112,36 @@ func (g *Game) PlayCardNext(playerID int, c cards.Card) error {
 		a, b := g.Decks[g.nombrePli].Score()
 		g.scoreTeamA += a
 		g.scoreTeamB += b
-		g.nombrePli++
-	}
 
-	fmt.Println(g.ring)
+		g.nombrePli++
+
+		if g.nombrePli < 7 {
+			g.Decks[g.nombrePli] = NewDeck(g.ring, g.take)
+		}
+		deck, _, _ := g.CurrentDeck()
+
+		for _, p := range g.GetPlayers() {
+			if p != nil {
+				scoreTeamA, scoreTeamB := g.Score()
+				b := player.ReceiveDeckEvt(p, deck, scoreTeamA, scoreTeamB, g.ring[0], g.Takechannel)
+
+				time.Sleep(time.Second)
+				p.BroadCastGameDeck(b)
+			}
+		}
+
+	} else {
+		deck, nextPlayer, _ := g.CurrentDeck()
+
+		for _, p := range g.GetPlayers() {
+			if p != nil {
+				scoreTeamA, scoreTeamB := g.Score()
+				b := player.ReceiveDeckEvt(p, deck, scoreTeamA, scoreTeamB, nextPlayer, g.Takechannel)
+
+				p.BroadCastGameDeck(b)
+			}
+		}
+	}
 
 	return nil
 }
@@ -130,20 +167,20 @@ func (g *Game) PlayCard(playerID int, card cards.Card) error {
 	return nil
 }
 
-func (g *Game) CurrentDeck() ([4]cards.Card, error) {
+func (g *Game) CurrentDeck() ([4]cards.Card, int, error) {
 	if g.nombrePli > 7 {
-		return [4]cards.Card{}, ErrDeckNotFound
+		return [4]cards.Card{}, 0, ErrDeckNotFound
 	}
 
-	return g.Decks[g.nombrePli].cards, nil
+	return g.Decks[g.nombrePli].cards, g.Decks[g.nombrePli].NextPlayer(), nil
 }
 
-func (g *Game) AddPlayer(plyr *player.Player) error {
+func (g *Game) AddPlayer(plyr player.BelotePlayer) error {
 	if g.NombreJoueurs == 4 {
 		return ErrGameIsFull
 	}
 
-	plyr.Hand.Cards = g.distribute()
+	plyr.SetHand(player.Hand{Cards: g.distribute()})
 	plyr.SetID(g.NombreJoueurs)
 	g.players[g.NombreJoueurs] = plyr
 	g.NombreJoueurs++

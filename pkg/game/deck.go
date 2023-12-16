@@ -54,6 +54,10 @@ func (d *Deck) AddCard(pid int, card cards.Card) error {
 	return nil
 }
 
+func (d *Deck) NextPlayer() int {
+	return d.players[d.cardscount]
+}
+
 func (d *Deck) Score() (int, int) {
 	if d.winner == 0 || d.winner == 2 {
 		return d.score, 0
