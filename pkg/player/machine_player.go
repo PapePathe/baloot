@@ -34,10 +34,9 @@ func NewMachinePlayer() *MachinePlayer {
 }
 
 func (p *MachinePlayer) BroadCastGameDeck(e ReceiveDeckMsg) {
-
 	if e.NextPlayer == p.ID {
 		time.Sleep(time.Second)
-		log.Info().Int("Machine Player ID", p.ID).Interface("Deck", e.Deck).Str("Hand", p.PlayingHand.String()).Msg("It's my turn to play")
+		log.Debug().Int("Machine Player ID", p.ID).Str("Hand", p.PlayingHand.String()).Msg("It's my turn to play")
 
 		c := cards.Card{}
 
@@ -45,26 +44,34 @@ func (p *MachinePlayer) BroadCastGameDeck(e ReceiveDeckMsg) {
 			found, pCards := p.HasColor(e.Deck[0].Couleur)
 
 			if found {
-				c = pCards[0]
+				mDeck := machineDeck{cards: e.Deck, gametake: e.Take}
 
-				log.Info().Int("Machine Player ID", p.ID).Str("Card", c.String()).Msg("Going to play card of same color as in Deck")
+				cc, err := mDeck.AttemptWin(pCards)
+
+				if err != nil {
+					c = p.PlayingHand.LowestCard(e.Take)
+				} else {
+					c = cc
+				}
+
+				log.Debug().Int("Machine Player ID", p.ID).Str("Card", c.String()).Msg("Going to play card of same color as in Deck")
 			} else {
-
 				for _, pc := range p.PlayingHand.Cards {
 					if pc.Couleur != "" && pc.Genre != "" {
-						log.Info().Int("Machine Player ID", p.ID).Str("Card", pc.String()).Msg("Going to play card of other color because missing color in hand")
 						c = pc
 					}
 				}
+
+				log.Debug().Int("Machine Player ID", p.ID).Str("Card", c.String()).Msg("Going to play card of other color because missing color in hand")
 
 			}
 		} else {
 			for _, pc := range p.PlayingHand.Cards {
 				if pc.Couleur != "" && pc.Genre != "" {
-					log.Info().Int("Machine Player ID", p.ID).Str("Card", pc.String()).Msg("Going to play the first card on deck")
 					c = pc
 				}
 			}
+			log.Debug().Int("Machine Player ID", p.ID).Str("Card", c.String()).Msg("Going to play the lowest card")
 		}
 
 		e.PlayChannel <- PlayEvent{Card: c, PlayerID: p.GetID()}
@@ -74,7 +81,7 @@ func (p *MachinePlayer) BroadCastGameDeck(e ReceiveDeckMsg) {
 }
 
 func (p *MachinePlayer) BroadCastPlayerTake(e BroadcastPlayerTakeMsg) {
-	fmt.Println("Received player take", e)
+	log.Debug().Str("Received player take", e.Take)
 }
 
 func (p *MachinePlayer) SetTake(t *gametake.GameTake) {

@@ -24,6 +24,17 @@ type PlayingHand struct {
 	Cards []cards.Card `json:"cards"`
 }
 
+func (h *PlayingHand) LowestCard(t gametake.GameTake) cards.Card {
+	c := h.Cards[0]
+
+	for _, cc := range h.Cards {
+		if cc.IsNotEmpty() && t.EvaluateCardForWin(c) >= t.EvaluateCardForWin(cc) {
+			c = cc
+		}
+	}
+	return c
+}
+
 func (h *PlayingHand) String() string {
 	var sb strings.Builder
 	for _, c := range h.Cards {

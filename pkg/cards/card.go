@@ -38,6 +38,10 @@ func (c *Card) IsNine() bool {
 	return c.Genre == "9"
 }
 
+func (c *Card) IsNotEmpty() bool {
+	return c.Couleur != "" && c.Genre != ""
+}
+
 type CardSet struct {
 	Cards [32]Card
 }

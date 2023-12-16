@@ -70,6 +70,12 @@ func (s *SocketHandler) StartPlayerRegistration(c *websocket.Conn) {
 		if err := c.WriteMessage(1, m); err != nil {
 			log.Error().Err(err).Msg("error writing message to socket")
 		}
+
+		s.g.AddPlayer(player.NewMachinePlayer())
+		s.g.AddPlayer(player.NewMachinePlayer())
+		s.g.AddPlayer(player.NewMachinePlayer())
+
+		go s.g.StartPlayChannel()
 	}
 }
 
@@ -202,18 +208,11 @@ func (s *SocketHandler) broadcastPlayerTake(id int, obj map[string]string, tk ga
 		}
 	}
 
-	b := game.BroadcastPlayerTakeEvt(obj["gametake"], id, takes)
+	b := player.BroadcastPlayerTakeEvt(obj["gametake"], id, takes)
 
 	for _, p := range s.g.GetPlayers() {
 		if p != nil {
-			m, err := json.Marshal(b)
-			if err != nil {
-				log.Error().Err(err).Msg("error marshaling broadcast take event")
-			}
-
-			if err := p.GetConn().WriteMessage(1, m); err != nil {
-				log.Error().Err(err).Msg("")
-			}
+			p.BroadCastPlayerTake(b)
 		}
 	}
 }
@@ -225,23 +224,5 @@ func (s *SocketHandler) HandlePlayerCard(_ *websocket.Conn, obj map[string]strin
 	err := s.g.PlayCardNext(pid, card)
 	if err != nil {
 		log.Error().Err(err).Msg("error playing card")
-	}
-
-	deck, _ := s.g.CurrentDeck()
-
-	for _, p := range s.g.GetPlayers() {
-		if p != nil && p.GetConn() != nil {
-			scoreTeamA, scoreTeamB := s.g.Score()
-			b := game.ReceiveDeckEvt(p, deck, scoreTeamA, scoreTeamB)
-			m, err := json.Marshal(b)
-
-			if err != nil {
-				log.Error().Err(err).Msg("error marshaling player to json")
-			}
-
-			if err := p.GetConn().WriteMessage(1, m); err != nil {
-				log.Error().Err(err).Msg("error socket msg to socket")
-			}
-		}
 	}
 }

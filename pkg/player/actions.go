@@ -1,6 +1,9 @@
 package player
 
-import "pathe.co/zinx/pkg/cards"
+import (
+	"pathe.co/zinx/gametake"
+	"pathe.co/zinx/pkg/cards"
+)
 
 type IPlayerActions interface {
 	PlayCard(c cards.Card)
@@ -23,16 +26,17 @@ var (
 )
 
 type ReceiveDeckMsg struct {
-	ID          messageID      `json:"id"`
-	Player      []cards.Card   `json:"player"`
-	Deck        [4]cards.Card  `json:"deck"`
-	ScoreTeamA  int            `json:"scoreTeamA"`
-	ScoreTeamB  int            `json:"scoreTeamB"`
-	NextPlayer  int            `json:nextPlayer`
-	PlayChannel chan PlayEvent `json:"-"`
+	ID          messageID         `json:"id"`
+	Player      []cards.Card      `json:"player"`
+	Deck        [4]cards.Card     `json:"deck"`
+	ScoreTeamA  int               `json:"scoreTeamA"`
+	ScoreTeamB  int               `json:"scoreTeamB"`
+	NextPlayer  int               `json:nextPlayer`
+	PlayChannel chan PlayEvent    `json:"-"`
+	Take        gametake.GameTake `json:"-"`
 }
 
-func ReceiveDeckEvt(p BelotePlayer, d [4]cards.Card, a int, b int, n int, c chan PlayEvent) ReceiveDeckMsg {
+func ReceiveDeckEvt(p BelotePlayer, d [4]cards.Card, a int, b int, n int, c chan PlayEvent, t gametake.GameTake) ReceiveDeckMsg {
 	msg := ReceiveDeckMsg{
 		ID:          ReceiveDeck,
 		Player:      p.GetPlayingHand().Cards,
@@ -41,6 +45,7 @@ func ReceiveDeckEvt(p BelotePlayer, d [4]cards.Card, a int, b int, n int, c chan
 		ScoreTeamB:  b,
 		NextPlayer:  n,
 		PlayChannel: c,
+		Take:        t,
 	}
 
 	return msg

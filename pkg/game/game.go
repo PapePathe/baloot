@@ -4,12 +4,20 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
 	"time"
 
 	"pathe.co/zinx/gametake"
 	"pathe.co/zinx/pkg/cards"
 	"pathe.co/zinx/pkg/player"
+
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
+
+func init() {
+	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
+}
 
 var (
 	ErrCardsAlreadyDispatched   = errors.New("cards already dispatched error")
@@ -60,8 +68,7 @@ func NewGame() *Game {
 func (g *Game) StartPlayChannel() {
 	for pc := range g.Takechannel {
 		err := g.PlayCardNext(pc.PlayerID, pc.Card)
-		fmt.Println(pc, "ERR PLAYING", err)
-		fmt.Println(g.CurrentDeck())
+		log.Err(err).Str("Error playing card", pc.Card.String())
 	}
 }
 
@@ -92,8 +99,6 @@ func (g *Game) PlayCardNext(playerID int, c cards.Card) error {
 		return ErrCardNotFoundInPlayerHand
 	}
 
-	fmt.Println("Game ring debug before processing", g.ring)
-
 	if g.Decks[g.nombrePli].cardscount == 0 {
 		g.Decks[g.nombrePli] = NewDeck(g.ring, g.take)
 	}
@@ -105,10 +110,7 @@ func (g *Game) PlayCardNext(playerID int, c cards.Card) error {
 	plyr.GetPlayingHand().Cards[idx] = cards.Card{Genre: "", Couleur: ""}
 
 	if g.Decks[g.nombrePli].cardscount == 4 {
-		fmt.Println("Winner debug", g.Decks[g.nombrePli].winner)
-		fmt.Println("Winner debug", g.Decks[g.nombrePli])
 		g.ring = g.NextRound(g.Decks[g.nombrePli].winner)
-		fmt.Println("Game ring debug", g.ring)
 		a, b := g.Decks[g.nombrePli].Score()
 		g.scoreTeamA += a
 		g.scoreTeamB += b
@@ -123,7 +125,7 @@ func (g *Game) PlayCardNext(playerID int, c cards.Card) error {
 		for _, p := range g.GetPlayers() {
 			if p != nil {
 				scoreTeamA, scoreTeamB := g.Score()
-				b := player.ReceiveDeckEvt(p, deck, scoreTeamA, scoreTeamB, g.ring[0], g.Takechannel)
+				b := player.ReceiveDeckEvt(p, deck, scoreTeamA, scoreTeamB, g.ring[0], g.Takechannel, g.take)
 
 				time.Sleep(time.Second)
 				p.BroadCastGameDeck(b)
@@ -136,7 +138,7 @@ func (g *Game) PlayCardNext(playerID int, c cards.Card) error {
 		for _, p := range g.GetPlayers() {
 			if p != nil {
 				scoreTeamA, scoreTeamB := g.Score()
-				b := player.ReceiveDeckEvt(p, deck, scoreTeamA, scoreTeamB, nextPlayer, g.Takechannel)
+				b := player.ReceiveDeckEvt(p, deck, scoreTeamA, scoreTeamB, nextPlayer, g.Takechannel, g.take)
 
 				p.BroadCastGameDeck(b)
 			}
@@ -206,8 +208,6 @@ func (g *Game) AddTake(playerID int, take gametake.GameTake) error {
 	}
 
 	if g.takesComplete() {
-		fmt.Println("takes complete")
-
 		g.TakesFinished = true
 
 		if err := g.DispatchCards(); err != nil {
@@ -233,13 +233,10 @@ func (g *Game) takesComplete() bool {
 		}
 
 		if p.GetTake() == nil {
-			fmt.Println("Player", p, "Take", p.GetTake())
-
 			return false
 		}
 
 		takesCount++
-		fmt.Println("Takes count:", takesCount)
 	}
 
 	return takesCount == 4
@@ -248,8 +245,6 @@ func (g *Game) takesComplete() bool {
 func (g *Game) sendPlayingHands() {
 	for _, plyr := range g.players {
 		if plyr != nil {
-			fmt.Println("sending playing hand to player")
-
 			r := ReceivePlayingHandEvt(plyr.GetPlayingHand().Cards, g.GetTake().Name())
 			jsonMsg, err := json.Marshal(r)
 
