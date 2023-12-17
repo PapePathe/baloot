@@ -77,12 +77,12 @@ func (p *MachinePlayer) SetID(id int) {
 }
 
 func (p *MachinePlayer) SetHand(h Hand) {
-	fmt.Println("Received hand", h)
+	log.Trace().Msg(fmt.Sprintf("Received hand %s", h))
 	p.Hand = h
 }
 
 func (p *MachinePlayer) SetPlayingHand(h PlayingHand) {
-	fmt.Println("Received playing hand", h)
+	log.Trace().Int("Machine player", p.ID).Msg(fmt.Sprintf("Received playing hand %s", h))
 	p.PlayingHand = h
 }
 

@@ -2,7 +2,6 @@ package player
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
 	"sort"
 
@@ -52,14 +51,16 @@ func NewPlayer() *Player {
 }
 
 func (p *Player) BroadCastGameDeck(e ReceiveDeckMsg) {
-	m, err := json.Marshal(e)
+	if p.GetConn() != nil {
+		m, err := json.Marshal(e)
 
-	if err != nil {
-		log.Error().Err(err).Msg("error marshaling player to json")
-	}
+		if err != nil {
+			log.Error().Err(err).Msg("error marshaling player to json")
+		}
 
-	if err := p.GetConn().WriteMessage(1, m); err != nil {
-		log.Error().Err(err).Msg("error socket msg to socket")
+		if err := p.GetConn().WriteMessage(1, m); err != nil {
+			log.Error().Err(err).Msg("error socket msg to socket")
+		}
 	}
 }
 
@@ -72,7 +73,6 @@ func (p *Player) BroadCastPlayerTake(e BroadcastPlayerTakeMsg) {
 	if err := p.GetConn().WriteMessage(1, m); err != nil {
 		log.Error().Err(err).Msg("")
 	}
-	fmt.Println(e)
 }
 
 func (p *Player) GetTake() *gametake.GameTake {
@@ -154,7 +154,6 @@ func (p *Player) OrderedCardsForTake(take gametake.GameTake) [5]cards.Card {
 	}
 
 	sort.Strings(keys)
-	fmt.Println(keys)
 
 	result := []cards.Card{}
 
@@ -188,7 +187,6 @@ func (p *Player) OrderedCardsForPlaying(take gametake.GameTake) [8]cards.Card {
 	}
 
 	sort.Strings(keys)
-	fmt.Println(keys)
 
 	result := []cards.Card{}
 
