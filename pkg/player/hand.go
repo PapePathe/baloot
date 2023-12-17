@@ -1,8 +1,10 @@
 package player
 
 import (
+	"fmt"
 	"strings"
 
+	"github.com/rs/zerolog/log"
 	"pathe.co/zinx/gametake"
 	"pathe.co/zinx/pkg/cards"
 )
@@ -28,11 +30,27 @@ func (h *PlayingHand) LowestCard(t gametake.GameTake) cards.Card {
 	c := h.Cards[0]
 
 	for _, cc := range h.Cards {
+		log.Trace().Msg(fmt.Sprintf("Comparing cards (%s %d) vs (%s %d)", c, t.EvaluateCardForWin(c), cc, t.EvaluateCardForWin(cc)))
+		if !c.IsNotEmpty() {
+			c = cc
+		}
 		if cc.IsNotEmpty() && t.EvaluateCardForWin(c) >= t.EvaluateCardForWin(cc) {
 			c = cc
 		}
 	}
 	return c
+}
+
+func (h *PlayingHand) HasColor(c string) (bool, []cards.Card) {
+	foundCards := []cards.Card{}
+
+	for _, pc := range h.Cards {
+		if pc.Couleur == c {
+			foundCards = append(foundCards, pc)
+		}
+	}
+
+	return len(foundCards) > 0, foundCards
 }
 
 func (h *PlayingHand) String() string {

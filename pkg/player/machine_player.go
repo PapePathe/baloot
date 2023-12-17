@@ -37,43 +37,23 @@ func (p *MachinePlayer) BroadCastGameDeck(e ReceiveDeckMsg) {
 	if e.NextPlayer == p.ID {
 		time.Sleep(time.Second)
 		log.Debug().Int("Machine Player ID", p.ID).Str("Hand", p.PlayingHand.String()).Msg("It's my turn to play")
+		log.Trace().Msg(fmt.Sprintf("Deck: %s %s %s %s", e.Deck[0], e.Deck[1], e.Deck[2], e.Deck[3]))
 
 		c := cards.Card{}
+		mDeck := machineDeck{cards: e.Deck, gametake: e.Take, hand: p.PlayingHand}
 
 		if e.Deck[0].Couleur != "" {
-			found, pCards := p.HasColor(e.Deck[0].Couleur)
-
-			if found {
-				mDeck := machineDeck{cards: e.Deck, gametake: e.Take}
-
-				cc, err := mDeck.AttemptWin(pCards)
-
-				if err != nil {
-					c = p.PlayingHand.LowestCard(e.Take)
-				} else {
-					c = cc
-				}
-
-				log.Debug().Int("Machine Player ID", p.ID).Str("Card", c.String()).Msg("Going to play card of same color as in Deck")
-			} else {
-				for _, pc := range p.PlayingHand.Cards {
-					if pc.Couleur != "" && pc.Genre != "" {
-						c = pc
-					}
-				}
-
-				log.Debug().Int("Machine Player ID", p.ID).Str("Card", c.String()).Msg("Going to play card of other color because missing color in hand")
-
-			}
+			log.Debug().Int("Machine Player ID", p.ID).Msg("==> Searching for winning or lowest card")
+			c = mDeck.WinningOrLowestCard()
+			log.Debug().Int("Machine Player ID", p.ID).Msg("==> Found card")
 		} else {
-			for _, pc := range p.PlayingHand.Cards {
-				if pc.Couleur != "" && pc.Genre != "" {
-					c = pc
-				}
-			}
-			log.Debug().Int("Machine Player ID", p.ID).Str("Card", c.String()).Msg("Going to play the lowest card")
+			c = mDeck.LowestCard()
+			log.Debug().Int("Machine Player ID", p.ID).Str("Card", c.String()).Msg("Going to play the lowest card since player does not have card")
 		}
 
+		if !c.IsNotEmpty() {
+			panic(c)
+		}
 		e.PlayChannel <- PlayEvent{Card: c, PlayerID: p.GetID()}
 
 		time.Sleep(time.Second)
@@ -120,18 +100,6 @@ func (p *MachinePlayer) GetConn() *websocket.Conn {
 
 func (p *MachinePlayer) GetID() int {
 	return p.ID
-}
-
-func (p *MachinePlayer) HasColor(c string) (bool, []cards.Card) {
-	foundCards := []cards.Card{}
-
-	for _, pc := range p.PlayingHand.Cards {
-		if pc.Couleur == c {
-			foundCards = append(foundCards, pc)
-		}
-	}
-
-	return len(foundCards) > 0, foundCards
 }
 
 func (p *MachinePlayer) HasCard(c cards.Card) (bool, int) {
