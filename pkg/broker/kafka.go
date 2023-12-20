@@ -14,7 +14,6 @@ type KafkaPublisher struct {
 func NewPublisher(addr []string, autocreateTopics bool) *KafkaPublisher {
 	w := &kafka.Writer{
 		Addr:                   kafka.TCP(addr...),
-		Balancer:               &kafka.LeastBytes{},
 		AllowAutoTopicCreation: autocreateTopics,
 	}
 

@@ -54,7 +54,14 @@ func (p *MachinePlayer) BroadCastGameDeck(e ReceiveDeckMsg) {
 		if !c.IsNotEmpty() {
 			panic(c)
 		}
+
 		e.PlayChannel <- PlayEvent{Card: c, PlayerID: p.GetID()}
+		e.PlayEventDetailsChannel <- PlayEventDetails{
+			Deck:     e.Deck[0:],
+			Play:     c,
+			Hand:     p.PlayingHand.Cards,
+			Gametake: e.Take,
+		}
 
 		time.Sleep(time.Second)
 	}

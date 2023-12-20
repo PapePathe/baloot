@@ -1,6 +1,10 @@
 package player
 
 import (
+	"encoding/json"
+	"fmt"
+
+	"github.com/segmentio/kafka-go"
 	"pathe.co/zinx/gametake"
 	"pathe.co/zinx/pkg/cards"
 )
@@ -16,6 +20,24 @@ type PlayEvent struct {
 	Card     cards.Card
 }
 
+type PlayEventDetails struct {
+	Deck       []cards.Card
+	Play       cards.Card
+	Hand       []cards.Card
+	History    [][4]cards.Card
+	Gametake   gametake.GameTake
+	PlayerType string
+}
+
+func (ped PlayEventDetails) AsKafkaMessage(topic string) (kafka.Message, error) {
+	b, err := json.Marshal(ped)
+	if err != nil {
+		return kafka.Message{}, fmt.Errorf("error marshalling constrainedTake %w", err)
+	}
+
+	return kafka.Message{Key: []byte(ped.Gametake.Name()), Topic: topic, Value: b}, nil
+}
+
 var (
 	BroadcastPlayerTake messageID = 5
 	PlayCard            messageID = 4
@@ -26,26 +48,28 @@ var (
 )
 
 type ReceiveDeckMsg struct {
-	ID          messageID         `json:"id"`
-	Player      []cards.Card      `json:"player"`
-	Deck        [4]cards.Card     `json:"deck"`
-	ScoreTeamA  int               `json:"scoreTeamA"`
-	ScoreTeamB  int               `json:"scoreTeamB"`
-	NextPlayer  int               `json:nextPlayer`
-	PlayChannel chan PlayEvent    `json:"-"`
-	Take        gametake.GameTake `json:"-"`
+	ID                      messageID             `json:"id"`
+	Player                  []cards.Card          `json:"player"`
+	Deck                    [4]cards.Card         `json:"deck"`
+	ScoreTeamA              int                   `json:"scoreTeamA"`
+	ScoreTeamB              int                   `json:"scoreTeamB"`
+	NextPlayer              int                   `json:nextPlayer`
+	PlayChannel             chan PlayEvent        `json:"-"`
+	PlayEventDetailsChannel chan PlayEventDetails `json:"-"`
+	Take                    gametake.GameTake     `json:"-"`
 }
 
-func ReceiveDeckEvt(p BelotePlayer, d [4]cards.Card, a int, b int, n int, c chan PlayEvent, t gametake.GameTake) ReceiveDeckMsg {
+func ReceiveDeckEvt(p BelotePlayer, d [4]cards.Card, a int, b int, n int, c chan PlayEvent, cpd chan PlayEventDetails, t gametake.GameTake) ReceiveDeckMsg {
 	msg := ReceiveDeckMsg{
-		ID:          ReceiveDeck,
-		Player:      p.GetPlayingHand().Cards,
-		Deck:        d,
-		ScoreTeamA:  a,
-		ScoreTeamB:  b,
-		NextPlayer:  n,
-		PlayChannel: c,
-		Take:        t,
+		ID:                      ReceiveDeck,
+		Player:                  p.GetPlayingHand().Cards,
+		Deck:                    d,
+		ScoreTeamA:              a,
+		ScoreTeamB:              b,
+		NextPlayer:              n,
+		PlayChannel:             c,
+		PlayEventDetailsChannel: cpd,
+		Take:                    t,
 	}
 
 	return msg

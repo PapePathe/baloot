@@ -2,6 +2,7 @@ package player
 
 import (
 	"errors"
+
 	"pathe.co/zinx/gametake"
 	"pathe.co/zinx/pkg/cards"
 
@@ -59,7 +60,7 @@ func (m machineDeck) WinningOrLowestCard() cards.Card {
 func (m machineDeck) AttemptWin(hand []cards.Card) (cards.Card, error) {
 	w := m.FindWinner()
 
-	for _, c := range m.hand.Cards {
+	for _, c := range hand {
 		if c.IsNotEmpty() && w.IsNotEmpty() && m.gametake.Winner(w, c) == c {
 			return c, nil
 		}

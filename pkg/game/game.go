@@ -8,11 +8,13 @@ import (
 	"time"
 
 	"pathe.co/zinx/gametake"
+	"pathe.co/zinx/pkg/broker"
 	"pathe.co/zinx/pkg/cards"
 	"pathe.co/zinx/pkg/player"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	"github.com/segmentio/kafka-go"
 )
 
 func init() {
@@ -29,46 +31,59 @@ var (
 )
 
 type Game struct {
-	CartesDistribuees      int
-	nombrePli              int
-	pliCardsCount          int
-	NombreJoueurs          int
-	TakesFinished          bool
-	scoreTeamA, scoreTeamB int
-	Cartes                 [32]cards.Card
-	Decks                  [8]Deck
-	Plis                   [8][4]cards.Card
-	players                [4]player.BelotePlayer
-	ring                   [4]int
-	take                   gametake.GameTake
-	Takechannel            chan player.PlayEvent
+	CartesDistribuees       int
+	nombrePli               int
+	pliCardsCount           int
+	NombreJoueurs           int
+	TakesFinished           bool
+	scoreTeamA, scoreTeamB  int
+	Cartes                  [32]cards.Card
+	Decks                   [8]Deck
+	Plis                    [8][4]cards.Card
+	players                 [4]player.BelotePlayer
+	ring                    [4]int
+	take                    gametake.GameTake
+	Takechannel             chan player.PlayEvent
+	PlayEventDetailsChannel chan player.PlayEventDetails
 }
 
 func NewGame() *Game {
 	jeu := cards.CardSet{Cards: [32]cards.Card{}}
 
 	newGame := Game{
-		Cartes:            jeu.Distribute(),
-		Plis:              [8][4]cards.Card{},
-		Decks:             [8]Deck{},
-		CartesDistribuees: 0,
-		NombreJoueurs:     0,
-		TakesFinished:     false,
-		players:           [4]player.BelotePlayer{nil, nil, nil, nil},
-		take:              gametake.PASSE,
-		nombrePli:         0,
-		pliCardsCount:     0,
-		ring:              [4]int{0, 1, 2, 3},
-		Takechannel:       make(chan player.PlayEvent, 100),
+		Cartes:                  jeu.Distribute(),
+		Plis:                    [8][4]cards.Card{},
+		Decks:                   [8]Deck{},
+		CartesDistribuees:       0,
+		NombreJoueurs:           0,
+		TakesFinished:           false,
+		players:                 [4]player.BelotePlayer{nil, nil, nil, nil},
+		take:                    gametake.PASSE,
+		nombrePli:               0,
+		pliCardsCount:           0,
+		ring:                    [4]int{0, 1, 2, 3},
+		Takechannel:             make(chan player.PlayEvent, 100),
+		PlayEventDetailsChannel: make(chan player.PlayEventDetails, 320),
 	}
 
 	return &newGame
 }
 
 func (g *Game) StartPlayChannel() {
-	for pc := range g.Takechannel {
-		err := g.PlayCardNext(pc.PlayerID, pc.Card)
-		log.Err(err).Str("Error playing card", pc.Card.String())
+
+	for {
+		select {
+		case pc := <-g.Takechannel:
+			fmt.Println(pc)
+			err := g.PlayCardNext(pc.PlayerID, pc.Card)
+			log.Err(err).Str("Error playing card", pc.Card.String())
+		case evt := <-g.PlayEventDetailsChannel:
+			publisher := broker.NewPublisher([]string{"localhost:19092"}, true)
+			msg, _ := evt.AsKafkaMessage("play.event.details")
+			publisher.Publish([]kafka.Message{msg})
+			log.Trace().Caller().Interface("Event", evt)
+		default:
+		}
 	}
 }
 
@@ -125,7 +140,12 @@ func (g *Game) PlayCardNext(playerID int, c cards.Card) error {
 		for _, p := range g.GetPlayers() {
 			if p != nil {
 				scoreTeamA, scoreTeamB := g.Score()
-				b := player.ReceiveDeckEvt(p, deck, scoreTeamA, scoreTeamB, g.ring[0], g.Takechannel, g.take)
+				b := player.ReceiveDeckEvt(
+					p, deck,
+					scoreTeamA, scoreTeamB, g.ring[0],
+					g.Takechannel, g.PlayEventDetailsChannel,
+					g.take,
+				)
 
 				time.Sleep(time.Second)
 				p.BroadCastGameDeck(b)
@@ -138,7 +158,9 @@ func (g *Game) PlayCardNext(playerID int, c cards.Card) error {
 		for _, p := range g.GetPlayers() {
 			if p != nil {
 				scoreTeamA, scoreTeamB := g.Score()
-				b := player.ReceiveDeckEvt(p, deck, scoreTeamA, scoreTeamB, nextPlayer, g.Takechannel, g.take)
+				b := player.ReceiveDeckEvt(
+					p, deck, scoreTeamA, scoreTeamB, nextPlayer, g.Takechannel, g.PlayEventDetailsChannel, g.take,
+				)
 
 				p.BroadCastGameDeck(b)
 			}
