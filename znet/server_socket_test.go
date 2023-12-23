@@ -21,8 +21,9 @@ func TestIndexPage(t *testing.T) {
 
 	app := setupTestApp("7780")
 	req := httptest.NewRequest("GET", "/", nil)
-	resp, _ := app.app.Test(req, 1)
+	resp, err := app.app.Test(req, 1000)
 
+	fmt.Println(err, "ERROR")
 	assert.Equal(t, 200, resp.StatusCode)
 }
 
