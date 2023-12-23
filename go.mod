@@ -11,6 +11,7 @@ require (
 	github.com/rs/zerolog v1.31.0
 	github.com/segmentio/kafka-go v0.4.44
 	github.com/stretchr/testify v1.8.4
+	github.com/tysonmote/gommap v0.0.2
 	google.golang.org/grpc v1.58.3
 	google.golang.org/protobuf v1.31.0
 )
