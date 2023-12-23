@@ -70,11 +70,10 @@ func NewGame() *Game {
 }
 
 func (g *Game) StartPlayChannel() {
-
 	for {
 		select {
 		case pc := <-g.Takechannel:
-			fmt.Println(pc)
+			log.Trace().Interface("player sent a card", pc)
 			err := g.PlayCardNext(pc.PlayerID, pc.Card)
 			log.Err(err).Str("Error playing card", pc.Card.String())
 		case evt := <-g.PlayEventDetailsChannel:
@@ -125,6 +124,9 @@ func (g *Game) PlayCardNext(playerID int, c cards.Card) error {
 	plyr.GetPlayingHand().Cards[idx] = cards.Card{Genre: "", Couleur: ""}
 
 	if g.Decks[g.nombrePli].cardscount == 4 {
+		g.broadcastGameDeck()
+		time.Sleep(time.Second)
+
 		g.ring = g.NextRound(g.Decks[g.nombrePli].winner)
 		a, b := g.Decks[g.nombrePli].Score()
 		g.scoreTeamA += a
@@ -135,60 +137,29 @@ func (g *Game) PlayCardNext(playerID int, c cards.Card) error {
 		if g.nombrePli < 7 {
 			g.Decks[g.nombrePli] = NewDeck(g.ring, g.take)
 		}
-		deck, _, _ := g.CurrentDeck()
 
-		for _, p := range g.GetPlayers() {
-			if p != nil {
-				scoreTeamA, scoreTeamB := g.Score()
-				b := player.ReceiveDeckEvt(
-					p, deck,
-					scoreTeamA, scoreTeamB, g.ring[0],
-					g.Takechannel, g.PlayEventDetailsChannel,
-					g.take,
-				)
-
-				time.Sleep(time.Second)
-				p.BroadCastGameDeck(b)
-			}
-		}
+		g.broadcastGameDeck()
 
 	} else {
-		deck, nextPlayer, _ := g.CurrentDeck()
-
-		for _, p := range g.GetPlayers() {
-			if p != nil {
-				scoreTeamA, scoreTeamB := g.Score()
-				b := player.ReceiveDeckEvt(
-					p, deck, scoreTeamA, scoreTeamB, nextPlayer, g.Takechannel, g.PlayEventDetailsChannel, g.take,
-				)
-
-				p.BroadCastGameDeck(b)
-			}
-		}
+		g.broadcastGameDeck()
 	}
 
 	return nil
 }
 
-func (g *Game) PlayCard(playerID int, card cards.Card) error {
-	plyr := g.players[playerID]
-	hasCard, idx := plyr.HasCard(card)
+func (g *Game) broadcastGameDeck() {
+	deck, nextPlayer, _ := g.CurrentDeck()
 
-	if !hasCard {
-		return ErrCardNotFoundInPlayerHand
+	scoreTeamA, scoreTeamB := g.Score()
+	for _, p := range g.GetPlayers() {
+		if p != nil {
+			b := player.ReceiveDeckEvt(
+				p, deck, scoreTeamA, scoreTeamB, nextPlayer, g.Takechannel, g.PlayEventDetailsChannel, g.take,
+			)
+
+			p.BroadCastGameDeck(b)
+		}
 	}
-
-	g.Plis[g.nombrePli][g.pliCardsCount] = card
-	plyr.GetPlayingHand().Cards[idx] = cards.Card{Genre: "", Couleur: ""}
-
-	g.pliCardsCount++
-
-	if g.pliCardsCount == 4 {
-		g.nombrePli++
-		g.pliCardsCount = 0
-	}
-
-	return nil
 }
 
 func (g *Game) CurrentDeck() ([4]cards.Card, int, error) {
@@ -267,7 +238,10 @@ func (g *Game) takesComplete() bool {
 func (g *Game) sendPlayingHands() {
 	for _, plyr := range g.players {
 		if plyr != nil {
-			r := ReceivePlayingHandEvt(plyr.GetPlayingHand().Cards, g.GetTake().Name())
+			r := ReceivePlayingHandEvt(
+				plyr.GetPlayingHand().OrderedCardsForPlaying(g.GetTake()),
+				g.GetTake().Name(),
+			)
 			jsonMsg, err := json.Marshal(r)
 
 			if err != nil {

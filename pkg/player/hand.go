@@ -2,6 +2,7 @@ package player
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/rs/zerolog/log"
@@ -39,6 +40,42 @@ func (h *PlayingHand) LowestCard(t gametake.GameTake) cards.Card {
 		}
 	}
 	return c
+}
+
+func (h PlayingHand) OrderedCardsForPlaying(take gametake.GameTake) []cards.Card {
+	cardsMap := make(map[string][]cards.Card)
+
+	for _, card := range h.Cards {
+		if !card.IsNotEmpty() {
+			continue
+		}
+		_, ok := cardsMap[card.Couleur]
+
+		if ok {
+			cardsMap[card.Couleur] = append(cardsMap[card.Couleur], card)
+		} else {
+			cardsMap[card.Couleur] = []cards.Card{card}
+		}
+
+		sorter := SortByColorAndType{cardsMap[card.Couleur], take}
+		sort.Sort(sorter)
+	}
+
+	keys := make([]string, 0, len(cardsMap))
+	for k := range cardsMap {
+		keys = append(keys, k)
+	}
+
+	sort.Strings(keys)
+
+	result := []cards.Card{}
+
+	for _, key := range keys {
+		mapCards := cardsMap[key]
+		result = append(result, mapCards...)
+	}
+
+	return result
 }
 
 func (h *PlayingHand) HasColor(c string) (bool, []cards.Card) {

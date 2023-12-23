@@ -62,7 +62,7 @@ type ReceiveDeckMsg struct {
 func ReceiveDeckEvt(p BelotePlayer, d [4]cards.Card, a int, b int, n int, c chan PlayEvent, cpd chan PlayEventDetails, t gametake.GameTake) ReceiveDeckMsg {
 	msg := ReceiveDeckMsg{
 		ID:                      ReceiveDeck,
-		Player:                  p.GetPlayingHand().Cards,
+		Player:                  p.GetPlayingHand().OrderedCardsForPlaying(t),
 		Deck:                    d,
 		ScoreTeamA:              a,
 		ScoreTeamB:              b,

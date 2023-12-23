@@ -55,7 +55,11 @@ func (d *Deck) AddCard(pid int, card cards.Card) error {
 }
 
 func (d *Deck) NextPlayer() int {
-	return d.players[d.cardscount]
+	if d.cardscount < 4 {
+		return d.players[d.cardscount]
+	}
+
+	return 0
 }
 
 func (d *Deck) Score() (int, int) {
