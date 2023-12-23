@@ -42,9 +42,8 @@ func (h *PlayingHand) LowestCard(t gametake.GameTake) cards.Card {
 	return c
 }
 
-func (h PlayingHand) OrderedCardsForPlaying(take gametake.GameTake) []cards.Card {
+func (h PlayingHand) CardsTree(take gametake.GameTake) (map[string][]cards.Card, []string) {
 	cardsMap := make(map[string][]cards.Card)
-
 	for _, card := range h.Cards {
 		if !card.IsNotEmpty() {
 			continue
@@ -67,6 +66,12 @@ func (h PlayingHand) OrderedCardsForPlaying(take gametake.GameTake) []cards.Card
 	}
 
 	sort.Strings(keys)
+
+	return cardsMap, keys
+}
+
+func (h PlayingHand) OrderedCardsForPlaying(take gametake.GameTake) []cards.Card {
+	cardsMap, keys := h.CardsTree(take)
 
 	result := []cards.Card{}
 
