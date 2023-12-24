@@ -45,6 +45,7 @@ type Game struct {
 	take                    gametake.GameTake
 	Takechannel             chan player.PlayEvent
 	PlayEventDetailsChannel chan player.PlayEventDetails
+	quitChannel             chan bool
 }
 
 func NewGame() *Game {
@@ -64,6 +65,7 @@ func NewGame() *Game {
 		ring:                    [4]int{0, 1, 2, 3},
 		Takechannel:             make(chan player.PlayEvent, 100),
 		PlayEventDetailsChannel: make(chan player.PlayEventDetails, 320),
+		quitChannel:             make(chan bool),
 	}
 
 	return &newGame
@@ -81,6 +83,8 @@ func (g *Game) StartPlayChannel() {
 			msg, _ := evt.AsKafkaMessage("play.event.details")
 			publisher.Publish([]kafka.Message{msg})
 			log.Trace().Caller().Interface("Event", evt)
+		case val := <-g.quitChannel:
+			log.Warn().Bool("Quit", val).Msg("Received quit message, going to terminate game")
 		default:
 		}
 	}
@@ -139,9 +143,13 @@ func (g *Game) PlayCardNext(playerID int, c cards.Card) error {
 		}
 
 		g.broadcastGameDeck()
-
 	} else {
 		g.broadcastGameDeck()
+	}
+	log.Trace().Interface("Game ring", g.ring).Int("Nombre de plis", g.nombrePli).Msg("")
+
+	if g.nombrePli > 7 {
+		g.quitChannel <- true
 	}
 
 	return nil
