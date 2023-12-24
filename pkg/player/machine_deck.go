@@ -22,6 +22,7 @@ func (m machineDeck) FindWinner() cards.Card {
 		if c.IsNotEmpty() && winningCard.IsNotEmpty() {
 			winner := m.gametake.Winner(winningCard, c)
 
+			log.Trace().Str("previous winner:", winningCard.String()).Str("winner", winner.String()).Str("candidate:", c.String()).Msg("")
 			if winner == c {
 				winningCard = c
 			}
@@ -29,6 +30,19 @@ func (m machineDeck) FindWinner() cards.Card {
 	}
 
 	return winningCard
+}
+
+func (m machineDeck) RemainingCardsCount() int {
+	count := 0
+
+	for _, c := range m.hand.Cards {
+		if c.IsNotEmpty() {
+			count++
+		}
+	}
+
+	return count
+
 }
 
 func (m machineDeck) WinningOrLowestCard() cards.Card {

@@ -184,7 +184,10 @@ func TestWinnerTOUT(t *testing.T) {
 	assert.Equal(t, cards.HuitCoeur, winner)
 
 	winner = TOUT.Winner(cards.RoiPique, cards.HuitCoeur)
-	assert.Equal(t, cards.HuitCoeur, winner)
+	assert.Equal(t, cards.RoiPique, winner)
+
+	winner = TOUT.Winner(cards.RoiPique, cards.DixCarreau)
+	assert.Equal(t, cards.RoiPique, winner)
 
 	winner = TOUT.Winner(cards.RoiPique, cards.DamePique)
 	assert.Equal(t, cards.RoiPique, winner)
@@ -193,8 +196,8 @@ func TestWinnerTOUT(t *testing.T) {
 	assert.Equal(t, cards.ValetCarreau, winner)
 
 	winner = TOUT.Winner(cards.ValetTrefle, cards.NeufCarreau)
-	assert.Equal(t, cards.NeufCarreau, winner)
+	assert.Equal(t, cards.ValetTrefle, winner)
 
 	winner = TOUT.Winner(cards.NeufCarreau, cards.ValetTrefle)
-	assert.Equal(t, cards.ValetTrefle, winner)
+	assert.Equal(t, cards.NeufCarreau, winner)
 }

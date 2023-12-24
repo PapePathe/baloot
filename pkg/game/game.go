@@ -65,7 +65,7 @@ func NewGame() *Game {
 		ring:                    [4]int{0, 1, 2, 3},
 		Takechannel:             make(chan player.PlayEvent, 100),
 		PlayEventDetailsChannel: make(chan player.PlayEventDetails, 320),
-		quitChannel:             make(chan bool),
+		quitChannel:             make(chan bool, 1),
 	}
 
 	return &newGame
@@ -76,8 +76,10 @@ func (g *Game) StartPlayChannel() {
 		select {
 		case pc := <-g.Takechannel:
 			log.Trace().Interface("player sent a card", pc)
-			err := g.PlayCardNext(pc.PlayerID, pc.Card)
-			log.Err(err).Str("Error playing card", pc.Card.String())
+			if g.nombrePli < 8 {
+				err := g.PlayCardNext(pc.PlayerID, pc.Card)
+				log.Err(err).Str("Error playing card", pc.Card.String())
+			}
 		case evt := <-g.PlayEventDetailsChannel:
 			publisher := broker.NewPublisher([]string{"localhost:19092"}, true)
 			msg, _ := evt.AsKafkaMessage("play.event.details")
@@ -137,19 +139,15 @@ func (g *Game) PlayCardNext(playerID int, c cards.Card) error {
 		g.scoreTeamB += b
 
 		g.nombrePli++
-
 		if g.nombrePli < 7 {
 			g.Decks[g.nombrePli] = NewDeck(g.ring, g.take)
 		}
-
-		g.broadcastGameDeck()
-	} else {
-		g.broadcastGameDeck()
 	}
-	log.Trace().Interface("Game ring", g.ring).Int("Nombre de plis", g.nombrePli).Msg("")
 
 	if g.nombrePli > 7 {
 		g.quitChannel <- true
+	} else {
+		g.broadcastGameDeck()
 	}
 
 	return nil
@@ -319,5 +317,6 @@ func (g *Game) DispatchCards() error {
 		}
 	}
 
+	g.broadcastGameDeck()
 	return nil
 }

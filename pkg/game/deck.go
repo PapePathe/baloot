@@ -59,7 +59,7 @@ func (d *Deck) NextPlayer() int {
 		return d.players[d.cardscount]
 	}
 
-	return 0
+	return d.winner
 }
 
 func (d *Deck) Score() (int, int) {

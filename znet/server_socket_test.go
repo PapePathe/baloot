@@ -14,6 +14,7 @@ import (
 	"pathe.co/zinx/gametake"
 	"pathe.co/zinx/pkg/cards"
 	"pathe.co/zinx/pkg/game"
+	"pathe.co/zinx/pkg/player"
 )
 
 func TestIndexPage(t *testing.T) {
@@ -130,8 +131,15 @@ func TestNewSocketHandler(t *testing.T) {
 	_, rawmsg, err = conn.ReadMessage()
 	require.NoError(t, err)
 
+	var deckMsg = player.ReceiveDeckMsg{}
+	err = json.Unmarshal(rawmsg, &deckMsg)
+	require.NoError(t, err)
+	assert.Equal(t, player.ReceiveDeck, deckMsg.ID)
+
+	_, rawmsg, err = conn.ReadMessage()
 	var playMsg game.ReceivePlayingHandMsg
 
+	fmt.Println(string(rawmsg))
 	err = json.Unmarshal(rawmsg, &playMsg)
 	require.NoError(t, err)
 	assert.Equal(t, game.ReceivePlayingHand, playMsg.ID)

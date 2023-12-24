@@ -3,6 +3,7 @@ package game
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -375,8 +376,29 @@ func TestPlayCardNext(t *testing.T) {
 			})
 
 			fmt.Println("take ", game1.GetTake().Name(), "deck", pli, "winner:", winner)
+
+			for i := 1; i < 8; i++ {
+				for _, pid := range game1.ring {
+					p := game1.GetPlayers()[pid]
+					err := game1.PlayCardNext(p.GetID(), p.GetPlayingHand().Cards[i])
+					require.NoError(t, err)
+				}
+			}
 		})
 	}
+}
+
+func TestPlayingWithMachines(t *testing.T) {
+	t.Parallel()
+
+	game1 := setupGameWithMachines(4)
+
+	err := game1.AddTake(game1.GetPlayers()[0].GetID(), gametake.TOUT)
+	require.NoError(t, err)
+	assert.True(t, game1.takesComplete())
+	go game1.StartPlayChannel()
+
+	time.Sleep(time.Second * 10)
 }
 
 func TestTakesComplete(t *testing.T) {
@@ -427,6 +449,18 @@ func TestTakesComplete(t *testing.T) {
 		require.NoError(t, err)
 		assert.True(t, game1.takesComplete())
 	})
+}
+
+func setupGameWithMachines(playersCount int) *Game {
+	game1 := NewGame()
+	for i := 0; i < playersCount; i++ {
+		err := game1.AddPlayer(player.NewMachinePlayer(time.Millisecond))
+		if err != nil {
+			fmt.Println("ERROR SETTING UP A TEST GAME")
+		}
+	}
+
+	return game1
 }
 
 func setupGame(playersCount int) *Game {

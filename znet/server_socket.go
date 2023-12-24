@@ -71,9 +71,9 @@ func (s *SocketHandler) StartPlayerRegistration(c *websocket.Conn) {
 			log.Error().Err(err).Msg("error writing message to socket")
 		}
 
-		s.g.AddPlayer(player.NewMachinePlayer())
-		s.g.AddPlayer(player.NewMachinePlayer())
-		s.g.AddPlayer(player.NewMachinePlayer())
+		s.g.AddPlayer(player.NewMachinePlayer(time.Second))
+		s.g.AddPlayer(player.NewMachinePlayer(time.Second))
+		s.g.AddPlayer(player.NewMachinePlayer(time.Second))
 
 		go s.g.StartPlayChannel()
 	}

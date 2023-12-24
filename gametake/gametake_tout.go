@@ -125,11 +125,11 @@ func (t Tout) EvaluateCard(card cards.Card) (int, bool) {
 func (t Tout) Winner(a cards.Card, b cards.Card) cards.Card {
 	aValue, bValue := t.EvaluateCardForWin(a), t.EvaluateCardForWin(b)
 
-	if a.Couleur == b.Couleur && aValue > bValue {
-		return a
+	if a.Couleur == b.Couleur && aValue < bValue {
+		return b
 	}
 
-	return b
+	return a
 }
 
 func (t Tout) EvaluateCardForWin(card cards.Card) int {

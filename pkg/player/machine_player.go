@@ -18,24 +18,26 @@ func init() {
 }
 
 type MachinePlayer struct {
-	Hand        Hand               `json:"hand"`
-	PlayingHand PlayingHand        `json:"playingHand"`
-	Take        *gametake.GameTake `json:"take"`
-	ID          int                `json:"id"`
+	Hand         Hand               `json:"hand"`
+	PlayingHand  PlayingHand        `json:"playingHand"`
+	Take         *gametake.GameTake `json:"take"`
+	ID           int                `json:"id"`
+	waitDuration time.Duration
 }
 
-func NewMachinePlayer() *MachinePlayer {
+func NewMachinePlayer(wDuration time.Duration) *MachinePlayer {
 	return &MachinePlayer{
-		Hand:        Hand{Cards: [5]cards.Card{}},
-		PlayingHand: PlayingHand{Cards: []cards.Card{}},
-		Take:        nil,
-		ID:          0,
+		Hand:         Hand{Cards: [5]cards.Card{}},
+		PlayingHand:  PlayingHand{Cards: []cards.Card{}},
+		Take:         nil,
+		ID:           0,
+		waitDuration: wDuration,
 	}
 }
 
 func (p *MachinePlayer) BroadCastGameDeck(e ReceiveDeckMsg) {
 	if e.NextPlayer == p.ID {
-		time.Sleep(time.Second)
+		time.Sleep(p.waitDuration)
 		log.Debug().Int("Machine Player ID", p.ID).Str("Hand", p.PlayingHand.String()).Msg("It's my turn to play")
 		log.Trace().Msg(fmt.Sprintf("Deck: %s %s %s %s", e.Deck[0], e.Deck[1], e.Deck[2], e.Deck[3]))
 
@@ -47,12 +49,13 @@ func (p *MachinePlayer) BroadCastGameDeck(e ReceiveDeckMsg) {
 			c = mDeck.WinningOrLowestCard()
 			log.Debug().Int("Machine Player ID", p.ID).Msg("==> Found card")
 		} else {
-			c = mDeck.LowestCard()
-			log.Debug().Int("Machine Player ID", p.ID).Str("Card", c.String()).Msg("Going to play the lowest card since player does not have card")
-		}
 
-		if !c.IsNotEmpty() {
-			panic(c)
+			if mDeck.RemainingCardsCount() == 1 {
+				log.Trace().Msg("Player has only one card remaining on hand")
+			}
+
+			c = mDeck.LowestCard()
+			log.Debug().Int("Machine Player ID", p.ID).Str("Card", c.String()).Msg("Going to play the lowest card since player does not have card that can win")
 		}
 
 		e.PlayChannel <- PlayEvent{Card: c, PlayerID: p.GetID()}
@@ -63,7 +66,7 @@ func (p *MachinePlayer) BroadCastGameDeck(e ReceiveDeckMsg) {
 			Gametake: e.Take,
 		}
 
-		time.Sleep(time.Second)
+		time.Sleep(p.waitDuration)
 	}
 }
 
