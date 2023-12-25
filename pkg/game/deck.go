@@ -102,7 +102,7 @@ func (d *Deck) findWinner() int {
 
 	for idx := 1; idx < 4; idx++ {
 		currentCard := d.cards[idx]
-		winner := d.gametake.Winner(currentCard, winningCard)
+		winner := d.gametake.Winner(winningCard, currentCard)
 
 		if winner == currentCard {
 			winningCard = currentCard

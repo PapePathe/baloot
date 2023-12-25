@@ -356,7 +356,6 @@ func TestPlayCardNext(t *testing.T) {
 			}
 
 			winner := game1.Decks[0].winner
-			fmt.Println(game1.Decks)
 
 			t.Run("Test deck winner", func(t *testing.T) {
 				assert.Equal(t, 1, game1.nombrePli)

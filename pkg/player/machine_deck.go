@@ -2,6 +2,7 @@ package player
 
 import (
 	"errors"
+	"sort"
 
 	"pathe.co/zinx/gametake"
 	"pathe.co/zinx/pkg/cards"
@@ -72,12 +73,23 @@ func (m machineDeck) WinningOrLowestCard() cards.Card {
 }
 
 func (m machineDeck) AttemptWin(hand []cards.Card) (cards.Card, error) {
+	winningCards := []cards.Card{}
 	w := m.FindWinner()
 
 	for _, c := range hand {
 		if c.IsNotEmpty() && w.IsNotEmpty() && m.gametake.Winner(w, c) == c {
-			return c, nil
+			winningCards = append(winningCards, c)
 		}
+	}
+
+	if lw := len(winningCards); lw > 0 {
+		sorter := SortByColorAndType{winningCards, m.gametake}
+		sort.Sort(sorter)
+
+		// Implement multiple choices
+		// Play lowest card that can win, this can be risky
+		// Play highest card that can win
+		return winningCards[lw-1], nil
 	}
 
 	return cards.Card{}, errors.New("Could not find card that can win")
