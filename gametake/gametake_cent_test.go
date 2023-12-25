@@ -200,10 +200,10 @@ func TestWinnerCENT(t *testing.T) {
 	assert.Equal(t, cards.ValetCarreau, winner)
 
 	winner = CENT.Winner(cards.ValetTrefle, cards.NeufCarreau)
-	assert.Equal(t, cards.NeufCarreau, winner)
+	assert.Equal(t, cards.ValetTrefle, winner)
 
 	winner = CENT.Winner(cards.NeufCarreau, cards.ValetTrefle)
-	assert.Equal(t, cards.ValetTrefle, winner)
+	assert.Equal(t, cards.NeufCarreau, winner)
 }
 
 func TestMarshalJSONCENT(t *testing.T) {

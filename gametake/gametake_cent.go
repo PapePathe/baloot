@@ -89,11 +89,11 @@ func (t Cent) EvaluateCard(card cards.Card) (int, bool) {
 func (t Cent) Winner(a cards.Card, b cards.Card) cards.Card {
 	aValue, bValue := t.EvaluateCardForWin(a), t.EvaluateCardForWin(b)
 
-	if a.Couleur == b.Couleur && aValue > bValue {
-		return a
+	if a.Couleur == b.Couleur && aValue < bValue {
+		return b
 	}
 
-	return b
+	return a
 }
 
 var centWinValues = map[string]int{"A": 11, "10": 10, "R": 4, "D": 3, "V": 2, "9": 1, "8": 0, "7": -1}
