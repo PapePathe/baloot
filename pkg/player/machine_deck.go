@@ -59,13 +59,12 @@ func (m machineDeck) WinningOrLowestCard() cards.Card {
 
 		log.Debug().Str("Card", c.String()).Msg("Going to play card of same color as in Deck")
 		return c
+	}
 
-	} else {
-		for _, pc := range m.hand.Cards {
-			if pc.Couleur != "" && pc.Genre != "" {
-				log.Debug().Str("Card", pc.String()).Msg("Going to play card of other color because missing color in hand")
-				return pc
-			}
+	for _, pc := range m.hand.Cards {
+		if pc.Couleur != "" && pc.Genre != "" {
+			log.Debug().Str("Card", pc.String()).Msg("Going to play card of other color because missing color in hand")
+			return pc
 		}
 	}
 

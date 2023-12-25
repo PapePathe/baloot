@@ -116,4 +116,18 @@ func TestWinningOrLowestCard(t *testing.T) {
 		hand:     PlayingHand{Cards: []cards.Card{cards.NeufCarreau, cards.ValetCoeur, cards.ValetCarreau}},
 	}
 	assert.Equal(t, cards.NeufCarreau, m.WinningOrLowestCard())
+
+	m = machineDeck{
+		cards:    [4]cards.Card{cards.ValetCarreau},
+		gametake: gametake.TOUT,
+		hand:     PlayingHand{Cards: []cards.Card{cards.NeufCarreau, cards.SeptCarreau, cards.ValetCoeur}},
+	}
+	assert.Equal(t, cards.SeptCarreau, m.WinningOrLowestCard())
+
+	m = machineDeck{
+		cards:    [4]cards.Card{cards.SeptCarreau},
+		gametake: gametake.TOUT,
+		hand:     PlayingHand{Cards: []cards.Card{cards.NeufPique, cards.ValetCoeur, cards.ValetTrefle}},
+	}
+	assert.Equal(t, cards.NeufPique, m.WinningOrLowestCard())
 }
